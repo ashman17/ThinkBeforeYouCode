@@ -1,0 +1,263 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "huydhn"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "When running H100 TorchInductor benchmark with 2.10 RC in https://github.com/pytorch/pytorch/pull/171857, I'm seeing some failures. So, I'm documenting them here to see if they need to be fixed before the final RC. They can all be reproduced on H100 orH200\n\n* [x] sam (cc @jeanschmidt) (Failing on 2.10 RC, passing on nightly), flaky, couldn't reproduce this anymore on RC5\n```\npip install torch==2.10.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/test/cu128\npython benchmarks/dynamo/torchbench.py --accuracy --no-translation-validation --inference --bfloat16 --backend inductor --disable-cudagraphs --device cuda --only sam\n\nloading model: 0it [00:06, ?it/s]\ncuda eval  sam\nE0108 10:28:37.621000 859 torch/_dynamo/utils.py:3124] Accuracy failed: uint8 tensor did not match\nE0108 10:28:37.622000 859 torch/_dynamo/utils.py:3087] Accuracy failed for key name masks\nfail_accuracy\n```\n\nThe latest nightly seems ok though\n```\npip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128\npython benchmarks/dynamo/torchbench.py --accuracy --no-translation-validation --inference --bfloat16 --backend inductor --disable-cudagraphs --device cuda --only sam\n\nloading model: 0it [00:06, ?it/s]\ncuda eval  sam\npass\n```\n\n[The dashboard](https://hud.pytorch.org/benchmark/v3/dashboard/compiler_inductor?renderGroupId=main&time.start=2025-12-10T00%3A00%3A00.000Z&time.end=2026-01-08T11%3A00%3A00.000Z&filters.repo=pytorch%2Fpytorch&filters.benchmarkName=compiler&filters.mode=inference&filters.dtype=bfloat16&filters.deviceName=cuda+%28h100%29&filters.device=cuda&filters.arch=h100&filters.suite=all&filters.compiler=&filters.model=sam&lbranch=main&rbranch=main&rcommit.commit=d8f8e6aff8c51e18baacb2b9d61be74ab81abca0&rcommit.workflow_id=20287531338&rcommit.date=2025-12-17T08%3A00%3A00Z&rcommit.branch=main&lcommit.commit=9407f0951682dd6817aa37c8fec9e1532c0dd039&lcommit.workflow_id=20252460513&lcommit.date=2025-12-16T07%3A00%3A00Z&lcommit.branch=main&maxSampling=110) showed that this might be fixed between the nightly run from Dec 16th to Dec 17th\n\n* [x] torch_multimodal_clip, nanogpt, mobilevit_s (same failure) (Failing on 2.10 RC, passing on nightly) - Confirm that the issue is fixed on [RC5](https://hud.pytorch.org/benchmark/v3/dashboard/compiler_inductor?renderGroupId=main&time.start=2026-01-02T00%3A00%3A00.000Z&time.end=2026-01-09T23%3A59%3A59.999Z&filters.repo=pytorch%2Fpytorch&filters.benchmarkName=compiler&filters.backend=&filters.mode=training&filters.dtype=amp&filters.deviceName=cuda+%28h100%29&filters.device=cuda&filters.arch=h100&filters.model=torch_multimodal_clip&lbranch=prepare-perf-number-2.9.1&rbranch=prepare-perf-number-2.10-v2&rcommit.commit=48ac90a47e9eb80c30282ae991f2bb3399427919&rcommit.workflow_id=20837908962&rcommit.date=2026-01-09T04%3A00%3A00Z&rcommit.branch=prepare-perf-number-2.10-v2&lcommit.commit=be32f077fb50b49ad856e957a6860d37565583db&lcommit.workflow_id=20799100249&lcommit.date=2026-01-08T02%3A00%3A00Z&lcommit.branch=prepare-perf-number-2.9.1&maxSampling=110)\n```\npip install torch==2.10.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/test/cu128\npython benchmarks/dynamo/torchbench.py --performance --cold-start-latency --training --amp --backend inductor --device cuda --only nanogpt\n\nclip_merges.bpe: 532kB [00:00, 20.4MB/s]\nloading model: 0it [00:05, ?it/s]/s]\ncuda train torch_multimodal_clip\nW0108 11:45:15.890000 15958 torch/_logging/_internal.py:1204] [6/0] Profiler function <class 'torch.autograd.profiler.record_function'> will be ignored\nERROR:common:Backend dynamo failed in warmup()\nTraceback (most recent call last):\n  File \"/shared-personal/huydo/github/pytorch/benchmarks/dynamo/common.py\", line 2711, in warmup\n    fn(model, example_inputs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py\", line 953, in compile_wrapper\n    return fn(*args, **kwargs)\n  File \"/shared-personal/huydo/github/pytorch/benchmarks/dynamo/torchbench.py\", line 468, in forward_and_backward_pass\n    cloned_inputs = clone_inputs(inputs)\n  File \"/shared-personal/huydo/github/pytorch/benchmarks/dynamo/torchbench.py\", line 469, in torch_dynamo_resume_in_forward_and_backward_pass_at_468\n    self.optimizer_zero_grad(mod)\n  File \"/shared-personal/huydo/github/pytorch/benchmarks/dynamo/torchbench.py\", line 475, in torch_dynamo_resume_in_forward_and_backward_pass_at_469\n    loss = self.compute_loss(pred)\n  File \"/shared-personal/huydo/github/pytorch/benchmarks/dynamo/torchbench.py\", line 476, in torch_dynamo_resume_in_forward_and_backward_pass_at_475\n    self.grad_scaler.scale(loss).backward()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_tensor.py\", line 630, in backward\n    torch.autograd.backward(\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/autograd/__init__.py\", line 364, in backward\n    _engine_run_backward(\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/autograd/graph.py\", line 865, in _engine_run_backward\n    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/autograd/function.py\", line 317, in apply\n    return user_fn(self, *args)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/runtime_wrappers.py\", line 2338, in backward\n    return impl_fn()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/runtime_wrappers.py\", line 2324, in impl_fn\n    out = CompiledFunction._backward_impl(ctx, all_args)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/runtime_wrappers.py\", line 2494, in _backward_impl\n    out = call_func_at_runtime_with_args(\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_functorch/_aot_autograd/utils.py\", line 134, in call_func_at_runtime_with_args\n    out = normalize_as_list(f(args))\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py\", line 1181, in _fn\n    return fn(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/output_code.py\", line 638, in __call__\n    return self.current_callable(inputs)\n  File \"/tmp/torchinductor_dev/mj/cmj4cn3oekh6i7qclpuhxtuhhmhpdm4tyh54dt4ygcl5vnr3gm5s.py\", line 8492, in call\n    (buf576, buf577, buf6, buf573, buf585, buf12, buf14, buf596, buf598, buf592, buf606, buf617, buf621, buf623, buf631, buf605, buf22, buf21, buf642, buf644, buf638, buf652, buf663, buf667, buf669, buf677, buf651, buf688, buf690, buf684, buf698, buf709, buf713, buf715, buf723, buf697, buf734, buf736, buf730, buf744, buf755, buf759, buf761, buf769, buf743, buf780, buf782, buf776, buf790, buf801, buf805, buf807, buf815, buf789, buf826, buf828, buf822, buf836, buf847, buf851, buf853, buf861, buf835, buf872, buf874, buf868, buf882, buf893, buf897, buf899, buf907, buf881, buf918, buf920, buf914, buf928, buf939, buf943, buf945, buf953, buf927, buf964, buf966, buf960, buf974, buf985, buf989, buf991, buf999, buf973, buf1010, buf1012, buf1006, buf1020, buf1031, buf1035, buf1037, buf1045, buf1019, buf1056, buf1058, buf1052, buf1066, buf1077, buf1081, buf1083, buf1091, buf1065, buf1102, buf1104, buf1098, buf1112, buf1123, buf1111, buf616, buf662, buf708, buf754, buf800, buf846, buf892, buf938, buf984, buf1030, buf1076, buf1122, buf584, buf591, buf630, buf637, buf676, buf683, buf722, buf729, buf768, buf775, buf814, buf821, buf860, buf867, buf906, buf913, buf952, buf959, buf998, buf1005, buf1044, buf1051, buf1090, buf1097, buf29, buf33, buf35, buf43, buf54, buf58, buf60, buf68, buf42, buf53, buf28, buf67, buf75, buf79, buf81, buf89, buf100, buf104, buf106, buf114, buf88, buf99, buf74, buf113, buf121, buf125, buf127, buf135, buf146, buf150, buf152, buf160, buf134, buf145, buf120, buf159, buf167, buf171, buf173, buf181, buf192, buf196, buf198, buf206, buf180, buf191, buf166, buf205, buf213, buf217, buf219, buf227, buf238, buf242, buf244, buf252, buf226, buf237, buf212, buf251, buf259, buf263, buf265, buf273, buf284, buf288, buf290, buf298, buf272, buf283, buf258, buf297, buf305, buf309, buf311, buf319, buf330, buf334, buf336, buf344, buf318, buf329, buf304, buf343, buf351, buf355, buf357, buf365, buf376, buf380, buf382, buf390, buf364, buf375, buf350, buf389, buf397, buf401, buf403, buf411, buf422, buf426, buf428, buf436, buf410, buf421, buf396, buf435, buf443, buf447, buf449, buf457, buf468, buf472, buf474, buf482, buf456, buf467, buf442, buf481, buf489, buf493, buf495, buf503, buf514, buf518, buf520, buf528, buf502, buf513, buf488, buf527, buf535, buf539, buf541, buf549, buf560, buf564, buf566, buf548, buf559, buf534, buf1128, buf1130, buf1136, buf1138, buf1140, buf1139, buf1144, buf569, buf568) = self.partitions[0](partition0_args)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/compile_fx.py\", line 1843, in run\n    return compiled_fn(new_inputs)  # type: ignore[arg-type]\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/cudagraph_trees.py\", line 388, in deferred_cudagraphify\n    return fn(inputs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/utils.py\", line 3220, in run\n    out = model(new_inputs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/cudagraph_trees.py\", line 2033, in run\n    out = self._run(new_inputs, function_id)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/cudagraph_trees.py\", line 2203, in _run\n    return self.record_function(new_inputs, function_id)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/cudagraph_trees.py\", line 2259, in record_function\n    torch.cuda.synchronize()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/cuda/__init__.py\", line 1108, in synchronize\n    return torch._C._cuda_synchronize()\ntorch.AcceleratorError: CUDA error: an illegal memory access was encountered\nSearch for `cudaErrorIllegalAddress' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\nwarmup_failed\n```\n\nNightly is ok here too:\n```\npip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128\npython benchmarks/dynamo/torchbench.py --performance --cold-start-latency --training --amp --backend inductor --device cuda --only nanogpt\n```\n\n* [x] torchrec_dlrm (failing on both 2.10 RC and nightly, [the dashboard](https://hud.pytorch.org/benchmark/v3/dashboard/compiler_inductor?renderGroupId=main&time.start=2025-12-10T00%3A00%3A00.000Z&time.end=2026-01-08T11%3A00%3A00.000Z&filters.repo=pytorch%2Fpytorch&filters.benchmarkName=compiler&filters.mode=training&filters.dtype=amp&filters.deviceName=cuda+%28h100%29&filters.device=cuda&filters.arch=h100&filters.suite=all&filters.compiler=&filters.model=torchrec_dlrm&lbranch=main&rbranch=main&rcommit.commit=1daa7257b0d761144bf1fe5c64df900a7eaaba2c&rcommit.workflow_id=20183921790&rcommit.date=2025-12-13T06%3A00%3A00Z&rcommit.branch=main&lcommit.commit=8b21f924c3c24d4cbe239265c87aeb7b271fe974&lcommit.workflow_id=20152216717&lcommit.date=2025-12-12T04%3A00%3A00Z&lcommit.branch=main&maxSampling=110) shows the regression happened between nightly Dec 12th and Dec 13th run)\n\n```\npip install torch==2.10.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/test/cu128\npip install git+https://github.com/pytorch/FBGEMM.git@de731af65b4f04696e85c729e3282450b51b95fd#subdirectory=fbgemm_gpu --no-build-isolation\npip install git+https://github.com/pytorch/torchrec.git@6cd9fd362514d14ebb9ed51314c62ac1e1e2bbf2 --no-build-isolation\n\npython benchmarks/dynamo/torchbench.py --accuracy --no-translation-validation --training --amp --backend inductor --disable-cudagraphs --device cuda --only torchrec_dlrm\n\nloading model: 0it [00:00, ?it/s][rank0]:W0108 11:21:01.992000 13642 torch/fx/_symbolic_trace.py:53] is_fx_tracing will return true for both fx.symbolic_trace and torch.export. Please use is_fx_tracing_symbolic_tracing() for specifically fx.symbolic_trace or torch.compiler.is_compiling() for specifically torch.export/compile.\nloading model: 0it [00:01, ?it/s]\ncuda train torchrec_dlrm\n[rank0]:W0108 11:21:10.898000 13642 torch/_logging/_internal.py:1204] [6/0] Profiler function <class 'torch.autograd.profiler.record_function'> will be ignored\n[rank0]:E0108 11:21:18.362000 13642 torch/_dynamo/utils.py:3226] RMSE (res-fp64): 0.00093, (ref-fp64): 0.00004 and shape=torch.Size([256]). res.dtype: torch.float32, multiplier: 3.000000, tol: 0.001000, use_larger_multiplier_for_smaller_tensor: 0\n[rank0]:E0108 11:21:18.363000 13642 torch/_dynamo/utils.py:3087] Accuracy failed for key name model.over_arch.model.0._mlp.2._linear.bias\nfail_accuracy\n[rank0]:[W108 11:21:19.281845184 ProcessGroupNCCL.cpp:1553] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())\n```\n\n* [x] modded_nanogpt (failing on both 2.10 RC and nightly, [the dashboard](https://hud.pytorch.org/benchmark/v3/dashboard/compiler_inductor?renderGroupId=main&time.start=2025-12-10T00%3A00%3A00.000Z&time.end=2026-01-08T11%3A00%3A00.000Z&filters.repo=pytorch%2Fpytorch&filters.benchmarkName=compiler&filters.mode=training&filters.dtype=amp&filters.deviceName=cuda+%28h100%29&filters.device=cuda&filters.arch=h100&filters.suite=all&filters.compiler=&filters.model=modded_nanogpt&lbranch=main&rbranch=main&rcommit.commit=f65bb97673dfa24cc5270f3bb74cca892736de2b&rcommit.workflow_id=20609168520&rcommit.date=2025-12-31T02%3A00%3A00Z&rcommit.branch=main&lcommit.commit=712b350f5b91ee10254289562183eb8a6ec80672&lcommit.workflow_id=20585973619&lcommit.date=2025-12-30T03%3A00%3A00Z&lcommit.branch=main&maxSampling=110) shows a regression between Dec 30th and Dec 31st run)\n```\npip install torch==2.10.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/test/cu128\npython benchmarks/dynamo/torchbench.py --accuracy --no-translation-validation --training --amp --backend inductor --disable-cudagraphs --device cuda --only modded_nanogpt\n\nloading model: 0it [00:06, ?it/s]\ncuda train modded_nanogpt\nWARNING:common:fp64 golden ref were not generated for modded_nanogpt. Setting accuracy check to cosine\nTraceback (most recent call last):\n  File \"/shared-personal/huydo/github/pytorch/benchmarks/dynamo/common.py\", line 2206, in check_accuracy\n    fp64_outputs = self.run_n_iterations(\n  File \"/shared-personal/huydo/github/pytorch/benchmarks/dynamo/common.py\", line 2043, in run_n_iterations\n    model_iter_fn(mod, inputs, collect_outputs=False)\n  File \"/shared-personal/huydo/github/pytorch/benchmarks/dynamo/torchbench.py\", line 474, in forward_and_backward_pass\n    pred = mod(*cloned_inputs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1776, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1787, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/__init__.py\", line 25, in forward\n    return self.model(input_seq, self.target_seq, self.sliding_window_num_blocks)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1776, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1787, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/model.py\", line 929, in forward\n    logits = self.lm_head(x).float()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1776, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1787, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/model.py\", line 613, in forward\n    out: Tensor = torch.ops.nanogpt.mm(\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_ops.py\", line 1209, in __call__\n    return self._op(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_library/autograd.py\", line 110, in autograd_impl\n    result = Generated.apply(*args, Metadata(keyset, keyword_only_args))  # type: ignore[attr-defined]\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/autograd/function.py\", line 583, in apply\n    return super().apply(*args, **kwargs)  # type: ignore[misc]\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_library/autograd.py\", line 51, in forward\n    result = op.redispatch(keyset & _C._after_autograd_keyset, *args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_ops.py\", line 826, in redispatch\n    return self._handle.redispatch_boxed(keyset, *args, **kwargs)  # type: ignore[return-value]\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_library/custom_ops.py\", line 347, in backend_impl\n    result = self._backend_fns[device_type](*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_compile.py\", line 54, in inner\n    return disable_fn(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py\", line 1181, in _fn\n    return fn(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_library/custom_ops.py\", line 382, in wrapped_fn\n    return fn(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/model.py\", line 60, in mm_op\n    return impl(x, w)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py\", line 967, in compile_wrapper\n    raise e.remove_dynamo_frames() from None  # see TORCHDYNAMO_VERBOSE=1\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/compile_fx.py\", line 1019, in _compile_fx_inner\n    raise InductorError(e, currentframe()).with_traceback(\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/compile_fx.py\", line 1003, in _compile_fx_inner\n    mb_compiled_graph = fx_codegen_and_compile(\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/compile_fx.py\", line 1766, in fx_codegen_and_compile\n    return scheme.codegen_and_compile(gm, example_inputs, inputs_to_check, graph_kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/compile_fx.py\", line 1537, in codegen_and_compile\n    compiled_module = graph.compile_to_module()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/graph.py\", line 2416, in compile_to_module\n    return self._compile_to_module()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/graph.py\", line 2426, in _compile_to_module\n    mod = self._compile_to_module_lines(wrapper_code)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/graph.py\", line 2501, in _compile_to_module_lines\n    mod = PyCodeCache.load_by_key_path(\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/codecache.py\", line 3674, in load_by_key_path\n    mod = _reload_python_module(key, path, set_sys_modules=in_toplevel)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/runtime/compile_tasks.py\", line 35, in _reload_python_module\n    exec(code, mod.__dict__, mod.__dict__)\n  File \"/tmp/torchinductor_dev/6v/c6v65m4wxpaba4tzfmwsyz4jersywz7ejvmqgyziv7qqfsbdgwxv.py\", line 187, in <module>\n    async_compile.wait(globals())\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/async_compile.py\", line 649, in wait\n    self._wait_futures(scope)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/async_compile.py\", line 669, in _wait_futures\n    kernel = result.result()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/codecache.py\", line 4417, in result\n    return self.result_fn()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/async_compile.py\", line 438, in get_result\n    raise e.with_name(kernel_name) from e\ntorch._inductor.exc.InductorError: SubprocException: An exception occurred in a subprocess:\n\nName=triton_poi_fused__to_copy_div_0\nTraceback (most recent call last):\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/compile_worker/subproc_pool.py\", line 457, in do_job\n    result = job()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/runtime/compile_tasks.py\", line 68, in _worker_compile_triton\n    kernel.precompile(warm_cache_only=True)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/runtime/triton_heuristics.py\", line 432, in precompile\n    self._precompile_worker()\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/runtime/triton_heuristics.py\", line 463, in _precompile_worker\n    compile_results.append(self._precompile_config(c))\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/_inductor/runtime/triton_heuristics.py\", line 808, in _precompile_config\n    binary = triton.compile(*compile_args, **compile_kwargs)\n  File \"/opt/conda/envs/py_3.10/lib/python3.10/site-packages/triton/compiler/compiler.py\", line 324, in compile\n    next_module = compile_ir(module, metadata)\n  File \"/opt/conda/envs/py_3.10/lib/python3.10/site-packages/triton/backends/nvidia/compiler.py\", line 544, in <lambda>\n    stages[\"llir\"] = lambda src, metadata: self.make_llir(src, metadata, options, capability)\n  File \"/opt/conda/envs/py_3.10/lib/python3.10/site-packages/triton/backends/nvidia/compiler.py\", line 378, in make_llir\n    pm.run(mod, 'make_llir')\nRuntimeError: PassManager::run failed\n\n\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS=\"+dynamo\"\n\nW0108 11:37:55.947000 15449 torch/_logging/_internal.py:1204] [8/0] Profiler function <class 'torch.autograd.profiler.record_function'> will be ignored\nW0108 11:38:04.237000 15449 torch/_dynamo/utils.py:3136] Similarity score=0.9161608219146729\nE0108 11:38:04.238000 15449 torch/_dynamo/utils.py:3087] Accuracy failed for key name model.blocks.0.attn.qkvo_w.grad\nfail_accuracy\n```\n\n@ezyang @gchanan @kadeng @msaroufim @chauhang @penguinwu @voznesenskym @EikanWang @jgong5 @Guobing-Chen @XiaobingSuper @zhuhaozhe @blzheng @wenzhe-nrv @jiayisunx @ipiszy @muchulee8 @amjames @aakhundov @coconutruben @jataylo ",
+  "closedAt": "2026-01-12T20:06:52Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "cc @eellison ",
+      "createdAt": "2026-01-08T19:54:21Z",
+      "id": "IC_kwDOA-j9z87eDrnr",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3725507051"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "How I reproduce this locally:\n\n```\ngpu-dev reserve --gpu-type H200 --gpus 1 --dockerimage 308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/ci-image:pytorch-linux-jammy-cuda12.8-cudnn9-py3-gcc11-inductor-benchmarks-48b5409470241f2def0ce9056c83a69914a2c731\n# Connect to the server\n\n# Set the Python path using the conda env already there in the Docker image\nexport PATH=/opt/conda/envs/py_3.10/bin:/home/dev/.local/bin:/usr/local/cuda/bin:$PATH\n\n# All TorchBench model are kept here\nexport PYTHONPATH=/torchbench\n\n# Checkout PyTorch, and switch to release/2.10 branch\n\n# Run the above DynamoBench commands\n```",
+      "createdAt": "2026-01-08T20:24:06Z",
+      "id": "IC_kwDOA-j9z87eEJXb",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3725628891"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "jeanschmidt"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "FOR `sam`, `sam_fast` and `vision_maskrcnn` models:\n\nIMO, comparing regressions using absolute binary equal operations is too strict. It does not allow for small / non-meaningful numerical differences.\n\na single pixel in the mask that changes from (using a threshold of 0.5 as an example) 0.4999999 to 0.500001 would trigger the whole test to fail. Even if computationally those are equivalent and just small numerical discrepancies have been introduced.\n\nIt is practice the standard to use similarity metrics in those cases. The same as we do with numerical comparisons for other models.\n\nso, IMO all accuracy tests for masks should be using similarity metrics and not absolute equal comparisons. And looking at nightlies is a half-story. The problem is that this test have been failing consistently for a long while. And this can be observed into this signal flakiness, where about 10% of the time we got errors that `sam` was failing.\n\n\n\n",
+      "createdAt": "2026-01-08T21:12:12Z",
+      "id": "IC_kwDOA-j9z87eE41e",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3725823326"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Lucaskabela"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@huydhn  For `torchrec_dlrm`, the change is from the reversion of addmm fusions (see https://github.com/pytorch/pytorch/pull/170724)\n\nSince this was already a reversion due to numeric instability, I am not sure what the right action should be, but cc'ing @nikitaved as well since they were the original PR author",
+      "createdAt": "2026-01-08T23:53:48Z",
+      "id": "IC_kwDOA-j9z87eHJ3q",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3726417386"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@atalman @eqy For the illegal memory access error, this is fixed by building PyTorch from main to include https://github.com/pytorch/pytorch/pull/171627. So, the failure is the same as https://github.com/pytorch/pytorch/issues/169849. ~~Are we sure that we have cherry pick all the change we need there into 2.10?~~ It turns out that the cherry pick was from yesterday and hasn't gotten into RC yet, I'll test it again once RC5 is out\n\n```\npip install torch==2.10.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/test/cu128\npython benchmarks/dynamo/torchbench.py --performance --cold-start-latency --training --amp --backend inductor --device cuda --only nanogpt\n```",
+      "createdAt": "2026-01-09T02:08:39Z",
+      "id": "IC_kwDOA-j9z87eIX6B",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3726737025"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@Lucaskabela @atalman I have been able to get to the bottom of `torchrec_dlrm` issue. It turns out that https://github.com/pytorch/pytorch/pull/170724 is a red herring.  The real root cause is that benchmarking `torchrec_dlrm` with 2.10 RC needs `torchrec`and `fbgemm-gpu` built from source and and both of them are 3-year old https://github.com/pytorch/pytorch/blob/main/.github/ci_commit_pins/fbgemm.txt (yuck). That's the reason why `torchrec_dlrm`  has been failing in CI since forever.\n\nOn the other hand, when benchmark `torchrec_dlrm` on 2.9.1. I can pip install the whole list https://github.com/pytorch/pytorch/pull/171936/files#diff-9709e5db13aeac90c0312b2b8da34b37cf51242ec789ca959fcf1ba295a8da7aR823 and get the the latest version of torchrec`and `fbgemm-gpu` that are working with 2.9.1. That's the reason why it gives the wrong impression that the model regresses from 2.9.1 to 2.10.\n\nLet me submit a PR to bump `torchrec`and `fbgemm-gpu` pinned commits to fix this. But we can cross this off the list now because this is not a real regression",
+      "createdAt": "2026-01-09T11:02:09Z",
+      "id": "IC_kwDOA-j9z87eO3W5",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3728438713"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Also, for sam's fail_accuracy, I can confirm now that it's flaky, and also not a real regression. We can cherry pick @jeanschmidt https://github.com/pytorch/pytorch/pull/171927#issuecomment-3728484653 to get release CI to green.  Thank you Jean for the timing fix!",
+      "createdAt": "2026-01-09T11:17:36Z",
+      "id": "IC_kwDOA-j9z87ePD5l",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3728490085"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "atalman"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Hi @jeanschmidt and @huydhn looks like sam error is still happening on main: https://hud.pytorch.org/pytorch/pytorch/commit/64987e1fa59ca696796774ad942478c27a97342c",
+      "createdAt": "2026-01-09T16:20:01Z",
+      "id": "IC_kwDOA-j9z87eTeHN",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3729646029"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "jeanschmidt"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "thanks for the headsup, I'll try to reproduce this locally and find a more suitable threshold for sam, \n\nMaybe, in this case, let me revert the [PR](https://github.com/pytorch/pytorch/pull/171927) as it should return the model accuracy to be disabled and improve on it.",
+      "createdAt": "2026-01-09T17:54:39Z",
+      "id": "IC_kwDOA-j9z87eUvLY",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3729978072"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "atalman"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Confirm issue 1 is resolved:\n```\npython benchmarks/dynamo/torchbench.py --performance --cold-start-latency --training --amp --backend inductor --device cuda --only nanogpt\nloading model: 0it [00:00, ?it/s]number of parameters: 123.69M\nnum decayed parameter tensors: 50, with 124,354,560 parameters\nnum non-decayed parameter tensors: 98, with 121,344 parameters\nusing fused AdamW: True\nloading model: 0it [00:02, ?it/s]\ncuda train nanogpt                            \nW0109 18:58:41.166000 191 torch/_logging/_internal.py:1204] [6/0] Profiler function <class 'torch.autograd.profiler.record_function'> will be ignored\nrunning benchmark: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 30/30 [00:00<00:00, 30.57it/s]\n6.510x\n```",
+      "createdAt": "2026-01-09T19:00:01Z",
+      "id": "IC_kwDOA-j9z87eVmQ9",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3730203709"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "atalman"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "For ``python benchmarks/dynamo/torchbench.py --accuracy --no-translation-validation --training --amp --backend inductor --disable-cudagraphs --device cuda --only modded_nanogpt``\n\nI have following error:\n\n```\nWARNING:common:fp64 golden ref were not generated for modded_nanogpt. Setting accuracy check to cosine\nW0109 19:26:25.546000 2059 torch/_logging/_internal.py:1270] [8/0] Profiler record function <class 'torch.autograd.profiler.record_function'> will be ignored\nW0109 19:26:35.322000 2059 torch/_dynamo/utils.py:3165] Similarity score=0.9161608219146729\nE0109 19:26:35.323000 2059 torch/_dynamo/utils.py:3116] Accuracy failed for key name model.blocks.0.attn.qkvo_w.grad\nfail_accuracy\n```\n\nSame issue with dev20251121+cu128.\n\nTrying to repro on 2.9.1:\n```\npython benchmarks/dynamo/torchbench.py --accuracy --no-translation-validation --training --amp --backend inductor --disable-cudagraphs --device cuda --only modded_nanogpt\nloading model: 0it [00:02, ?it/s]\ncuda train modded_nanogpt                     \nTraceback (most recent call last):\n  File \"/home/dev/pytorch/benchmarks/dynamo/common.py\", line 1997, in validate_model\n    self.model_iter_fn(model, example_inputs)\n  File \"/home/dev/pytorch/benchmarks/dynamo/torchbench.py\", line 491, in forward_and_backward_pass\n    pred = mod(*cloned_inputs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1775, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1786, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/__init__.py\", line 25, in forward\n    return self.model(input_seq, self.target_seq, self.sliding_window_num_blocks)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1775, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1786, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/model.py\", line 924, in forward\n    x = self.blocks[i](x, ve[i], x0, lambdas[i], sa_lambdas[i], block_masks[i])\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1775, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1786, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/model.py\", line 751, in forward\n    x = x + self.attn(norm(x), ve, sa_lambdas, block_mask)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1775, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1786, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/model.py\", line 690, in forward\n    y = flex_attention(\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/attention/flex_attention.py\", line 1526, in flex_attention\n    _validate_sdpa_input(query, key, value)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/attention/_utils.py\", line 45, in _validate_sdpa_input\n    raise ValueError(\nValueError: Expected query, key, and value to have the same dtype, but got query.dtype: torch.float16, key.dtype: torch.float16, and value.dtype: torch.float32 instead.\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/dev/pytorch/benchmarks/dynamo/common.py\", line 4172, in run\n    ) = runner.load_model(\n  File \"/home/dev/pytorch/benchmarks/dynamo/torchbench.py\", line 401, in load_model\n    self.validate_model(model, example_inputs)\n  File \"/home/dev/pytorch/benchmarks/dynamo/common.py\", line 1999, in validate_model\n    raise RuntimeError(\"Eager run failed\") from e\nRuntimeError: Eager run failed\n\neager_fail_to_run\n\n```\n",
+      "createdAt": "2026-01-09T19:30:05Z",
+      "id": "IC_kwDOA-j9z87eV83R",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3730296273"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "atalman"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Confirmed failure on 2.8.0 as well:\n```\npython benchmarks/dynamo/torchbench.py --accuracy --no-translation-validation --training --amp --backend inductor --disable-cudagraphs --device cuda --only modded_nanogpt\nloading model: 0it [00:02, ?it/s]\ncuda train modded_nanogpt                     \nTraceback (most recent call last):\n  File \"/home/dev/pytorch/benchmarks/dynamo/common.py\", line 1898, in validate_model\n    self.model_iter_fn(model, example_inputs)\n  File \"/home/dev/pytorch/benchmarks/dynamo/torchbench.py\", line 469, in forward_and_backward_pass\n    pred = mod(*cloned_inputs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1773, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1784, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/__init__.py\", line 25, in forward\n    return self.model(input_seq, self.target_seq, self.sliding_window_num_blocks)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1773, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1784, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/model.py\", line 924, in forward\n    x = self.blocks[i](x, ve[i], x0, lambdas[i], sa_lambdas[i], block_masks[i])\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1773, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1784, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/model.py\", line 751, in forward\n    x = x + self.attn(norm(x), ve, sa_lambdas, block_mask)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1773, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1784, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/torchbench/torchbenchmark/models/modded_nanogpt/model.py\", line 690, in forward\n    y = flex_attention(\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/attention/flex_attention.py\", line 1298, in flex_attention\n    _validate_sdpa_input(query, key, value)\n  File \"/home/dev/.local/lib/python3.10/site-packages/torch/nn/attention/_utils.py\", line 45, in _validate_sdpa_input\n    raise ValueError(\nValueError: Expected query, key, and value to have the same dtype, but got query.dtype: torch.float16, key.dtype: torch.float16, and value.dtype: torch.float32 instead.\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/dev/pytorch/benchmarks/dynamo/common.py\", line 4004, in run\n    ) = runner.load_model(\n  File \"/home/dev/pytorch/benchmarks/dynamo/torchbench.py\", line 381, in load_model\n    self.validate_model(model, example_inputs)\n  File \"/home/dev/pytorch/benchmarks/dynamo/common.py\", line 1900, in validate_model\n    raise RuntimeError(\"Eager run failed\") from e\nRuntimeError: Eager run failed\n\neager_fail_to_run\n\n```",
+      "createdAt": "2026-01-09T20:42:39Z",
+      "id": "IC_kwDOA-j9z87eWw0q",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3730509098"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Ty for confirm that `modded_nanogpt` isn't a new regression! Given that it has never been working correctly for a long time, let's skip it https://github.com/pytorch/pytorch/pull/172125",
+      "createdAt": "2026-01-09T21:28:38Z",
+      "id": "IC_kwDOA-j9z87eXNy6",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3730627770"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@atalman @Lucaskabela And here is the PR to bump torchrec and fbgemm pinned commits https://github.com/pytorch/pytorch/pull/172147 under testing",
+      "createdAt": "2026-01-10T00:04:44Z",
+      "id": "IC_kwDOA-j9z87eY7tr",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3731077995"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "For `sam`, I will verify it again with the final RC next week, I couldn't reproduce it locally anymore with the current RC5",
+      "createdAt": "2026-01-10T01:52:28Z",
+      "id": "IC_kwDOA-j9z87eaUuQ",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3731442576"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Last round of benchmark with the final RC https://github.com/pytorch/pytorch/actions/runs/20969710907:\n\n* `sam` [confirms fixed](https://hud.pytorch.org/benchmark/v3/dashboard/compiler_inductor?renderGroupId=main&time.start=2026-01-07T00%3A00%3A00.000Z&time.end=2026-01-14T23%3A59%3A59.999Z&filters.repo=pytorch%2Fpytorch&filters.benchmarkName=compiler&filters.mode=inference&filters.dtype=bfloat16&filters.deviceName=cuda+%28h100%29&filters.device=cuda&filters.arch=h100&filters.suite=torchbench&filters.compiler=&filters.model=sam&lbranch=prepare-perf-number-2.9.1&rbranch=prepare-perf-number-2.10&rcommit.commit=80c5addf062fd9acd5d7ab84c905183ae71d277f&rcommit.workflow_id=20969710907&rcommit.date=2026-01-13T22%3A00%3A00Z&rcommit.branch=prepare-perf-number-2.10&lcommit.commit=be32f077fb50b49ad856e957a6860d37565583db&lcommit.workflow_id=20799100249&lcommit.date=2026-01-08T04%3A00%3A00Z&lcommit.branch=prepare-perf-number-2.9.1&maxSampling=110)\n* `nanogpt` [confirms fixed](https://hud.pytorch.org/benchmark/v3/dashboard/compiler_inductor?renderGroupId=main&time.start=2026-01-07T00%3A00%3A00.000Z&time.end=2026-01-14T23%3A59%3A59.999Z&filters.repo=pytorch%2Fpytorch&filters.benchmarkName=compiler&filters.mode=training&filters.dtype=amp&filters.deviceName=cuda+%28h100%29&filters.device=cuda&filters.arch=h100&filters.suite=torchbench&filters.compiler=&filters.model=nanogpt&lbranch=prepare-perf-number-2.9.1&rbranch=prepare-perf-number-2.10&rcommit.commit=80c5addf062fd9acd5d7ab84c905183ae71d277f&rcommit.workflow_id=20969710907&rcommit.date=2026-01-13T22%3A00%3A00Z&rcommit.branch=prepare-perf-number-2.10&lcommit.commit=be32f077fb50b49ad856e957a6860d37565583db&lcommit.workflow_id=20799100249&lcommit.date=2026-01-08T04%3A00%3A00Z&lcommit.branch=prepare-perf-number-2.9.1&maxSampling=110)\n* `modded_nanogpt` failed on [both 2.9.1 and 2.10](https://hud.pytorch.org/benchmark/v3/dashboard/compiler_inductor?renderGroupId=main&time.start=2026-01-07T00%3A00%3A00.000Z&time.end=2026-01-14T23%3A59%3A59.999Z&filters.repo=pytorch%2Fpytorch&filters.benchmarkName=compiler&filters.mode=training&filters.dtype=amp&filters.deviceName=cuda+%28h100%29&filters.device=cuda&filters.arch=h100&filters.suite=torchbench&filters.compiler=&filters.model=modded_nanogpt&lbranch=prepare-perf-number-2.9.1&rbranch=prepare-perf-number-2.10&rcommit.commit=80c5addf062fd9acd5d7ab84c905183ae71d277f&rcommit.workflow_id=20969710907&rcommit.date=2026-01-13T22%3A00%3A00Z&rcommit.branch=prepare-perf-number-2.10&lcommit.commit=be32f077fb50b49ad856e957a6860d37565583db&lcommit.workflow_id=20799100249&lcommit.date=2026-01-08T02%3A00%3A00Z&lcommit.branch=prepare-perf-number-2.9.1&maxSampling=110) (not a regression). To create a tracking issue for PT2 oncall (TODO @huydhn)\n* `torchrec_dlrm` [is passing now](https://hud.pytorch.org/benchmark/v3/dashboard/compiler_inductor?renderGroupId=main&time.start=2026-01-07T00%3A00%3A00.000Z&time.end=2026-01-14T23%3A59%3A59.999Z&filters.repo=pytorch%2Fpytorch&filters.benchmarkName=compiler&filters.mode=training&filters.dtype=amp&filters.deviceName=cuda+%28h100%29&filters.device=cuda&filters.arch=h100&filters.suite=torchbench&filters.compiler=&filters.model=torchrec_dlrm&lbranch=main&rbranch=main&rcommit.commit=430181803ff49ed303e3445f0b9fb0c9268d0b0f&rcommit.workflow_id=20978012969&rcommit.date=2026-01-14T04%3A00%3A00Z&rcommit.branch=main&lcommit.commit=712bfd126be04e65f5568842f2ad7c83bf2a5340&lcommit.workflow_id=20766738904&lcommit.date=2026-01-07T03%3A00%3A00Z&lcommit.branch=main&maxSampling=110)",
+      "createdAt": "2026-01-14T03:14:47Z",
+      "id": "IC_kwDOA-j9z87fXi1e",
+      "url": "https://github.com/pytorch/pytorch/issues/172015#issuecomment-3747491166"
+    }
+  ],
+  "createdAt": "2026-01-08T19:09:43Z",
+  "id": "I_kwDOA-j9z87iJLv1",
+  "labels": [
+    {
+      "name": "high priority"
+    },
+    {
+      "name": "triage review"
+    },
+    {
+      "name": "oncall: pt2"
+    },
+    {
+      "name": "module: inductor"
+    }
+  ],
+  "number": 172015,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "huydhn"
+      },
+      "createdAt": "2026-01-08T19:10:09Z",
+      "label": {
+        "name": "module: inductor"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "pytorch-bot"
+      },
+      "createdAt": "2026-01-08T19:10:12Z",
+      "label": {
+        "name": "oncall: pt2"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "atalman"
+      },
+      "createdAt": "2026-01-08T21:22:15Z",
+      "label": {
+        "name": "high priority"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "pytorch-bot"
+      },
+      "createdAt": "2026-01-08T21:22:17Z",
+      "label": {
+        "name": "triage review"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "atalman"
+      },
+      "createdAt": "2026-01-12T20:06:52Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "TorchInductor benchmark accuracy check failing for some models in 2.10",
+  "url": "https://github.com/pytorch/pytorch/issues/172015"
+}

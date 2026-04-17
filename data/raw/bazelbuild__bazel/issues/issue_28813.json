@@ -1,0 +1,249 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "darkrift"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Description of the bug:\n\n\nUsing Bazel 9, when a test fails on our end, the BES report network summary contains excessively huge values for bytesSent and BytesRecv:\n\n```\n{\"id\":{\"buildMetrics\":{}},\"lastMessage\":true,\"buildMetrics\":{\"actionSummary\":{\"actionsCreated\":\"2123\",\"actionsExecuted\":\"1745\",\"actionsCreatedNotIncludingAspects\":\"2123\",\"actionData\":[{\"mnemonic\":\"CopyFile\",\"actionsExecuted\":\"1095\",\"firstStartedMs\":\"1771619876820\",\"lastEndedMs\":\"1771619892316\",\"systemTime\":\"0.004s\",\"userTime\":\"0.001s\",\"actionsCreated\":\"39685\"},{\"mnemonic\":\"CppCompile\",\"actionsExecuted\":\"487\",\"firstStartedMs\":\"1771619876805\",\"lastEndedMs\":\"1771619892316\",\"actionsCreated\":\"86481\"},{\"mnemonic\":\"GoCompilePkg\",\"actionsExecuted\":\"40\",\"firstStartedMs\":\"1771619879500\",\"lastEndedMs\":\"1771619892316\",\"actionsCreated\":\"7129\"},{\"mnemonic\":\"CppArchive\",\"actionsExecuted\":\"20\",\"firstStartedMs\":\"1771619876814\",\"lastEndedMs\":\"1771619885224\",\"actionsCreated\":\"7596\"},{\"mnemonic\":\"CreateCompileJar\",\"actionsExecuted\":\"17\",\"firstStartedMs\":\"1771619876805\",\"lastEndedMs\":\"1771619880408\",\"actionsCreated\":\"68\"},{\"mnemonic\":\"CopyToDirectory\",\"actionsExecuted\":\"15\",\"firstStartedMs\":\"1771619876813\",\"lastEndedMs\":\"1771619891897\",\"actionsCreated\":\"1083\"},{\"mnemonic\":\"CppLink\",\"actionsExecuted\":\"15\",\"firstStartedMs\":\"1771619881415\",\"lastEndedMs\":\"1771619888852\",\"actionsCreated\":\"527\"},{\"mnemonic\":\"RunNogo\",\"actionsExecuted\":\"15\",\"firstStartedMs\":\"1771619884459\",\"lastEndedMs\":\"1771619892316\",\"actionsCreated\":\"4661\"},{\"mnemonic\":\"Javac\",\"actionsExecuted\":\"9\",\"firstStartedMs\":\"1771619884041\",\"lastEndedMs\":\"1771619890041\",\"actionsCreated\":\"39\"},{\"mnemonic\":\"CcStage0Compile\",\"actionsExecuted\":\"5\",\"firstStartedMs\":\"1771619876814\",\"lastEndedMs\":\"1771619883950\",\"actionsCreated\":\"395\"},{\"mnemonic\":\"CppTransitiveArchive\",\"actionsExecuted\":\"5\",\"firstStartedMs\":\"1771619876805\",\"lastEndedMs\":\"1771619892312\",\"actionsCreated\":\"330\"},{\"mnemonic\":\"StampJarManifest\",\"actionsExecuted\":\"4\",\"firstStartedMs\":\"1771619876803\",\"lastEndedMs\":\"1771619888578\",\"actionsCreated\":\"68\"},{\"mnemonic\":\"ValidateNogo\",\"actionsExecuted\":\"3\",\"firstStartedMs\":\"1771619890038\",\"lastEndedMs\":\"1771619892312\",\"actionsCreated\":\"488\"},{\"mnemonic\":\"Turbine\",\"actionsExecuted\":\"2\",\"firstStartedMs\":\"1771619884340\",\"lastEndedMs\":\"1771619887369\",\"actionsCreated\":\"24\"},{\"mnemonic\":\"GoStdlib\",\"actionsExecuted\":\"2\",\"firstStartedMs\":\"1771619880435\",\"lastEndedMs\":\"1771619884457\",\"actionsCreated\":\"40\"},{\"mnemonic\":\"Genrule\",\"actionsExecuted\":\"2\",\"firstStartedMs\":\"1771619876901\",\"lastEndedMs\":\"1771619878471\",\"actionsCreated\":\"245\"},{\"mnemonic\":\"ExecutableSymlink\",\"actionsExecuted\":\"2\",\"firstStartedMs\":\"1771619876852\",\"lastEndedMs\":\"1771619878440\",\"actionsCreated\":\"2195\"},{\"mnemonic\":\"JavaToolchainCompileBootClasspath\",\"actionsExecuted\":\"1\",\"firstStartedMs\":\"1771619878422\",\"lastEndedMs\":\"1771619880650\",\"actionsCreated\":\"6\"},{\"mnemonic\":\"Ijar\",\"actionsExecuted\":\"1\",\"firstStartedMs\":\"1771619880650\",\"lastEndedMs\":\"1771619884041\",\"actionsCreated\":\"6\"},{\"mnemonic\":\"JavaToolchainCompileClasses\",\"actionsExecuted\":\"1\",\"firstStartedMs\":\"1771619876802\",\"lastEndedMs\":\"1771619878421\",\"actionsCreated\":\"6\"}],\"runnerCount\":[{\"name\":\"total\",\"count\":1745},{\"name\":\"disk cache hit\",\"count\":150,\"execKind\":\"Remote\"},{\"name\":\"remote cache hit\",\"count\":34,\"execKind\":\"Remote\"},{\"name\":\"internal\",\"count\":403},{\"name\":\"darwin-sandbox\",\"count\":1,\"execKind\":\"Local\"},{\"name\":\"remote\",\"count\":1157,\"execKind\":\"Remote\"}],\"actionCacheStatistics\":{\"sizeInBytes\":\"10558612\",\"saveTimeInMs\":\"38\",\"hits\":298,\"misses\":1745,\"missDetails\":[{},{\"reason\":\"DIFFERENT_DEPS\"},{\"reason\":\"DIFFERENT_ENVIRONMENT\"},{\"reason\":\"DIFFERENT_FILES\"},{\"reason\":\"CORRUPTED_CACHE_ENTRY\"},{\"reason\":\"NOT_CACHED\",\"count\":1259},{\"reason\":\"UNCONDITIONAL_EXECUTION\",\"count\":1},{\"reason\":\"DIGEST_MISMATCH\",\"count\":485}],\"cacheCheckSemaphoreWaitTimeInMs\":\"67552\"}},\"memoryMetrics\":{\"garbageMetrics\":[{\"type\":\"CodeHeap \\u0027non-profiled nmethods\\u0027\",\"garbageCollected\":\"2614912\"},{\"type\":\"CodeHeap \\u0027profiled nmethods\\u0027\",\"garbageCollected\":\"5887616\"},{\"type\":\"Compressed Class Space\",\"garbageCollected\":\"2112\"},{\"type\":\"G1 Eden Space\",\"garbageCollected\":\"6899630080\"},{\"type\":\"G1 Old Gen\",\"garbageCollected\":\"67203880\"},{\"type\":\"G1 Survivor Space\",\"garbageCollected\":\"124387080\"},{\"type\":\"Metaspace\",\"garbageCollected\":\"7192\"}]},\"targetMetrics\":{\"targetsConfigured\":\"1095\",\"targetsConfiguredNotIncludingAspects\":\"1095\"},\"packageMetrics\":{\"packagesLoaded\":\"1\"},\"timingMetrics\":{\"cpuTimeInMs\":\"40266\",\"wallTimeInMs\":\"21383\",\"analysisPhaseTimeInMs\":\"1434\",\"executionPhaseTimeInMs\":\"15582\",\"actionsExecutionStartInMs\":\"5749\",\"criticalPathTime\":\"15.495441292s\"},\"cumulativeMetrics\":{\"numAnalyses\":13,\"numBuilds\":12},\"artifactMetrics\":{\"sourceArtifactsRead\":{\"sizeInBytes\":\"24826709\",\"count\":2277},\"outputArtifactsSeen\":{\"sizeInBytes\":\"1254374304\",\"count\":7635},\"outputArtifactsFromActionCache\":{\"sizeInBytes\":\"327099840\",\"count\":785},\"topLevelArtifacts\":{}},\"buildGraphMetrics\":{\"actionLookupValueCount\":116046,\"actionCount\":35793,\"outputArtifactCount\":46751,\"postInvocationSkyframeNodeCount\":807172,\"actionLookupValueCountNotIncludingAspects\":115171,\"actionCountNotIncludingAspects\":35792,\"inputFileConfiguredTargetCount\":29465,\"outputFileConfiguredTargetCount\":15873,\"otherConfiguredTargetCount\":5445,\"dirtiedValues\":[{\"skyfunctionName\":\"DIRECTORY_LISTING\",\"count\":\"174\"},{\"skyfunctionName\":\"BUILD_CONFIGURATION\",\"count\":\"136\"},{\"skyfunctionName\":\"PLATFORM\",\"count\":\"4\"},{\"skyfunctionName\":\"TARGET_PATTERN\",\"count\":\"1\"},{\"skyfunctionName\":\"SINGLE_TOOLCHAIN_RESOLUTION\",\"count\":\"339\"},{\"skyfunctionName\":\"PACKAGE\",\"count\":\"1\"},{\"skyfunctionName\":\"TOOLCHAIN_RESOLUTION\",\"count\":\"651\"},{\"skyfunctionName\":\"ARTIFACT_NESTED_SET\",\"count\":\"2046\"},{\"skyfunctionName\":\"REGISTERED_TOOLCHAINS\",\"count\":\"135\"},{\"skyfunctionName\":\"PACKAGE_LOOKUP\",\"count\":\"176\"},{\"skyfunctionName\":\"ARTIFACT\",\"count\":\"28\"},{\"skyfunctionName\":\"BASELINE_OPTIONS\",\"count\":\"2\"},{\"skyfunctionName\":\"ACTION_EXECUTION\",\"count\":\"4740\"},{\"skyfunctionName\":\"GLOBS\",\"count\":\"1\"},{\"skyfunctionName\":\"BUILD_CONFIGURATION_KEY\",\"count\":\"3\"},{\"skyfunctionName\":\"FILE\",\"count\":\"702\"},{\"skyfunctionName\":\"CONFIGURED_TARGET\",\"count\":\"574013\"},{\"skyfunctionName\":\"REGISTERED_EXECUTION_PLATFORMS\",\"count\":\"136\"},{\"skyfunctionName\":\"TARGET_COMPLETION\",\"count\":\"65\"},{\"skyfunctionName\":\"ASPECT\",\"count\":\"875\"}],\"changedValues\":[{\"skyfunctionName\":\"PRECOMPUTED\",\"count\":\"1\"},{\"skyfunctionName\":\"ERROR_TRANSIENCE\",\"count\":\"1\"},{\"skyfunctionName\":\"FILE_STATE\",\"count\":\"2\"}],\"builtValues\":[{\"skyfunctionName\":\"TARGET_PATTERN\",\"count\":\"1\"},{\"skyfunctionName\":\"PACKAGE\",\"count\":\"1\"},{\"skyfunctionName\":\"ARTIFACT_NESTED_SET\",\"count\":\"956\"},{\"skyfunctionName\":\"ARTIFACT\",\"count\":\"2301\"},{\"skyfunctionName\":\"FILE_STATE\",\"count\":\"6\"},{\"skyfunctionName\":\"ACTION_EXECUTION\",\"count\":\"1506\"},{\"skyfunctionName\":\"GLOBS\",\"count\":\"1\"},{\"skyfunctionName\":\"FILE\",\"count\":\"160\"},{\"skyfunctionName\":\"CONFIGURED_TARGET\",\"count\":\"1249\"}],\"cleanedValues\":[{\"skyfunctionName\":\"ACTION_EXECUTION\",\"count\":\"138\"},{\"skyfunctionName\":\"REGISTERED_EXECUTION_PLATFORMS\",\"count\":\"134\"},{\"skyfunctionName\":\"PLATFORM\",\"count\":\"3\"},{\"skyfunctionName\":\"PACKAGE_LOOKUP\",\"count\":\"49\"},{\"skyfunctionName\":\"SINGLE_TOOLCHAIN_RESOLUTION\",\"count\":\"329\"},{\"skyfunctionName\":\"TOOLCHAIN_RESOLUTION\",\"count\":\"642\"}],\"evaluatedValues\":[{\"skyfunctionName\":\"PLATFORM\",\"count\":\"5\"},{\"skyfunctionName\":\"TARGET_PATTERN\",\"count\":\"1\"},{\"skyfunctionName\":\"SINGLE_TOOLCHAIN_RESOLUTION\",\"count\":\"329\"},{\"skyfunctionName\":\"PACKAGE\",\"count\":\"1\"},{\"skyfunctionName\":\"TOOLCHAIN_RESOLUTION\",\"count\":\"1098\"},{\"skyfunctionName\":\"ARTIFACT_NESTED_SET\",\"count\":\"4199\"},{\"skyfunctionName\":\"PACKAGE_LOOKUP\",\"count\":\"98\"},{\"skyfunctionName\":\"ARTIFACT\",\"count\":\"2347\"},{\"skyfunctionName\":\"TEST_COMPLETION\",\"count\":\"1\"},{\"skyfunctionName\":\"FILE_STATE\",\"count\":\"6\"},{\"skyfunctionName\":\"ACTION_EXECUTION\",\"count\":\"4949\"},{\"skyfunctionName\":\"BUILD_DRIVER\",\"count\":\"2\"},{\"skyfunctionName\":\"GLOBS\",\"count\":\"1\"},{\"skyfunctionName\":\"FILE\",\"count\":\"180\"},{\"skyfunctionName\":\"CONFIGURED_TARGET\",\"count\":\"1443\"},{\"skyfunctionName\":\"REGISTERED_EXECUTION_PLATFORMS\",\"count\":\"267\"},{\"skyfunctionName\":\"TARGET_COMPLETION\",\"count\":\"1\"}]},\"workerMetrics\":[{\"processId\":41390,\"mnemonic\":\"Javac\",\"isMultiplex\":true,\"isMeasurable\":true,\"workerStats\":[{\"collectTimeInMs\":\"1771619892245\",\"workerMemoryInKb\":8336,\"lastActionStartTimeInMs\":\"1771611418866\",\"priorWorkerMemoryInKb\":8288}],\"workerIds\":[1],\"workerKeyHash\":\"2130855249\",\"workerStatus\":\"ALIVE\",\"actionsExecuted\":\"1\",\"priorActionsExecuted\":\"1\"}],\"networkMetrics\":{\"systemNetworkStats\":{\"bytesSent\":\"18446744072900581376\",\"bytesRecv\":\"18446744070989369344\",\"packetsSent\":\"8214046\",\"packetsRecv\":\"13168333\",\"peakBytesSentPerSec\":\"1797491877\",\"peakBytesRecvPerSec\":\"5182434579\",\"peakPacketsSentPerSec\":\"13451685\",\"peakPacketsRecvPerSec\":\"20210899\"}},\"workerPoolMetrics\":{\"workerPoolStats\":[{\"hash\":2130855249,\"mnemonic\":\"Javac\",\"aliveCount\":\"1\"}]},\"dynamicExecutionMetrics\":{},\"remoteAnalysisCacheStatistics\":{}}}\n```\n\n\n```\n    \"networkMetrics\": {\n      \"systemNetworkStats\": {\n        \"bytesSent\": \"18446744072900581376\",\n        \"bytesRecv\": \"18446744070989369344\",\n        \"packetsSent\": \"8214046\",\n        \"packetsRecv\": \"13168333\",\n        \"peakBytesSentPerSec\": \"1797491877\",\n        \"peakBytesRecvPerSec\": \"5182434579\",\n        \"peakPacketsSentPerSec\": \"13451685\",\n        \"peakPacketsRecvPerSec\": \"20210899\"\n      }\n    },\n```\n\nWe are nowhere near that scale \ud83d\ude06 \n\n### Which category does this issue belong to?\n\nRemote Execution\n\n### What's the simplest, easiest way to reproduce this bug? Please provide a minimal example if possible.\n\n\n_No response_\n\n### Which operating system are you running Bazel on?\n\n\nMacos\n\n### What is the output of `bazel info release`?\n\n\nrelease 9.0.0\n\n### If `bazel info release` returns `development version` or `(@non-git)`, tell us how you built Bazel.\n\n\n_No response_\n\n### What's the output of `git remote get-url origin; git rev-parse HEAD` ?\n\n\n```text\n\n```\n\n### If this is a regression, please try to identify the Bazel commit where the bug was introduced with bazelisk --bisect.\n\n\n_No response_\n\n### Have you found anything relevant by searching the web?\n\n_No response_\n\n### Any other information, logs, or outputs that you want to share?\n\n_No response_",
+  "closedAt": "2026-03-03T16:19:58Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "darkrift"
+      },
+      "authorAssociation": "NONE",
+      "body": "Looks related to https://github.com/bazelbuild/bazel/commit/d34d6389adb8848e55626b4b45667c3278772c51",
+      "createdAt": "2026-02-26T16:46:53Z",
+      "id": "IC_kwDOATz7jc7sgD7s",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3967827692"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@bazel-io fork 9.0.1",
+      "createdAt": "2026-02-26T18:00:13Z",
+      "id": "IC_kwDOATz7jc7shvMk",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3968267044"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@bazel-io fork 9.1.0",
+      "createdAt": "2026-02-26T18:00:21Z",
+      "id": "IC_kwDOATz7jc7shvYL",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3968267787"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@keith",
+      "createdAt": "2026-02-26T18:00:25Z",
+      "id": "IC_kwDOATz7jc7shveY",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3968268184"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "keith"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Can you check the contents of the relevant file to see what the values are\r\nthere?\r\n\r\n--\r\nKeith Smiley\r\n\r\n\r\nOn Thu, Feb 26, 2026 at 12:00 Fabian Meumertzheim ***@***.***>\r\nwrote:\r\n\r\n> *fmeum* left a comment (bazelbuild/bazel#28813)\r\n> <https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3968268184>\r\n>\r\n> @keith <https://github.com/keith>\r\n>\r\n> \u2014\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3968268184>,\r\n> or unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/AACFJ3QXWR67BI7DT37XLBD4N4YFBAVCNFSM6AAAAACWAYL5HSVHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHMZTSNRYGI3DQMJYGQ>\r\n> .\r\n> You are receiving this because you were mentioned.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+      "createdAt": "2026-02-26T18:19:23Z",
+      "id": "IC_kwDOATz7jc7siL68",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3968384700"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JakeNewfield"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Inflated byte counts in BES make it nearly impossible to attribute remote cache bandwidth to actual CI spend.  A fix in BEP itself is the right answer.                                \n",
+      "createdAt": "2026-02-27T00:42:23Z",
+      "id": "IC_kwDOATz7jc7sonw9",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3970071613"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "keith"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yep. It would be useful to see a bad file so we can understand where the\r\nparsing is going wrong\r\n\r\n--\r\nKeith Smiley\r\n\r\n\r\nOn Thu, Feb 26, 2026 at 19:42 Jake Newfield ***@***.***>\r\nwrote:\r\n\r\n> *JakeNewfield* left a comment (bazelbuild/bazel#28813)\r\n> <https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3970071613>\r\n>\r\n> Inflated byte counts in BES make it nearly impossible to attribute remote\r\n> cache bandwidth to actual CI spend. A fix in BEP itself is the right answer.\r\n>\r\n> \u2014\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3970071613>,\r\n> or unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/AACFJ3QI4ZKOMV3BDJH4KXT4N6HILAVCNFSM6AAAAACWAYL5HSVHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHMZTSNZQGA3TCNRRGM>\r\n> .\r\n> You are receiving this because you were mentioned.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+      "createdAt": "2026-02-27T01:04:21Z",
+      "id": "IC_kwDOATz7jc7so2E_",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3970130239"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "darkrift"
+      },
+      "authorAssociation": "NONE",
+      "body": "What is the ask exactly here ? The full ndjson or some information extracted from the cache ?",
+      "createdAt": "2026-02-27T18:39:46Z",
+      "id": "IC_kwDOATz7jc7s5Ygc",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3974465564"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "darkrift"
+      },
+      "authorAssociation": "NONE",
+      "body": "Just tried reverting the calcDelta change in the related change from my first comment. On OSX:\n\nBefore revert\n```\n    \"networkMetrics\": {\n      \"systemNetworkStats\": {\n        \"bytesSent\": \"18446744073465395200\",\n        \"bytesRecv\": \"69963776\",\n        \"packetsSent\": \"3467343\",\n        \"packetsRecv\": \"4916025\",\n        \"peakBytesSentPerSec\": \"248448255\",\n        \"peakBytesRecvPerSec\": \"949352524\",\n        \"peakPacketsSentPerSec\": \"500550\",\n        \"peakPacketsRecvPerSec\": \"1102395\"\n      }\n    },\n```\n\nAfter revert:\n```\n    \"networkMetrics\": {\n      \"systemNetworkStats\": {\n        \"bytesSent\": \"33984512\",\n        \"bytesRecv\": \"67107840\",\n        \"packetsSent\": \"70260\",\n        \"packetsRecv\": \"113458\",\n        \"peakBytesSentPerSec\": \"7612023\",\n        \"peakBytesRecvPerSec\": \"7811551\",\n        \"peakPacketsSentPerSec\": \"6634\",\n        \"peakPacketsRecvPerSec\": \"9123\"\n      }\n    },\n```",
+      "createdAt": "2026-03-01T21:15:05Z",
+      "id": "IC_kwDOATz7jc7tSd8d",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3981041437"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "keith"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "https://github.com/bazelbuild/bazel/pull/28856",
+      "createdAt": "2026-03-02T22:50:45Z",
+      "id": "IC_kwDOATz7jc7tq3C-",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3987435710"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "darkrift"
+      },
+      "authorAssociation": "NONE",
+      "body": "Ran it a few times with the suggested fix, seems peculiar that some of the peak stats are the exact same between invocations, unless they are global for as long as the daemon is running ?\n\n```\n    \"networkMetrics\": {\n      \"systemNetworkStats\": {\n        \"bytesSent\": \"72880128\",\n        \"bytesRecv\": \"91162624\",\n        \"packetsSent\": \"127193\",\n        \"packetsRecv\": \"186586\",\n        \"peakBytesSentPerSec\": \"92155136\",\n        \"peakBytesRecvPerSec\": \"85697484\",\n        \"peakPacketsSentPerSec\": \"170216\",\n        \"peakPacketsRecvPerSec\": \"226734\"\n      }\n    },\n\n    \"networkMetrics\": {\n      \"systemNetworkStats\": {\n        \"bytesSent\": \"96250880\",\n        \"bytesRecv\": \"118585344\",\n        \"packetsSent\": \"177154\",\n        \"packetsRecv\": \"253921\",\n        \"peakBytesSentPerSec\": \"92155136\",\n        \"peakBytesRecvPerSec\": \"85697484\",\n        \"peakPacketsSentPerSec\": \"170216\",\n        \"peakPacketsRecvPerSec\": \"226734\"\n      }\n    },\n\n    \"networkMetrics\": {\n      \"systemNetworkStats\": {\n        \"bytesSent\": \"124000256\",\n        \"bytesRecv\": \"154123264\",\n        \"packetsSent\": \"269466\",\n        \"packetsRecv\": \"384595\",\n        \"peakBytesSentPerSec\": \"92155136\",\n        \"peakBytesRecvPerSec\": \"85697484\",\n        \"peakPacketsSentPerSec\": \"252800\",\n        \"peakPacketsRecvPerSec\": \"369976\"\n      }\n    },\n```",
+      "createdAt": "2026-03-03T00:54:20Z",
+      "id": "IC_kwDOATz7jc7tsrz4",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3987913976"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "keith"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think it is tied to the server, but i guess you can verify with the reverted version to make super sure?",
+      "createdAt": "2026-03-03T00:57:44Z",
+      "id": "IC_kwDOATz7jc7tsucp",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3987924777"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "darkrift"
+      },
+      "authorAssociation": "NONE",
+      "body": "Did `bazel shutdown` between invocations and is more stable, so yeah they are probably tied to the server :\n\n```\n    \"networkMetrics\": {\n      \"systemNetworkStats\": {\n        \"bytesSent\": \"23396352\",\n        \"bytesRecv\": \"43711488\",\n        \"packetsSent\": \"52017\",\n        \"packetsRecv\": \"79141\",\n        \"peakBytesSentPerSec\": \"8398002\",\n        \"peakBytesRecvPerSec\": \"8607453\",\n        \"peakPacketsSentPerSec\": \"6944\",\n        \"peakPacketsRecvPerSec\": \"8805\"\n      }\n    },\n```\n\n```\n    \"networkMetrics\": {\n      \"systemNetworkStats\": {\n        \"bytesSent\": \"26010624\",\n        \"bytesRecv\": \"51042304\",\n        \"packetsSent\": \"55763\",\n        \"packetsRecv\": \"86129\",\n        \"peakBytesSentPerSec\": \"6647894\",\n        \"peakBytesRecvPerSec\": \"6672830\",\n        \"peakPacketsSentPerSec\": \"5595\",\n        \"peakPacketsRecvPerSec\": \"7052\"\n      }\n    },\n```",
+      "createdAt": "2026-03-03T01:01:58Z",
+      "id": "IC_kwDOATz7jc7tsxn3",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-3987937783"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A fix for this issue has been included in\u00a0[Bazel 9.0.1 RC1](https://github.com/bazelbuild/bazel/releases/tag/9.0.1rc1). Please test out the release candidate and report any issues as soon as possible.\nIf you're using Bazelisk, you can point to the latest RC by setting USE_BAZEL_VERSION=9.0.1rc1. Thanks!",
+      "createdAt": "2026-03-06T05:42:04Z",
+      "id": "IC_kwDOATz7jc7u_4D3",
+      "url": "https://github.com/bazelbuild/bazel/issues/28813#issuecomment-4009722103"
+    }
+  ],
+  "createdAt": "2026-02-26T16:30:35Z",
+  "id": "I_kwDOATz7jc7uNhb4",
+  "labels": [
+    {
+      "name": "type: bug"
+    },
+    {
+      "name": "P2"
+    },
+    {
+      "name": "team-Performance"
+    }
+  ],
+  "number": 28813,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "darkrift"
+      },
+      "createdAt": "2026-02-26T16:30:37Z",
+      "label": {
+        "name": "type: bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "darkrift"
+      },
+      "createdAt": "2026-02-26T16:30:37Z",
+      "label": {
+        "name": "untriaged"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "createdAt": "2026-02-26T20:01:29Z",
+      "label": {
+        "name": "team-Performance"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "meisterT"
+      },
+      "createdAt": "2026-03-03T14:41:55Z",
+      "label": {
+        "name": "untriaged"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "meisterT"
+      },
+      "createdAt": "2026-03-03T14:41:55Z",
+      "label": {
+        "name": "P2"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "copybara-service"
+      },
+      "createdAt": "2026-03-03T16:19:58Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "BES huge values for bytesSent / bytesRecv",
+  "url": "https://github.com/bazelbuild/bazel/issues/28813"
+}

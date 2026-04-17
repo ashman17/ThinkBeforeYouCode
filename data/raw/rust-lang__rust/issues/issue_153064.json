@@ -1,0 +1,236 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "nnethercote"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "`rustc_queries!` is a proc macro at the heart of the compiler's query system. The call to it in `compiler/rustc_middle/src/queries.rs` defines all the queries. It's also **really** complicated. Until very recently, it produced five different things as output.\n\n### `macro_rules! rustc_with_all_queries { .. }`\nThis is a higher-order macro. You can call it, passing it another macro which processes entries like this:\n```\n[(arena_cache)] fn registered_tools(()) -> & 'tcx ty::RegisteredTools,\n```\n\n### `macro_rules! rustc_feedable_queries { .. }`\nAnother higher-order macro, very similar to `rustc_with_all_queries`, but only including entries for feedable queries.\n\nThis was removed in #153009, hooray.\n\n### `mod _description_fns`\nA module containing one generated description function per query.\n\nThe body comes from the `desc` modifier. E.g. this modifier:\n```\ndesc { \"getting HIR ID of `{}`\", tcx.def_path_str(key) }\n```\ngets turned into this function:\n```\npub fn local_def_id_to_hir_id<'tcx>(tcx: TyCtxt<'tcx>, key: LocalDefId) -> String {                                              \n    format!(\"getting HIR ID of `{}`\", tcx.def_path_str(key))\n}                                              \n```\n\n### `mod _cache_on_disk_if_fns`\nA module containing one generated cache check function per `cache_on_disk_if` query.\n\nThe body comes from the `cache_on_disk_if` modifier, e.g. this modifier:\n```\ncache_on_disk_if { param.is_local() }\n```\ngets turned into this function:\n```\npub fn const_param_default<'tcx>(_: TyCtxt<'tcx>, param: &crate::queries::const_param_default::Key<'tcx>) -> bool {                                    \n    param.is_local()                           \n} \n```\n\n### `mod _analyzer_hints`\nThis is a weird module that exists purely to help rust-analyzer users find query definitions. It contains one never-executed function per query. E.g.\n```\nfn type_alias_is_lazy<'tcx>() -> bool {\n    let crate::query::Providers { type_alias_is_lazy: _, .. };\n    // These are the types in compiler/rustc_middle/src/query/modifiers.rs, just for documentation purposes.\n    crate::query::modifiers::desc;\n    crate::query::modifiers::separate_provide_extern;\n    loop {}\n}\n```\nThe exact spans on the various identifiers are very important to get right.\n\n### Summary\n\nThis one proc macro is doing a *lot*. It is incredibly hard to understand. I gained my understanding by `println!`ing the token stream and reading through things carefully. I don't know how else you could possibly understand it fully. It's clear that in the past people have modified it with only a partial understanding, leading to inconsistencies and weirdnesses, e.g. the inconsistent `tcx` binding syntax that was fixed in #152958.\n\nThe good news is that a lot of this functionality can be extracted from the proc macro and done instead in the declarative macros (e.g. `define_callbacks!`). Declarative macros are also not easy to read and understand, but they are *much* easier than proc macros. I think it should be possible to reduce the output from 2 macros + 3 mods down to 1 macro. (Though I'm not 100% sure about removing `mod _analyzer_hints`.) #153009 was a good start.",
+  "closedAt": "2026-03-03T03:20:24Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nnethercote"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "cc @Zalathar @oli-obk @cjgillot @Zoxc ",
+      "createdAt": "2026-02-24T23:21:57Z",
+      "id": "IC_kwDOAAsO6M7rwOHh",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3955286497"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Zalathar"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In the past, I\u2019ve run into several cases where I try to simplify some obviously-complex part of the query macros, but in the course of doing so I either break/degrade something important (which is why the complexity existed in the first place).\n\nOr the alternative ends up being *more* complex or more subtle than what I started with, due to the awkward limitations of working with non-trivial `macro_rules!` macros, so it ends up not being worthwhile.\n\n---\n\nEDIT: To clarify, I\u2019m not saying we shouldn\u2019t try to improve or discuss the situation; my intent was to share my anecdotal experience of some things that make it tricky.",
+      "createdAt": "2026-02-25T02:00:56Z",
+      "id": "IC_kwDOAAsO6M7rz3wM",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3956243468"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nnethercote"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "If it helps, think of this issue as me saying \"I think the current situation is bad and I'm going to make it better if I can\". It is *not* me saying \"I think the current situation is bad and I'm definitely going to change it even if that makes things worse\".",
+      "createdAt": "2026-02-25T02:36:48Z",
+      "id": "IC_kwDOAAsO6M7r0TiN",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3956357261"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Zoxc"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Though I'm not 100% sure about removing `mod _analyzer_hints`\n\nrust-analyzer does need these to be in the direct output of the proc macro.",
+      "createdAt": "2026-02-25T22:01:31Z",
+      "id": "IC_kwDOAAsO6M7sLL5a",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3962355290"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nnethercote"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> rust-analyzer does need these to be in the direct output of the proc macro.\n\nSo in summary, the rust-analyzer stuff is:\n- Weird (generates special functions that are never executed and contains weird code, purely for r-a redirection purposes)\n- Fragile (the spans have to be just right)\n- Untested and possible untestable?\n\nNot a good combination of characteristics!",
+      "createdAt": "2026-02-25T23:51:18Z",
+      "id": "IC_kwDOAAsO6M7sNfVt",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3962959213"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "workingjubilee"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@Veykril @ChayimFriedman2 is what exactly r-a needs here more... quantifiable?",
+      "createdAt": "2026-02-26T01:30:56Z",
+      "id": "IC_kwDOAAsO6M7sO4O7",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3963323323"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "workingjubilee"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I am guessing the thing r-a it \"needs\" is \"rustc devs had a request and some odd hack was constructed and now we are changing our minds about what we want\" but *probably* we can make this a strict improvement for both sides if the cleanup is complete enough.",
+      "createdAt": "2026-02-26T01:33:10Z",
+      "id": "IC_kwDOAAsO6M7sO5_t",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3963330541"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Zalathar"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Here's how I understand it:\n\n- rust-analyzer can't possibly understand arbitrary macros, but it makes a best-effort attempt to map output tokens (which form normal Rust code that it can analyze) back to input tokens (in the macro call), to enable IDE features like hover docs and find-all-references on those tokens.\n- There is a family of informal techniques that macro authors can use to guide r-a's best-effort mapping into giving more useful results, by carefully controlling how input tokens are used or not used, or by adding dummy uses of tokens in the right context to help guide the mapping.\n\n(I don't think there's any specific collaboration between rustc and rust-analyzer here; it's just a particular instance of macro authors tweaking their macro to play nicely with r-a's macro handling.)",
+      "createdAt": "2026-02-26T02:12:46Z",
+      "id": "IC_kwDOAAsO6M7sPmvO",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3963513806"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Veykril"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yea the expansion there is chosen such that input tokens in the query macros map to those items with its spans allowing r-a to map to those, I've added that at the all hands last year to help people with the general issue of not being able to find the provider assignments easily as with this one can now at least see the assignments when doing a find all references. Its not great but was the best we could do with how the macro worked.\n\n",
+      "createdAt": "2026-02-26T08:30:57Z",
+      "id": "IC_kwDOAAsO6M7sVLNV",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3964973909"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nnethercote"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I couldn't get buy-in on eliminating `mod _description_fns` and `mod _cache_on_disk_if_fns`, and `mod _analyzer_hints` doesn't seem eliminable, alas. At least `rustc_feedable_queries!` is gone.",
+      "createdAt": "2026-03-03T02:55:32Z",
+      "id": "IC_kwDOAAsO6M7tuJOo",
+      "url": "https://github.com/rust-lang/rust/issues/153064#issuecomment-3988296616"
+    }
+  ],
+  "createdAt": "2026-02-24T23:20:55Z",
+  "id": "I_kwDOAAsO6M7tmcyD",
+  "labels": [
+    {
+      "name": "C-cleanup"
+    },
+    {
+      "name": "T-compiler"
+    },
+    {
+      "name": "A-query-system"
+    },
+    {
+      "name": "A-technical-debt"
+    }
+  ],
+  "number": 153064,
+  "state": "CLOSED",
+  "stateReason": "NOT_PLANNED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-02-24T23:20:57Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "createdAt": "2026-02-24T23:27:37Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "createdAt": "2026-02-24T23:27:37Z",
+      "label": {
+        "name": "C-cleanup"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "createdAt": "2026-02-24T23:27:37Z",
+      "label": {
+        "name": "T-compiler"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "createdAt": "2026-02-24T23:27:37Z",
+      "label": {
+        "name": "A-query-system"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "createdAt": "2026-02-24T23:27:37Z",
+      "label": {
+        "name": "A-technical-debt"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "nnethercote"
+      },
+      "createdAt": "2026-03-03T02:55:32Z",
+      "stateReason": "COMPLETED"
+    },
+    {
+      "__typename": "ReopenedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "nnethercote"
+      },
+      "createdAt": "2026-03-03T03:20:02Z"
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "nnethercote"
+      },
+      "createdAt": "2026-03-03T03:20:24Z",
+      "stateReason": "NOT_PLANNED"
+    }
+  ],
+  "title": "`rustc_queries!` is very complicated",
+  "url": "https://github.com/rust-lang/rust/issues/153064"
+}

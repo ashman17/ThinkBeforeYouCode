@@ -1,0 +1,338 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "lbcjbb"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Description of the bug:\n\nFrom Bazel **9.0.0rc1** to **9.0.0rc6**, when building an executable target with remote cache (not necessarily in BwoB) and a BES backend (json file, text file or remote grpc backend) we have a warning:\n\n```\nWARNING: Uploading BEP referenced local file <bazel-out>/k8-fastbuild/bin/foo.sh.runfiles: <bazel-out>/k8-fastbuild/bin/foo.sh.runfiles (Is a directory)\n```\n\n- No warning with Bazel **8.4** and **8.5**.\n- No warning without `--build_event_publish_all_actions`, or without BES, or without remote cache.\n\n### Which category does this issue belong to?\n\nCore\n\n### What's the simplest, easiest way to reproduce this bug? Please provide a minimal example if possible.\n\n- `MODULE.bazel`\n\n``` starlark\nmodule(name = \"playground\")\n```\n\n- `def.bzl`\n\n``` starlark\ndef _my_rule_impl(ctx):\n    f = ctx.actions.declare_file(ctx.label.name + \".sh\")\n    ctx.actions.write(f, \"\", is_executable = True)\n\n    return DefaultInfo(executable = f)\n\nmy_rule = rule(\n    implementation = _my_rule_impl,\n    executable = True,\n)\n```\n\n- `BUILD.bazel`\n\n``` starlark\nload(\"//:def.bzl\", \"my_rule\")\n\nmy_rule(name = \"foo\")\n```\n\n- `.bazelrc`\n\n```\ncommon --remote_cache=\"grpc://localhost:9092\"\n\n# common --bes_backend=\"grpc://localhost:8090\"\ncommon --build_event_json_file=\"/tmp/bep.json\"\ncommon --build_event_publish_all_actions\n```\n\n- `.bazelversion`\n\n```\n9.0.0rc6\n```\n\n---\n\n``` shell\n$ bazel build //:foo\n```\n``` text\nINFO: Invocation ID: 775ea0a9-f92b-4d56-9f0f-5a16b8e3c5a7\nINFO: Analyzed target //:foo (5 packages loaded, 7 targets configured).\nWARNING: Uploading BEP referenced local file <bazel-out>/k8-fastbuild/bin/foo.sh.runfiles: <bazel-out>/k8-fastbuild/bin/foo.sh.runfiles (Is a directory)\nINFO: Found 1 target...\nTarget //:foo up-to-date:\n  bazel-bin/foo.sh\nINFO: Elapsed time: 0.181s, Critical Path: 0.00s\nINFO: 6 processes: 6 internal.\nINFO: Build completed successfully, 6 total actions\nINFO: Running command line: bazel-bin/foo.sh\nINFO: Build Event Protocol files produced successfully.\n```\n\n### Which operating system are you running Bazel on?\n\nlinux/amd64\n\n### What is the output of `bazel info release`?\n\nrelease 9.0.0rc6\n\n### If this is a regression, please try to identify the Bazel commit where the bug was introduced with bazelisk --bisect.\n\nMaybe 4b8334cae2ce947c47e093705d2e9795597c3726\n\n### Have you found anything relevant by searching the web?\n\nAnother similar issue I found was https://github.com/bazelbuild/bazel/issues/19847.",
+  "closedAt": "2026-03-16T12:49:45Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "coeuvre"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@lbcjbb Would it possible for you to use `bazelisk --bisect` to identify which commit broke this?",
+      "createdAt": "2026-01-20T14:39:47Z",
+      "id": "IC_kwDOATz7jc7g5rqN",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3773217421"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lbcjbb"
+      },
+      "authorAssociation": "NONE",
+      "body": "Already done \ud83d\ude04 \n\n>> If this is a regression, please try to identify the Bazel commit where the bug was introduced >> with bazelisk --bisect.\n>\n> Maybe 4b8334c\n\n``` shell\n#\n# OK d4898880309159c4eb373d09359fca0ce255ba64\n#\n\n$ USE_BAZEL_VERSION=d4898880309159c4eb373d09359fca0ce255ba64 bazel build --discard_analysis_cache //:foo\nStarting local Bazel server and connecting to it...\nINFO: Invocation ID: 4e74520f-eda4-4a75-8d66-31a074fce821\nWARNING: Couldn't auto load rules or symbols, because no dependency on module/repository 'protobuf' found. This will result in a failure if there's a reference to those rules or symbols.\nWARNING: Couldn't auto load rules or symbols, because no dependency on module/repository 'rules_android' found. This will result in a failure if there's a reference to those rules or symbols.\nINFO: Analyzed target //:foo (5 packages loaded, 7 targets configured).\nINFO: Found 1 target...\nTarget //:foo up-to-date:\n  bazel-bin/foo.sh\nINFO: Elapsed time: 1.805s, Critical Path: 0.02s\nINFO: 2 processes: 3 action cache hit, 2 internal.\nINFO: Build completed successfully, 2 total actions\nINFO: Build Event Protocol files produced successfully.\n\n#\n# KO 4b8334cae2ce947c47e093705d2e9795597c3726\n#\n\n$ USE_BAZEL_VERSION=4b8334cae2ce947c47e093705d2e9795597c3726 bazel build --discard_analysis_cache //:foo\nStarting local Bazel server and connecting to it...\nINFO: Invocation ID: 9433c530-8ce7-4ba5-9abb-1971ad280b09\nWARNING: Couldn't auto load rules or symbols, because no dependency on module/repository 'protobuf' found. This will result in a failure if there's a reference to those rules or symbols.\nWARNING: Couldn't auto load rules or symbols, because no dependency on module/repository 'rules_android' found. This will result in a failure if there's a reference to those rules or symbols.\nINFO: Analyzed target //:foo (5 packages loaded, 7 targets configured).\nWARNING: Uploading BEP referenced local file <bazel-out>/k8-fastbuild/bin/foo.sh.runfiles: <bazel-out>/k8-fastbuild/bin/foo.sh.runfiles (Is a directory)\nINFO: Found 1 target...\nTarget //:foo up-to-date:\n  bazel-bin/foo.sh\nINFO: Elapsed time: 1.796s, Critical Path: 0.02s\nINFO: 3 processes: 3 action cache hit, 3 internal.\nINFO: Build completed successfully, 3 total actions\nINFO: Build Event Protocol files produced successfully.\n```\n",
+      "createdAt": "2026-01-20T15:17:41Z",
+      "id": "IC_kwDOATz7jc7g6ZTS",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3773404370"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@coeuvre I suspect that this is a result of https://github.com/bazelbuild/bazel/blob/135a03ba5dbad5a1a26ef3bde9815ea244a093d7/src/main/java/com/google/devtools/build/lib/actions/Artifact.java#L619 not returning `true` for runfiles artifacts. Changing that could have implications for all call sites though.",
+      "createdAt": "2026-01-20T15:38:54Z",
+      "id": "IC_kwDOATz7jc7g61qt",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3773520557"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "tjgq"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Speculative targeted fix: replace `.isDirectory()` with `.isDirectory() || .isRunfilesTree()` in https://cs.opensource.google/bazel/bazel/+/master:src/main/java/com/google/devtools/build/lib/buildeventstream/BuildEvent.java;l=82;drc=cc1e0a6ba439764fea48e1f8035419aa44313f05?",
+      "createdAt": "2026-01-20T15:48:08Z",
+      "id": "IC_kwDOATz7jc7g7FT-",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3773584638"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lbcjbb"
+      },
+      "authorAssociation": "NONE",
+      "body": "I don't know why, but `metadata.getType()` doesn't return `DIRECTORY` for runfiles artifacts.\n\n``` diff\ndiff --git a/src/main/java/com/google/devtools/build/lib/buildeventstream/BuildEvent.java b/src/main/java/com/google/devtools/build/lib/buildeventstream/BuildEvent.java\nindex f13c8f01ec..911c538a68 100644\n--- a/src/main/java/com/google/devtools/build/lib/buildeventstream/BuildEvent.java\n+++ b/src/main/java/com/google/devtools/build/lib/buildeventstream/BuildEvent.java\n@@ -76,10 +76,11 @@ public interface BuildEvent extends ChainableEvent, ExtendedEventHandler.Postabl\n           return switch (metadata.getType()) {\n             case DIRECTORY -> LocalFileType.OUTPUT_DIRECTORY;\n             case SYMLINK -> LocalFileType.OUTPUT_SYMLINK;\n-            default -> LocalFileType.OUTPUT_FILE;\n+            default -> (artifact.isRunfilesTree() ? LocalFileType.OUTPUT_DIRECTORY : LocalFileType.OUTPUT_FILE);\n           };\n         }\n-        if (artifact.isDirectory()) {\n+\n+        if (artifact.isDirectory() || artifact.isRunfilesTree()) {\n           return LocalFileType.OUTPUT_DIRECTORY;\n         } else if (artifact.isSymlink()) {\n           return LocalFileType.OUTPUT_SYMLINK;\n```\n\nThe warning disappears with this quick fix.",
+      "createdAt": "2026-01-20T17:50:46Z",
+      "id": "IC_kwDOATz7jc7g9YwD",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3774188547"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "tjgq"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> The warning disappears with this quick fix.\n\nThanks for confirming that it works.\n\n> I don't know why, but metadata.getType() doesn't return DIRECTORY for runfiles artifacts.\n\nGood observation. That's probably because `RunfilesArtifactValue.getMetadata` returns a `FileArtifactValue` whose type is `FILE`, not `DIRECTORY`: https://cs.opensource.google/bazel/bazel/+/master:src/main/java/com/google/devtools/build/lib/actions/RunfilesArtifactValue.java;l=84;drc=9ba7cb15b2dd2e6348d8496a21e594977fcd6fde\n\nLet's not rush into submitting my proposed fix - we might want to consider a more comprehensive one. I also want to hear @lberki's opinion, as he carried out most of the runfiles overhaul in 8.x and 9.x.",
+      "createdAt": "2026-01-20T19:32:10Z",
+      "id": "IC_kwDOATz7jc7g-7M-",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3774591806"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@meteorcloudy This could also go into a patch release if we have one for the Python flags issue.",
+      "createdAt": "2026-01-20T20:52:14Z",
+      "id": "IC_kwDOATz7jc7hAEBQ",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3774890064"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "meteorcloudy"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "SG, @iancha1992 can you track this one for 9.0.1 as well?",
+      "createdAt": "2026-01-22T13:22:05Z",
+      "id": "IC_kwDOATz7jc7hkUv6",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3784395770"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@bazel-io fork 9.0.1",
+      "createdAt": "2026-01-22T18:29:59Z",
+      "id": "IC_kwDOATz7jc7hqjvY",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3786030040"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@bazel-io fork 9.1.0",
+      "createdAt": "2026-01-22T18:30:05Z",
+      "id": "IC_kwDOATz7jc7hqj4_",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3786030655"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lbcjbb"
+      },
+      "authorAssociation": "NONE",
+      "body": "Commit 952aabb doesn't seem to be enough. I've just tested the last commit of the **release-9.0.1** branch (commit 51c8fc75b) and I reproduce the same warning.\n\nFrom what I have seen, the **metadata** object given to the method [BuildEvent::forArtifact()](https://cs.opensource.google/bazel/bazel/+/release-9.0.1:src/main/java/com/google/devtools/build/lib/buildeventstream/BuildEvent.java;l=73) is the object [RUNFILES_TREE_MARKER](https://cs.opensource.google/bazel/bazel/+/release-9.0.1:src/main/java/com/google/devtools/build/lib/actions/FileArtifactValue.java;l=286) of type [SingletonMarkerValue](https://cs.opensource.google/bazel/bazel/+/release-9.0.1:src/main/java/com/google/devtools/build/lib/actions/FileArtifactValue.java;l=1300).",
+      "createdAt": "2026-02-10T00:04:38Z",
+      "id": "IC_kwDOATz7jc7m8N7L",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3874545355"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@bazel-io fork 9.0.1",
+      "createdAt": "2026-02-10T13:32:56Z",
+      "id": "IC_kwDOATz7jc7nICCF",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3877642373"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@bazel-io fork 9.1.0",
+      "createdAt": "2026-02-10T13:33:04Z",
+      "id": "IC_kwDOATz7jc7nICM_",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-3877643071"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A fix for this issue has been included in\u00a0[Bazel 9.0.1 RC1](https://github.com/bazelbuild/bazel/releases/tag/9.0.1rc1). Please test out the release candidate and report any issues as soon as possible.\nIf you're using Bazelisk, you can point to the latest RC by setting USE_BAZEL_VERSION=9.0.1rc1. Thanks!",
+      "createdAt": "2026-03-06T05:37:03Z",
+      "id": "IC_kwDOATz7jc7u_zq_",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-4009704127"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lbcjbb"
+      },
+      "authorAssociation": "NONE",
+      "body": "The warning is still present with Bazel **9.0.1rc1**.",
+      "createdAt": "2026-03-10T09:06:45Z",
+      "id": "IC_kwDOATz7jc7wMYki",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-4029778210"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lbcjbb"
+      },
+      "authorAssociation": "NONE",
+      "body": "7bf8f2b253e458a86e7a2802cdf2a93d6fc9442c Fixes this issue, I can no longer reproduce the problem. Thank you \ud83d\ude4f ",
+      "createdAt": "2026-03-16T16:34:07Z",
+      "id": "IC_kwDOATz7jc7yiCbz",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-4069009139"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "tjgq"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@bazel-io fork 9.0.2",
+      "createdAt": "2026-03-16T17:03:04Z",
+      "id": "IC_kwDOATz7jc7yixkq",
+      "url": "https://github.com/bazelbuild/bazel/issues/28330#issuecomment-4069202218"
+    }
+  ],
+  "createdAt": "2026-01-17T13:10:55Z",
+  "id": "I_kwDOATz7jc7j_1Zf",
+  "labels": [
+    {
+      "name": "type: bug"
+    },
+    {
+      "name": "P2"
+    },
+    {
+      "name": "team-Remote-Exec"
+    }
+  ],
+  "number": 28330,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "lbcjbb"
+      },
+      "createdAt": "2026-01-17T13:10:56Z",
+      "label": {
+        "name": "type: bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "lbcjbb"
+      },
+      "createdAt": "2026-01-17T13:10:56Z",
+      "label": {
+        "name": "untriaged"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bharadwaj08-one"
+      },
+      "createdAt": "2026-01-19T04:44:15Z",
+      "label": {
+        "name": "team-Core"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "meisterT"
+      },
+      "createdAt": "2026-01-20T07:13:26Z",
+      "label": {
+        "name": "team-Core"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "meisterT"
+      },
+      "createdAt": "2026-01-20T07:13:26Z",
+      "label": {
+        "name": "team-Remote-Exec"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "zhengwei143"
+      },
+      "createdAt": "2026-02-03T15:06:03Z",
+      "label": {
+        "name": "untriaged"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "zhengwei143"
+      },
+      "createdAt": "2026-02-03T15:06:03Z",
+      "label": {
+        "name": "P2"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "copybara-service"
+      },
+      "createdAt": "2026-02-04T12:50:22Z",
+      "stateReason": "COMPLETED"
+    },
+    {
+      "__typename": "ReopenedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "createdAt": "2026-02-10T13:32:37Z"
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "createdAt": "2026-03-06T05:37:03Z",
+      "stateReason": "COMPLETED"
+    },
+    {
+      "__typename": "ReopenedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "createdAt": "2026-03-10T10:31:34Z"
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "copybara-service"
+      },
+      "createdAt": "2026-03-16T12:49:45Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "BEP referenced local file (Is a directory) warning on Bazel 9.0.0rc6",
+  "url": "https://github.com/bazelbuild/bazel/issues/28330"
+}

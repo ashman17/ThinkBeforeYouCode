@@ -1,0 +1,216 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "maxin93"
+  },
+  "authorAssociation": "NONE",
+  "body": "### What happened?\n\nFile content of `kubelet_internal_checkpoint` stores the device allocated info, but when I delete the Pod, the device info with Pod was not  delete in the file.\nI checked the code of `pkg/kubelet/checkpointmanager/checkpoint_manager.go`, the interface RemoveCheckpoint(string) is not called by any code.\n\n### What did you expect to happen?\n\nThe PodDeviceEntries info in `kubelet_internal_checkpoint` should be delete after pod removed.\n\n### How can we reproduce it (as minimally and precisely as possible)?\n\nInstall any device-plugin, a Pod require a device, and then remove the Pod.\n\n### Anything else we need to know?\n\n_No response_\n\n### Kubernetes version\n\nkubernetes v1.34.1\n\n### Cloud provider\n\nN/A\n\n\n### OS version\n\nOpeneuler 22.03\n\n\n### Install tools\n\n<details>\n\n</details>\n\n\n### Container runtime (CRI) and version (if applicable)\n\n<details>\n\n</details>\n\n\n### Related plugins (CNI, CSI, ...) and versions (if applicable)\n\n<details>\n\n</details>\n",
+  "closedAt": "2026-02-25T18:35:06Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This issue is currently awaiting triage.\n\nIf a SIG or subproject determines this is a relevant issue, they will accept it by applying the `triage/accepted` label and provide further guidance.\n\nThe `triage/accepted` label can be added by org members by writing `/triage accepted` in a comment.\n\n\n<details>\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-02-13T08:53:07Z",
+      "id": "IC_kwDOAToIks7oM6Qq",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3895698474"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maxin93"
+      },
+      "authorAssociation": "NONE",
+      "body": "/sig node",
+      "createdAt": "2026-02-13T08:53:20Z",
+      "id": "IC_kwDOAToIks7oM6lO",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3895699790"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "ibm-adarsh"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hi @maxin93 Can you please assign this issue to me, I would like to work on this. I am new to the community and would love to contribute here.",
+      "createdAt": "2026-02-13T11:08:26Z",
+      "id": "IC_kwDOAToIks7oQVd8",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3896596348"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "ibm-adarsh"
+      },
+      "authorAssociation": "NONE",
+      "body": "/assign",
+      "createdAt": "2026-02-13T13:01:48Z",
+      "id": "IC_kwDOAToIks7oSYZ9",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3897132669"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "ibm-adarsh"
+      },
+      "authorAssociation": "NONE",
+      "body": "Were able to sucessfully reproduce the issue, now will be looking into the code and will provide the fix.\n\n<img width=\"2604\" height=\"622\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/1c8ecba7-27e1-4653-bc80-f4179c87b1d7\" />",
+      "createdAt": "2026-02-13T14:00:10Z",
+      "id": "IC_kwDOAToIks7oTZG6",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3897397690"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "ibm-adarsh"
+      },
+      "authorAssociation": "NONE",
+      "body": "In-progress: https://github.com/kubernetes/kubernetes/compare/master...ibm-adarsh:kubernetes:fix-checkpoint-cleanup\n",
+      "createdAt": "2026-02-13T14:38:04Z",
+      "id": "IC_kwDOAToIks7oUC0i",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3897568546"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "ffromani"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "the checkpoint data is updated lazily when a new pod is admitted and devices are garbage collected. If devices are held indefinetly, this is a bug. Otherwise the system is behaving as expected.\n\nIs there a use case for the immediate removal from the checkpoint? We're not aware of any.\n",
+      "createdAt": "2026-02-13T19:31:43Z",
+      "id": "IC_kwDOAToIks7oZjoS",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3899013650"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maxin93"
+      },
+      "authorAssociation": "NONE",
+      "body": "> the checkpoint data is updated lazily when a new pod is admitted and devices are garbage collected. If devices are held indefinetly, this is a bug. Otherwise the system is behaving as expected.\n> \n> Is there a use case for the immediate removal from the checkpoint? We're not aware of any.\n\nThank you very much. Yeah, I try to apply a new Pod which require a device, and then the checkpoint data is updated, and the device ID allocated to new Pod is different. This is behaving as expected. \nActually, there is no such use case for the immediate removal from the checkpoint.",
+      "createdAt": "2026-02-14T01:30:38Z",
+      "id": "IC_kwDOAToIks7oe0uQ",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3900394384"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "ffromani"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Glad the system is working well! For users which may land here through searches, should one need to learn the current allocation state of resources, the supported approach is through the [podresources API](https://kubernetes.io/blog/2023/08/23/kubelet-podresources-api-ga/).",
+      "createdAt": "2026-02-14T17:22:39Z",
+      "id": "IC_kwDOAToIks7olubX",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3902203607"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "SergeyKanzhelev"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "/close",
+      "createdAt": "2026-02-25T18:35:01Z",
+      "id": "IC_kwDOAToIks7sG1ho",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3961215080"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@SergeyKanzhelev: Closing this issue.\n\n<details>\n\nIn response to [this](https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3961215080):\n\n>/close\n\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-02-25T18:35:07Z",
+      "id": "IC_kwDOAToIks7sG1qz",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3961215667"
+    }
+  ],
+  "createdAt": "2026-02-13T08:52:57Z",
+  "id": "I_kwDOAToIks7qm74a",
+  "labels": [
+    {
+      "name": "kind/bug"
+    },
+    {
+      "name": "sig/node"
+    },
+    {
+      "name": "needs-triage"
+    }
+  ],
+  "number": 137010,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "maxin93"
+      },
+      "createdAt": "2026-02-13T08:52:58Z",
+      "label": {
+        "name": "kind/bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-02-13T08:53:05Z",
+      "label": {
+        "name": "needs-sig"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-02-13T08:53:06Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-02-13T08:53:23Z",
+      "label": {
+        "name": "sig/node"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-02-13T08:53:25Z",
+      "label": {
+        "name": "needs-sig"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-02-25T18:35:06Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "checkpoint info doesn't removed after pod deleted",
+  "url": "https://github.com/kubernetes/kubernetes/issues/137010"
+}

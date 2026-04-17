@@ -75,7 +75,7 @@ Each curated record contains:
 ## Setup
 
 The core data pipeline is lightweight. The project dependencies now include
-`python-dotenv` and `langextract`.
+`python-dotenv` and `outlines[ollama]`.
 
 ```bash
 python3 -m venv .venv
@@ -116,29 +116,31 @@ Optional filters:
 - `--max-comments 200`
 - `--output-root data`
 
-## Discussion Entity Extraction
+## Discussion Artifact Extraction
 
-The repository also includes a LangExtract-based extraction stage for turning
-discussion threads into evaluable reasoning points.
+The repository also includes a structured artifact extraction stage for turning
+discussion threads into typed engineering artifacts.
 
-The prompt and few-shot examples live in
-`src/tbyc_dataset/extraction/discussion_entities_prompt.py` so they can be tuned
-without touching the runtime pipeline.
+The prompt lives in `src/tbyc_dataset/extraction/discussion_entities_prompt.py`,
+the JSON schema lives in `src/tbyc_dataset/extraction/discussion_entities_schema.py`,
+and the runtime pipeline lives in
+`src/tbyc_dataset/extraction/discussion_entities_pipeline.py`.
 
-LangExtract guidance from the upstream project strongly emphasizes that examples
-should use exact verbatim spans, appear in source order, and avoid paraphrase. The
-prompt/examples in this repository follow that pattern, and the extractor now sends
-whole threads in `author: comment` form so cross-comment continuity is preserved.
+The extractor formats each thread as comment blocks with stable source ids:
 
-Extracted spans are also mapped back to the originating GitHub comment so factual
-speaker metadata such as author login and speaker role can be attached after
-extraction.
+```text
+[c0] author_id (author_role)
+comment text
+```
 
-Install LangExtract and ensure Ollama is serving your local model:
+This gives the model enough grounding to return artifact `source` objects with
+stable ids, author names, and verbatim supporting text.
+
+Install Outlines with Ollama support and ensure Ollama is serving your local model:
 
 ```bash
-pip install langextract
-ollama pull gemma3:4b
+pip install "outlines[ollama]"
+ollama pull qwen2.5:14b
 ollama serve
 ```
 
@@ -147,19 +149,38 @@ Then run extraction thread-by-thread over an existing curated dataset:
 ```bash
 python3 -m tbyc_dataset.cli extract-discussion-entities \
   --repo bitcoin/bitcoin \
-  --model-id gemma3:4b \
+  --model-id qwen2.5:14b \
   --model-url http://localhost:11434
 ```
 
 This writes:
 
-- `data/extractions/<owner>__<repo>/discussion_entities.jsonl`
-- `data/extractions/<owner>__<repo>/summary.json`
+- `data/extractions/<owner>__<repo>/discussion_artifacts.jsonl`
+- `data/extractions/<owner>__<repo>/discussion_artifacts_summary.json`
 
 Optional:
 
 - `--limit-threads 25`
-- `--save-annotated`
+- `--save-annotated` (compatibility flag, currently unused)
+
+## Processed Data Viewer
+
+Generate a static HTML viewer for all locally processed repositories:
+
+```bash
+python3 -m tbyc_dataset.cli build-viewer --output-root data
+```
+
+This writes:
+
+- `data/viewer/index.html`
+
+The viewer lets you pick a repo and issue from dropdowns and inspect:
+
+- issue URL,
+- detected files,
+- issue body,
+- formatted discussion.
 
 ## Future extensions
 

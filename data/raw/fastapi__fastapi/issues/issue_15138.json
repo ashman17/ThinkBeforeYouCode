@@ -1,0 +1,29 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "codeby-umar"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Privileged issue\n\n- [x] I'm @tiangolo or he asked me directly to create an issue here.\n\n### Issue Content\n\nI had similar issue, solved like this:",
+  "closedAt": "2026-03-17T17:19:18Z",
+  "comments": [],
+  "createdAt": "2026-03-17T16:55:44Z",
+  "id": "I_kwDOCZduT87zxh-Z",
+  "labels": [],
+  "number": 15138,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "YuriiMotov"
+      },
+      "createdAt": "2026-03-17T17:19:18Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "I had similar issue, solved like this:",
+  "url": "https://github.com/fastapi/fastapi/issues/15138"
+}

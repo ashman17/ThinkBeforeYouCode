@@ -1,0 +1,74 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "dergoegge"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "```\n[        21.153] [               node3] [err] AddressSanitizer:DEADLYSIGNAL\n[        21.153] [               node3] [err] =================================================================\n[        21.153] [               node3] [err] ==1==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000010 (pc 0x7fe2a1107370 bp 0x7be2865bac80 sp 0x7be2865bab98 T18)\n[        21.153] [               node3] [err] ==1==The signal is caused by a READ memory access.\n[        21.153] [               node3] [err] ==1==Hint: address points to the zero page.\n[        21.253] [               node3] [err]     #0 0x7fe2a1107370 in __pthread_mutex_lock nptl/pthread_mutex_lock.c:80:23\n[        21.253] [               node3] [err]     #1 0x55798207b9b7 in __gthread_mutex_lock(pthread_mutex_t*) /usr/lib/gcc/x86_64-linux-gnu/12/../../../../include/x86_64-linux-gnu/c++/12/bits/gthr-default.h:749:12\n[        21.253] [               node3] [err]     #2 0x55798207b9b7 in std::mutex::lock() /usr/lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/bits/std_mutex.h:100:17\n[        21.253] [               node3] [err]     #3 0x55798207b9b7 in std::unique_lock<std::mutex>::lock() /usr/lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/bits/unique_lock.h:139:17\n[        21.253] [               node3] [err]     #4 0x55798207b9b7 in std::unique_lock<std::mutex>::unique_lock(std::mutex&) /usr/lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/bits/unique_lock.h:69:2\n[        21.253] [               node3] [err]     #5 0x55798207b9b7 in mp::Lock::Lock(mp::Mutex&) /src/bitcoin/src/ipc/libmultiprocess/include/mp/util.h:173:45\n[        21.253] [               node3] [err]     #6 0x55798207b9b7 in mp::ProxyServer<mp::ThreadMap>::makeThread(capnp::CallContext<mp::ThreadMap::MakeThreadParams, mp::ThreadMap::MakeThreadResults>)::$_0::operator()() const /src/bitcoin/src/ipc/libmultiprocess/src/mp/proxy.cpp:420:14\n[        21.253] [               node3] [err]     #7 0x55798207b9b7 in void std::__invoke_impl<void, mp::ProxyServer<mp::ThreadMap>::makeThread(capnp::CallContext<mp::ThreadMap::MakeThreadParams, mp::ThreadMap::MakeThreadResults>)::$_0>(std::__invoke_other, mp::ProxyServer<mp::ThreadMap>::makeThread(capnp::CallContext<mp::ThreadMap::MakeThreadParams, mp::ThreadMap::MakeThreadResults>)::$_0&&) /usr/lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/bits/invoke.h:61:14\n[        21.253] [               node3] [err]     #8 0x55798207b9b7 in std::__invoke_result<mp::ProxyServer<mp::ThreadMap>::makeThread(capnp::CallContext<mp::ThreadMap::MakeThreadParams, mp::ThreadMap::MakeThreadResults>)::$_0>::type std::__invoke<mp::ProxyServer<mp::ThreadMap>::makeThread(capnp::CallContext<mp::ThreadMap::MakeThreadParams, mp::ThreadMap::MakeThreadResults>)::$_0>(mp::ProxyServer<mp::ThreadMap>::makeThread(capnp::CallContext<mp::ThreadMap::MakeThreadParams, mp::ThreadMap::MakeThreadResults>)::$_0&&) /usr/lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/bits/invoke.h:96:14\n[        21.253] [               node3] [err]     #9 0x55798207b9b7 in void std::thread::_Invoker<std::tuple<mp::ProxyServer<mp::ThreadMap>::makeThread(capnp::CallContext<mp::ThreadMap::MakeThreadParams, mp::ThreadMap::MakeThreadResults>)::$_0>>::_M_invoke<0ul>(std::_Index_tuple<0ul>) /usr/lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/bits/std_thread.h:252:13\n[        21.253] [               node3] [err]     #10 0x55798207b9b7 in std::thread::_Invoker<std::tuple<mp::ProxyServer<mp::ThreadMap>::makeThread(capnp::CallContext<mp::ThreadMap::MakeThreadParams, mp::ThreadMap::MakeThreadResults>)::$_0>>::operator()() /usr/lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/bits/std_thread.h:259:11\n[        21.253] [               node3] [err]     #11 0x55798207b9b7 in std::thread::_State_impl<std::thread::_Invoker<std::tuple<mp::ProxyServer<mp::ThreadMap>::makeThread(capnp::CallContext<mp::ThreadMap::MakeThreadParams, mp::ThreadMap::MakeThreadResults>)::$_0>>>::_M_run() /usr/lib/gcc/x86_64-linux-gnu/12/../../../../include/c++/12/bits/std_thread.h:210:13\n[        21.253] [               node3] [err]     #12 0x7fe2a14444a2  (/lib/x86_64-linux-gnu/libstdc++.so.6+0xd44a2) (BuildId: 289ee39f8c07bd4fa48102dfeeb7e6f9c76158b4)\n[        21.253] [               node3] [err]     #13 0x5579809e37b6 in asan_thread_start(void*) crtstuff.c\n[        21.253] [               node3] [err]     #14 0x7fe2a11041f4 in start_thread nptl/pthread_create.c:442:8\n[        21.253] [               node3] [err]     #15 0x7fe2a1183b3f in clone misc/../sysdeps/unix/sysv/linux/x86_64/clone.S:100\n[        21.253] [               node3] [err] \n[        21.253] [               node3] [err] ==1==Register values:\n[        21.253] [               node3] [err] rax = 0x00007be2865bb598  rbx = 0x00007be2865baba0  rcx = 0x00000f7c50cb76b3  rdx = 0x0000000000000001  \n[        21.253] [               node3] [err] rdi = 0x0000000000000000  rsi = 0x0000000000000000  rbp = 0x00007be2865bac80  rsp = 0x00007be2865bab98  \n[        21.253] [               node3] [err]  r8 = 0x00007be2865baae0   r9 = 0x00007be2865baab0  r10 = 0x00007be2865ba9f0  r11 = 0x0000000000000246  \n[        21.253] [               node3] [err] r12 = 0x00007be2855bb000  r13 = 0x00000f7cd0aaf600  r14 = 0x00007be2855bb160  r15 = 0x00007be29bc4b2b0  \n[        21.253] [               node3] [err] AddressSanitizer can not provide additional info.\n[        21.253] [               node3] [err] SUMMARY: AddressSanitizer: SEGV nptl/pthread_mutex_lock.c:80:23 in __pthread_mutex_lock\n[        21.253] [               node3] [err] Thread T18 created by T2 (b-capnp-loop) here:\n[        21.254] [               node3] [err]     #0 0x5579809ca061 in pthread_create (/usr/local/bin/bitcoin-node+0xd72061) (BuildId: c25495e4b8b85714b81a64e4409d2ed23b7adc0a)\n[        21.254] [               node3] [err]     #1 0x7fe2a1444578 in std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State>>, void (*)()) (/lib/x86_64-linux-gnu/libstdc++.so.6+0xd4578) (BuildId: 289ee39f8c07bd4fa48102dfeeb7e6f9c76158b4)\n[        21.254] [               node3] [err]     #2 0x557982066d9c in mp::ThreadMap::Server::dispatchCallInternal(unsigned short, capnp::CallContext<capnp::AnyPointer, capnp::AnyPointer>) /src/bitcoin/build/src/ipc/libmultiprocess/include/mp/proxy.capnp.c++:602:9\n[        21.254] [               node3] [err]     #3 0x557982066d9c in mp::ThreadMap::Server::dispatchCall(unsigned long, unsigned short, capnp::CallContext<capnp::AnyPointer, capnp::AnyPointer>) /src/bitcoin/build/src/ipc/libmultiprocess/include/mp/proxy.capnp.c++:591:14\n[        21.254] [               node3] [err]     #4 0x557982066d9c in virtual thunk to mp::ThreadMap::Server::dispatchCall(unsigned long, unsigned short, capnp::CallContext<capnp::AnyPointer, capnp::AnyPointer>) /src/bitcoin/build/src/ipc/libmultiprocess/include/mp/proxy.capnp.c++\n[        21.254] [               node3] [err] \n[        21.254] [               node3] [err] Thread T2 (b-capnp-loop) created by T0 here:\n[        21.268] [               node3] [err]     #0 0x5579809ca061 in pthread_create (/usr/local/bin/bitcoin-node+0xd72061) (BuildId: c25495e4b8b85714b81a64e4409d2ed23b7adc0a)\n[        21.268] [               node3] [err]     #1 0x7fe2a1444578 in std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State>>, void (*)()) (/lib/x86_64-linux-gnu/libstdc++.so.6+0xd4578) (BuildId: 289ee39f8c07bd4fa48102dfeeb7e6f9c76158b4)\n[        21.268] [               node3] [err]     #2 0x5579816249f5 in ipc::capnp::(anonymous namespace)::CapnpProtocol::listen(int, char const*, interfaces::Init&) /src/bitcoin/src/ipc/capnp/protocol.cpp:87:9\n[        21.268] [               node3] [err]     #3 0x55798162142c in ipc::(anonymous namespace)::IpcImpl::listenAddress(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>&) /src/bitcoin/src/ipc/interfaces.cpp:111:21\n[        21.268] [               node3] [err]     #4 0x557980a7cdf2 in AppInitMain(node::NodeContext&, interfaces::BlockAndHeaderTipInfo*) /src/bitcoin/src/init.cpp:1505:22\n[        21.268] [               node3] [err]     #5 0x557980a2e083 in AppInit(node::NodeContext&) /src/bitcoin/src/bitcoind.cpp:242:43\n[        21.268] [               node3] [err]     #6 0x557980a2e083 in main /src/bitcoin/src/bitcoind.cpp:283:10\n[        21.268] [               node3] [err]     #7 0x7fe2a10a2249 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16\n[        21.268] [               node3] [err] \n[        21.268] [               node3] [err] ==1==ABORTING\n```\n\nFull debug log for the node that crashed [segv-mutex-mp.log](https://github.com/user-attachments/files/25797970/segv-mutex-mp.log)\n\nFull antithesis log for this testcase: [segv-mutex-mp-antithesis.log](https://github.com/user-attachments/files/25798049/segv-mutex-mp-antithesis.log)\n\n*This was found with a test running on [Antithesis](https://antithesis.com/).*",
+  "closedAt": "2026-03-09T10:32:08Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fanquake"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "cc @Sjors @ryanofsky ",
+      "createdAt": "2026-03-06T15:15:31Z",
+      "id": "IC_kwDOABII587vJ3MK",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34756#issuecomment-4012339978"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "ryanofsky"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "From the stack trace, test seems to be crashing here:\n\nhttps://github.com/bitcoin/bitcoin/blob/f6d3201e1416bd8eef93de565dca79629704ffd9/src/ipc/libmultiprocess/src/mp/proxy.cpp#L420\n\nwhich suggests this is the same bug Marco reported in #34711 and should be fixed by the first diff in this comment https://github.com/bitcoin/bitcoin/issues/34711#issuecomment-3986380070, which doesn't have a PR yet. Next step should be to open a PR with that fix.\n\nVery cool that antithesis was able to trigger this bug! \n\n@dergoegge I'm wondering if there is a one-pager somewhere documenting how antithesis is being used in Bitcoin core and how to replay the logs if that is possible?",
+      "createdAt": "2026-03-06T16:01:22Z",
+      "id": "IC_kwDOABII587vKzW4",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34756#issuecomment-4012586424"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "dergoegge"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I'm wondering if there is a one-pager somewhere\n\nNot yet but I'll try to put something together. For now, if there is more information that would be useful (datadirs, logs, testing a patch) you can ping me and I'll do my best to help. So far at least I think the logs + stack traces have been enough to root case the bugs (like you did here).\n\nClosing as duplicate.",
+      "createdAt": "2026-03-09T10:32:08Z",
+      "id": "IC_kwDOABII587vxnCG",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34756#issuecomment-4022759558"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "ryanofsky"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Not yet but I'll try to put something together. \n\n@dergoegge Thanks! The main thing I was just confused about is just figuring out what just where the segv was happening: if it was in a functional test or fuzz test or someplace else. Then I saw it looked like nodes were being run in some kind of harness, but unclear where that harness was defined or configured. The antitheis homepage shows a video of a dashboard, but unclear where I would find that dashboard. Further down the page it mentions \"deterministic simulation\" and you would think the point of deterministic simulation is to make bugs easy to reproduce, you would need configuration information in addition to logs to do that, which didn't seem to be provided.\n\nAnyway I asked AI to generate a short explanation that would have helped me out, and it gave\n\n```md\nTesting context\n---------------\nThis issue was discovered by Antithesis system-level testing.\n\nAntithesis runs instrumented Bitcoin Core nodes inside a deterministic\nsimulation environment and automatically explores different execution paths\nby varying inputs, timing, and network conditions. In this test:\n\n \u2022 The bitcoind daemon was started normally (no functional tests involved)\n \u2022 Antithesis generated P2P connections and messages to the node\n \u2022 The environment explores different interleavings and schedules\n \u2022 AddressSanitizer was enabled\n\nWhen a failure occurs, Antithesis records the full execution so it can be\nanalyzed deterministically.\n\nArtifacts provided below include:\n \u2022 node debug log\n \u2022 Antithesis execution log\n \u2022 stack trace\n```\n\nso that might be a decent starting point. If there's a link to a git repo with antithesis scripts or configuration being used, that could also be helpful for reproducing or providing context.\n\nAnyway you are totally right that the logs + stack trace was more than sufficient to root-cause this bug. I was just initially confused, and might not have been able to understand what was being reported if I hadn't happened to debug the same area of code very recently.",
+      "createdAt": "2026-03-09T14:04:14Z",
+      "id": "IC_kwDOABII587v2ceA",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34756#issuecomment-4024027008"
+    }
+  ],
+  "createdAt": "2026-03-06T15:13:24Z",
+  "id": "I_kwDOABII587wfQvV",
+  "labels": [],
+  "number": 34756,
+  "state": "CLOSED",
+  "stateReason": "DUPLICATE",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "dergoegge"
+      },
+      "createdAt": "2026-03-09T10:32:09Z",
+      "stateReason": "DUPLICATE"
+    }
+  ],
+  "title": "ipc: AddressSanitizer: SEGV nptl/pthread_mutex_lock.c:80:23 in __pthread_mutex_lock",
+  "url": "https://github.com/bitcoin/bitcoin/issues/34756"
+}

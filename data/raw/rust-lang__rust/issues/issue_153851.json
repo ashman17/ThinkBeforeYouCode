@@ -1,0 +1,200 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "theemathas"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "Regression found by the 1.95 beta crater run.\n\n```\n[INFO] [stdout] error: imports need to be explicitly named\n[INFO] [stdout]   --> src/lib.rs:21:1\n[INFO] [stdout]    |\n[INFO] [stdout] 21 | / rutie_serde_methods!(\n[INFO] [stdout] 22 | |     SemanticAnalyzer,\n[INFO] [stdout] 23 | |     _rtself,\n[INFO] [stdout] 24 | |     ruby_class!(Exception),\n[INFO] [stdout] ...  |\n[INFO] [stdout] 37 | | );\n[INFO] [stdout]    | |_^\n[INFO] [stdout]    |\n[INFO] [stdout]    = note: this error originates in the macro `rutie_serde_methods` (in Nightly builds, run with -Z macro-backtrace for more info)\n[INFO] [stdout] help: try renaming it with a name\n[INFO] [stdout]   --> /opt/rustwide/cargo-home/registry/src/index.crates.io-1949cf8c6b5b557f/rutie-serde-0.3.0/src/macros.rs:55:30\n[INFO] [stdout]    |\n[INFO] [stdout] 55 |             use $crate::{self as name, DeserializeWrapper, IntoAnyObject, IntoException, ResultExt};\n[INFO] [stdout]    |                               +++++++\n```\n\nhttps://crater-reports.s3.amazonaws.com/beta-1.95-3/1.95.0-beta.3/gh/kind-io.semantic_analysis/log.txt",
+  "closedAt": "2026-03-17T06:13:09Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Minimal reproducer:\n\n```rust\nmacro_rules! foo {\n    () => {\n        use $crate::{self};\n    }\n}\n\nfoo!();\n```\n\nPresumably regressed in #146972. cc @mu001999 @petrochenkov ",
+      "createdAt": "2026-03-14T09:07:44Z",
+      "id": "IC_kwDOAAsO6M7yAIla",
+      "url": "https://github.com/rust-lang/rust/issues/153851#issuecomment-4060121434"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "petrochenkov"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Intentional, we've already seen this in crater runs in https://github.com/rust-lang/rust/pull/146972#issuecomment-3632851476.",
+      "createdAt": "2026-03-14T09:10:52Z",
+      "id": "IC_kwDOAAsO6M7yAJxz",
+      "url": "https://github.com/rust-lang/rust/issues/153851#issuecomment-4060126323"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@petrochenkov This crate (semantic_analysis_ was not mentioned in that comment you linked though.",
+      "createdAt": "2026-03-14T09:37:58Z",
+      "id": "IC_kwDOAAsO6M7yATFM",
+      "url": "https://github.com/rust-lang/rust/issues/153851#issuecomment-4060164428"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Oh, the PR was closing #146967, which is precisely about prohibiting this. Should this issue be closed then?",
+      "createdAt": "2026-03-14T09:39:10Z",
+      "id": "IC_kwDOAAsO6M7yATn2",
+      "url": "https://github.com/rust-lang/rust/issues/153851#issuecomment-4060166646"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "mu001999"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Should this issue be closed then?\n\nI think this could be closed, it is intentionally prohibited now.",
+      "createdAt": "2026-03-17T06:11:31Z",
+      "id": "IC_kwDOAAsO6M7yv1N2",
+      "url": "https://github.com/rust-lang/rust/issues/153851#issuecomment-4072625014"
+    }
+  ],
+  "createdAt": "2026-03-14T09:06:01Z",
+  "id": "I_kwDOAAsO6M7y5x5o",
+  "labels": [
+    {
+      "name": "A-resolve"
+    },
+    {
+      "name": "A-macros"
+    },
+    {
+      "name": "T-lang"
+    },
+    {
+      "name": "regression-from-stable-to-beta"
+    },
+    {
+      "name": "C-bug"
+    }
+  ],
+  "number": 153851,
+  "state": "CLOSED",
+  "stateReason": "NOT_PLANNED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-03-14T09:06:03Z",
+      "label": {
+        "name": "regression-from-stable-to-beta"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-03-14T09:06:03Z",
+      "label": {
+        "name": "C-bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-14T09:06:04Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-14T09:06:04Z",
+      "label": {
+        "name": "I-prioritize"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-03-14T09:08:07Z",
+      "label": {
+        "name": "A-resolve"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-03-14T09:08:07Z",
+      "label": {
+        "name": "A-macros"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-03-14T09:08:11Z",
+      "label": {
+        "name": "T-lang"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-03-14T09:08:22Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-03-17T06:13:09Z",
+      "stateReason": "NOT_PLANNED"
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "jieyouxu"
+      },
+      "createdAt": "2026-03-17T07:05:58Z",
+      "label": {
+        "name": "I-prioritize"
+      }
+    }
+  ],
+  "title": "1.95 beta regression: \"imports need to be explicitly named\"",
+  "url": "https://github.com/rust-lang/rust/issues/153851"
+}

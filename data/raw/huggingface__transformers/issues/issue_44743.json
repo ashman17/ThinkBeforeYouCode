@@ -1,0 +1,67 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "yansongzhou"
+  },
+  "authorAssociation": "NONE",
+  "body": "### System Info\n\n- `transformers` version: 5.3.0\n- Platform: Linux-5.15.0-171-generic-x86_64-with-glibc2.35\n- Python version: 3.12.11\n- Huggingface_hub version: 1.6.0\n- Safetensors version: 0.7.0\n- Accelerate version: 1.13.0\n- Accelerate config:    not found\n- DeepSpeed version: not installed\n- PyTorch version (accelerator?): 2.10.0+cu128 (CUDA)\n- Using distributed or parallel set-up in script?: No\n- Using GPU in script?: Yes\n- GPU type: NVIDIA GeForce RTX 4090 D\n\n### Who can help?\n\n_No response_\n\n### Information\n\n- [ ] The official example scripts\n- [x] My own modified scripts\n\n### Tasks\n\n- [ ] An officially supported task in the `examples` folder (such as GLUE/SQuAD, ...)\n- [x] My own task or dataset (give details below)\n\n### Reproduction\n\nRun generation token by token, then use the list of output tokens somewhere in the middle as input_ids along with past_key_values.\nFor instance this prompt \"\u968f\u673a\u751f\u6210\u4e09\u4e2a\u8fd0\u52a8\u5458\u7684\u5f97\u5206\u8bb0\u5f55\uff0c\u4ee5jsonl\u683c\u5f0f\u8f93\u51fa\u4e3a\u4e09\u884c\uff0c\u6bcf\u4e2a\u5b57\u5178\u5305\u62ec\u8fd0\u52a8\u5458\u540d\u5b57name\uff0c\u9879\u76eeevent\uff0c\u5f97\u5206score\u3002\" gives something like this:\n```\n{\"name\": \"Li Na\", \"event\": \"Tennis\", \"score\": 98.5}\n{\"name\": \"Usain Bolt\", \"event\": \"Sprint\", \"score\": 9.58}\n{\"name\": \"Simone Biles\", \"event\": \"Gymnastics\", \"score\": 16.75}\n```\nBut when you manually concat the exact tokens generated for 'Li Na' after '{\"name\": \"', the response turns into an introduction of her:\n```\n{\"name\": \"Li Na, a Chinese tennis player, has won 10 Grand Slam singles titles. The number of Grand Slam singles titles won by the top 10 players in the world is ...\n```\nI use the basic forward pass and greedy decode the output logits:\n```\n        forward_kwargs = {\n            \"input_ids\": current_input_ids, # may include multiple tokens\n            \"past_key_values\": past_key_values,\n            \"return_dict\": True,\n            \"use_cache\": True,\n        }\n        with torch.inference_mode():\n            outputs = model(**forward_kwargs)\n        next_token_logits = outputs.logits[:, -1, :]\n        next_token = torch.argmax(next_token_logits, dim=-1)\n```\n\n### Expected behavior\n\n## Source Code\nhttps://github.com/huggingface/transformers/blob/d64a6d67d8c004a25570db4df5689e06caea6af7/src/transformers/models/qwen3_5/modular_qwen3_5.py#L345\nWhen a past_key_values cache is present and input_ids contain multiple tokens, the recurrent state is always reset, causing loss of context.\n\n## Possible Fix\nMy current fix is reusing the recurrent_state in the cache (initial_state=recurrent_state) but not reusing the conv_state. However, this fix only gives a reasonable output, it does not guarantee the same output as when you run the model token by token.\nTo be frank I'm not sure if this fix really makes sense, but it does work better than what is present now.",
+  "closedAt": "2026-03-16T09:46:10Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "yansongzhou"
+      },
+      "authorAssociation": "NONE",
+      "body": "A more reasonable fix would be to modify the forward function within Qwen3_5GatedDeltaNet to handle multiple tokens with past token by token.",
+      "createdAt": "2026-03-16T09:27:24Z",
+      "id": "IC_kwDOCUB6oc7yXlDv",
+      "url": "https://github.com/huggingface/transformers/issues/44743#issuecomment-4066267375"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "yansongzhou"
+      },
+      "authorAssociation": "NONE",
+      "body": "So I consulted the Qwen3.5 team and the fix is simple: skip the seq_len==1 check, as it's just a safety check in transformers.\nHe told me that transformers currently does not officially support mtp or similar features, so I guess this may not be planned. But, would it be better to give some instruction instead of letting the logits run wild?\n\nAnyways, hope the solution helps!",
+      "createdAt": "2026-03-16T09:46:10Z",
+      "id": "IC_kwDOCUB6oc7yYDLJ",
+      "url": "https://github.com/huggingface/transformers/issues/44743#issuecomment-4066390729"
+    }
+  ],
+  "createdAt": "2026-03-16T08:47:36Z",
+  "id": "I_kwDOCUB6oc7zQFBn",
+  "labels": [
+    {
+      "name": "bug"
+    }
+  ],
+  "number": 44743,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "yansongzhou"
+      },
+      "createdAt": "2026-03-16T08:47:38Z",
+      "label": {
+        "name": "bug"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "yansongzhou"
+      },
+      "createdAt": "2026-03-16T09:46:10Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "transformers modular_qwen3_5.py: Recurrent states always reset when using cache and seq_len>1",
+  "url": "https://github.com/huggingface/transformers/issues/44743"
+}

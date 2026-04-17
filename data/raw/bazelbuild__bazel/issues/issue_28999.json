@@ -1,0 +1,109 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "furushchev"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Please list the URLs of the archives you'd like to mirror:\n\n\nhttps://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz",
+  "closedAt": "2026-03-16T04:59:30Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bharadwaj08-one"
+      },
+      "authorAssociation": "NONE",
+      "body": "@furushchev  here you go ! \nhttps://mirror.bazel.build/ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz\n",
+      "createdAt": "2026-03-16T04:59:30Z",
+      "id": "IC_kwDOATz7jc7yS9Tk",
+      "url": "https://github.com/bazelbuild/bazel/issues/28999#issuecomment-4065055972"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "furushchev"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you!",
+      "createdAt": "2026-03-16T17:02:16Z",
+      "id": "IC_kwDOATz7jc7yiwVW",
+      "url": "https://github.com/bazelbuild/bazel/issues/28999#issuecomment-4069197142"
+    }
+  ],
+  "createdAt": "2026-03-13T23:26:34Z",
+  "id": "I_kwDOATz7jc7y0lNC",
+  "labels": [
+    {
+      "name": "P2"
+    },
+    {
+      "name": "type: process"
+    },
+    {
+      "name": "team-OSS"
+    },
+    {
+      "name": "mirror request"
+    }
+  ],
+  "number": 28999,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "furushchev"
+      },
+      "createdAt": "2026-03-13T23:26:35Z",
+      "label": {
+        "name": "P2"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "furushchev"
+      },
+      "createdAt": "2026-03-13T23:26:35Z",
+      "label": {
+        "name": "type: process"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "furushchev"
+      },
+      "createdAt": "2026-03-13T23:26:35Z",
+      "label": {
+        "name": "team-OSS"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "furushchev"
+      },
+      "createdAt": "2026-03-13T23:26:35Z",
+      "label": {
+        "name": "mirror request"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bharadwaj08-one"
+      },
+      "createdAt": "2026-03-16T04:59:30Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "[Mirror] gawk 5.3.2",
+  "url": "https://github.com/bazelbuild/bazel/issues/28999"
+}

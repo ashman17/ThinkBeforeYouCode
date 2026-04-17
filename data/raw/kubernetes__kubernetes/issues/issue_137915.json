@@ -1,0 +1,178 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "BenTheElder"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "### Which jobs are failing?\n\nhttps://prow.k8s.io/?job=*-alpha-beta-features\n\n### Which tests are failing?\n\n`[sig-scheduling] Workload [FeatureGate:GenericWorkload] [Alpha] [Feature:OffByDefault] CRUD Tests PodGroup API availability`\n\n### Since when has it been failing?\n\nI think since it was introduced in https://github.com/kubernetes/kubernetes/pull/136976\n\n### Testgrid link\n\n_No response_\n\n### Reason for failure (if possible)\n\n```\n{ failed [FAILED] create initial namespaced resource \"podgroups\": podgroups.scheduling.k8s.io \"test\" is forbidden: PodGroup rejected: Workload \"w1\" not found\nIn [It] at: k8s.io/kubernetes/test/e2e/framework/conformance/conformance.go:686 @ 03/19/26 18:54:15.565\n}\n```\n\n### Anything else we need to know?\n\n_No response_\n\n### Relevant SIG(s)\n\n/sig scheduling",
+  "closedAt": "2026-03-20T15:36:19Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This issue is currently awaiting triage.\n\nIf a SIG or subproject determines this is a relevant issue, they will accept it by applying the `triage/accepted` label and provide further guidance.\n\nThe `triage/accepted` label can be added by org members by writing `/triage accepted` in a comment.\n\n\n<details>\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-03-19T19:16:33Z",
+      "id": "IC_kwDOAToIks7z8a5_",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092702335"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "x-ref #131040, we started running more feature coverage jobs on PRs that touch `pkg/features` but https://github.com/kubernetes/kubernetes/pull/136976 did not and yet still missed catching this due to the jobs not running.\n\nSo as a follow-up, will discuss in #131040 expanding the trigger to the API packages ...\n\nIn the meantime, this is impacting release-informing CI:\nhttps://testgrid.k8s.io/sig-release-master-informing#kind-master-alpha-beta-features\n\nWe mostly got that job healthy after https://github.com/kubernetes/kubernetes/issues/137894 but this test remains",
+      "createdAt": "2026-03-19T19:18:14Z",
+      "id": "IC_kwDOAToIks7z8dlA",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092713280"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "yongruilin"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "/cc @brejman ",
+      "createdAt": "2026-03-19T19:28:33Z",
+      "id": "IC_kwDOAToIks7z8qqx",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092766897"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "tosi3k"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "https://github.com/kubernetes/kubernetes/pull/137464 introduced a dependency that requires a matching Workload API object if the PodGroup API object refers to one.\n\nThe fix would be to drop the workloadReference from the PodGroup object created in that test.",
+      "createdAt": "2026-03-19T19:32:23Z",
+      "id": "IC_kwDOAToIks7z8vRQ",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092785744"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "liggitt"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> [#137464](https://github.com/kubernetes/kubernetes/pull/137464) introduced a dependency that requires a matching Workload API object if the PodGroup AP object refers to one.\n> \n> The fix would be to drop the workloadReference from the PodGroup object created in that test.\n\nplease open a PR to get that test back to green ASAP, thanks\n",
+      "createdAt": "2026-03-19T19:34:18Z",
+      "id": "IC_kwDOAToIks7z8xf0",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092794868"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kannon92"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "/assign",
+      "createdAt": "2026-03-19T19:35:56Z",
+      "id": "IC_kwDOAToIks7z8zpf",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092803679"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kannon92"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Fix PR: https://github.com/kubernetes/kubernetes/pull/137916",
+      "createdAt": "2026-03-19T19:38:09Z",
+      "id": "IC_kwDOAToIks7z82yq",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092816554"
+    }
+  ],
+  "createdAt": "2026-03-19T19:16:24Z",
+  "id": "I_kwDOAToIks70mdYl",
+  "labels": [
+    {
+      "name": "priority/critical-urgent"
+    },
+    {
+      "name": "sig/scheduling"
+    },
+    {
+      "name": "release-blocker"
+    },
+    {
+      "name": "kind/failing-test"
+    },
+    {
+      "name": "needs-triage"
+    }
+  ],
+  "number": 137915,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "createdAt": "2026-03-19T19:16:26Z",
+      "label": {
+        "name": "kind/failing-test"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-19T19:16:28Z",
+      "label": {
+        "name": "sig/scheduling"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-19T19:16:32Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "liggitt"
+      },
+      "createdAt": "2026-03-19T19:36:46Z",
+      "label": {
+        "name": "priority/critical-urgent"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "liggitt"
+      },
+      "createdAt": "2026-03-19T19:37:03Z",
+      "label": {
+        "name": "release-blocker"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-20T15:36:20Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "failing test: [sig-scheduling] Workload [FeatureGate:GenericWorkload] [Alpha] [Feature:OffByDefault] CRUD Tests PodGroup API availability",
+  "url": "https://github.com/kubernetes/kubernetes/issues/137915"
+}

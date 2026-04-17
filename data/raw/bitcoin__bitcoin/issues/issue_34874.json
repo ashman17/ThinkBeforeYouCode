@@ -1,0 +1,44 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "fanquake"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "On a macos machine:\n```bash\nmake -C depends HOST=x86_64-w64-mingw32\n....\n-- Configuring submodule 'qtbase'\n-- [QtBase] CMAKE_BUILD_TYPE was already explicitly set to: 'Release'\nCMake Error at qtbase/cmake/QtPublicAppleHelpers.cmake:976 (message):\n  Qt requires at least version 15 of Xcode, youre building against version .\n  Please upgrade.  You can turn this error into a warning by configuring with\n  -DQT_FORCE_WARN_APPLE_SDK_AND_XCODE_CHECK=ON, but the build will likely\n  fail.  Use at your own risk.\nCall Stack (most recent call first):\n  qtbase/cmake/QtBuildHelpers.cmake:457 (_qt_internal_check_apple_sdk_and_xcode_versions)\n  qtbase/cmake/QtBuild.cmake:4 (qt_internal_setup_build_and_global_variables)\n  qtbase/cmake/QtSetup.cmake:6 (include)\n  qtbase/cmake/QtBuildRepoHelpers.cmake:21 (include)\n  qtbase/cmake/QtBuildRepoHelpers.cmake:232 (qt_build_internals_set_up_private_api)\n  qtbase/cmake/QtBaseHelpers.cmake:154 (qt_build_repo_begin)\n  qtbase/CMakeLists.txt:32 (qt_internal_qtbase_build_repo)\n\n\n-- Configuring incomplete, errors occurred!\nCMake Error at qtbase/cmake/QtProcessConfigureArgs.cmake:1139 (message):\n  CMake exited with code 1.\n```",
+  "closedAt": "2026-03-22T23:45:47Z",
+  "comments": [],
+  "createdAt": "2026-03-20T04:48:53Z",
+  "id": "I_kwDOABII5870uG3l",
+  "labels": [
+    {
+      "name": "Build system"
+    }
+  ],
+  "number": 34874,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fanquake"
+      },
+      "createdAt": "2026-03-20T04:48:55Z",
+      "label": {
+        "name": "Build system"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fanquake"
+      },
+      "createdAt": "2026-03-22T23:45:47Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "build: qt windows cross build broken on macOS",
+  "url": "https://github.com/bitcoin/bitcoin/issues/34874"
+}

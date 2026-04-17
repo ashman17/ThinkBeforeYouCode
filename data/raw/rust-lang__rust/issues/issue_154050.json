@@ -1,0 +1,117 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "Lars-Schumann"
+  },
+  "authorAssociation": "NONE",
+  "body": "# Code\n<!-- problematic snippet and/or link to repo and/or full path of standard library function -->\n\n```rust\n#![feature(const_trait_impl)]\n#![feature(staged_api)]\n#![allow(internal_features)]\n#![stable(feature = \"rust1\", since = \"1.0.0\")]\n\n#[stable(feature = \"rust1\", since = \"1.0.0\")]\n#[rustc_const_unstable(feature = \"const_foo\", issue = \"1\")]\npub const trait Foo {}\n\n```\n\n# Reproduction Steps\n1. `rustdoc src/lib.rs`\n2. open `doc/lib/index.html` in a browser of your choice\n3. observe that stability and constness information is being displayed\n\n# Expected Outcome\nI expect the information visible in the generated to also be available in rustdocs json output. \nFor example the version since this Trait has been stable, or the fact that it is const-unstable.\n\n# Actual Output\nThe `Trait` struct from <https://docs.rs/rustdoc-types/0.57.3/rustdoc_types/struct.Trait.html> seems to be missing this information.\n\n\n# Version\n`rustdoc 1.96.0-nightly (1e2183119 2026-03-15)`\n`Mozilla Firefox 148.0.2`",
+  "closedAt": "2026-03-18T17:07:39Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "GuillaumeGomez"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think the information should be available in the `Item` type in its `attrs` field: https://docs.rs/rustdoc-types/0.57.3/rustdoc_types/struct.Item.html#structfield.attrs",
+      "createdAt": "2026-03-18T17:01:42Z",
+      "id": "IC_kwDOAAsO6M7zbsCN",
+      "url": "https://github.com/rust-lang/rust/issues/154050#issuecomment-4084121741"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Lars-Schumann"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yup, it's there as Strings under the Variant `Other`.",
+      "createdAt": "2026-03-18T17:07:39Z",
+      "id": "IC_kwDOAAsO6M7zb2xY",
+      "url": "https://github.com/rust-lang/rust/issues/154050#issuecomment-4084165720"
+    }
+  ],
+  "createdAt": "2026-03-18T16:55:30Z",
+  "id": "I_kwDOAAsO6M70KzdX",
+  "labels": [
+    {
+      "name": "T-rustdoc"
+    },
+    {
+      "name": "C-bug"
+    },
+    {
+      "name": "A-rustdoc-json"
+    }
+  ],
+  "number": 154050,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Lars-Schumann"
+      },
+      "createdAt": "2026-03-18T16:55:32Z",
+      "label": {
+        "name": "T-rustdoc"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Lars-Schumann"
+      },
+      "createdAt": "2026-03-18T16:55:32Z",
+      "label": {
+        "name": "C-bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-18T16:55:34Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "GuillaumeGomez"
+      },
+      "createdAt": "2026-03-18T16:59:18Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "GuillaumeGomez"
+      },
+      "createdAt": "2026-03-18T16:59:18Z",
+      "label": {
+        "name": "A-rustdoc-json"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Lars-Schumann"
+      },
+      "createdAt": "2026-03-18T17:07:39Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Missing info in `rustdoc_types`",
+  "url": "https://github.com/rust-lang/rust/issues/154050"
+}

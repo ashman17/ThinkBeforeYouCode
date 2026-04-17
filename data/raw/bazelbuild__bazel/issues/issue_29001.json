@@ -1,0 +1,109 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "Fantasime"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Description of the bug:\n\n\n# Steps to reproduce the problem\n\nCreate a new workspace with the following structure:\n\n```\nworkspace\n\u251c main\n| \u251c BUILD\n| \u2514 hello_world.cc\n\u251c .bazelrc\n\u251c MODULE.bazel\n\u2514 user.bazelrc\n```\n\nIn `.bazelrc`:\n\n```\ntry-import user.bazelrc\n```\n\nIn `user.bazelrc`:\n\n```\nstartup --output_user_root=\"D:\\Users\\username\\_bazel_username\"\n```\n\nThen run:\n\n```bash\nbazel build\n```\n\n\n# Problem description\n\nOS: Windows\n\nBazel Version: 9.0.1\n\nError message:\n\n```bash\n[INFO 02:24:53.779 src/main/cpp/rc_file.cc:94] Parsing the RcFile ******/.bazelrc\n[INFO 02:24:53.779 src/main/cpp/rc_file.cc:94] Parsing the RcFile user.bazelrc\n[FATAL 02:24:53.780 src/main/cpp/util/path_windows.cc:85] MakeAbsolute(D:Usersusername_bazel_username): AsAbsoluteWindowsPath failed: working-directory relative paths are unsupported\n```\n\n\n# Temporary solution\n\nModify `user.bazelrc`:\n\n```\nstartup --output_user_root=\"D:/Users/username/_bazel_username\"\n```\n\n",
+  "closedAt": "2026-03-17T18:12:48Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Fantasime"
+      },
+      "authorAssociation": "NONE",
+      "body": "I have corrected the title and content. A 100% reproducible way is presented.",
+      "createdAt": "2026-03-16T18:27:51Z",
+      "id": "IC_kwDOATz7jc7ykzkG",
+      "url": "https://github.com/bazelbuild/bazel/issues/29001#issuecomment-4069734662"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Fantasime"
+      },
+      "authorAssociation": "NONE",
+      "body": "It's not a bug. Bazel treats '\\\\' as an escape character on all platforms.\n\nComment in `src/main/cpp/rc_file.cc`:\n```c++\n// This will treat \"#\" as a comment, and properly\n// quote single and double quotes, and treat '\\'\n// as an escape character.\nblaze_util::Tokenize(line, '#', &words);\n```\n\nThe correct path seperator in the \"rc\" file is `\\\\`, so `user.bazelrc` in **Steps to reproduce the problem** should be modified:\n```\nstartup --output_user_root=\"D:\\\\Users\\\\username\\\\_bazel_username\"\n```",
+      "createdAt": "2026-03-17T18:12:48Z",
+      "id": "IC_kwDOATz7jc7zAlPp",
+      "url": "https://github.com/bazelbuild/bazel/issues/29001#issuecomment-4077016041"
+    }
+  ],
+  "createdAt": "2026-03-14T07:08:06Z",
+  "id": "I_kwDOATz7jc7y4tSO",
+  "labels": [
+    {
+      "name": "type: bug"
+    },
+    {
+      "name": "platform: windows"
+    },
+    {
+      "name": "untriaged"
+    },
+    {
+      "name": "team-Core"
+    }
+  ],
+  "number": 29001,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Fantasime"
+      },
+      "createdAt": "2026-03-14T07:08:08Z",
+      "label": {
+        "name": "type: bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Fantasime"
+      },
+      "createdAt": "2026-03-14T07:08:08Z",
+      "label": {
+        "name": "untriaged"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "deepalak56"
+      },
+      "createdAt": "2026-03-16T06:23:11Z",
+      "label": {
+        "name": "platform: windows"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "deepalak56"
+      },
+      "createdAt": "2026-03-16T06:23:11Z",
+      "label": {
+        "name": "team-Core"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Fantasime"
+      },
+      "createdAt": "2026-03-17T18:12:48Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Windows: backslashes are not supported in other \"rc\" files",
+  "url": "https://github.com/bazelbuild/bazel/issues/29001"
+}

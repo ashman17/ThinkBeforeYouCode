@@ -1,0 +1,29 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "bazel-io"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "Forked from #28330",
+  "closedAt": "2026-03-16T18:12:01Z",
+  "comments": [],
+  "createdAt": "2026-03-16T17:03:23Z",
+  "id": "I_kwDOATz7jc7zaDUI",
+  "labels": [],
+  "number": 29009,
+  "state": "CLOSED",
+  "stateReason": "DUPLICATE",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "createdAt": "2026-03-16T18:12:01Z",
+      "stateReason": "DUPLICATE"
+    }
+  ],
+  "title": "[9.0.2] BEP referenced local file (Is a directory) warning on Bazel 9.0.0rc6",
+  "url": "https://github.com/bazelbuild/bazel/issues/29009"
+}

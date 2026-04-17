@@ -1,0 +1,95 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "etaf"
+  },
+  "authorAssociation": "COLLABORATOR",
+  "body": "### \ud83d\udc1b Describe the bug\n\nI observed that this CUTLASS CI job https://github.com/pytorch/pytorch/actions/workflows/h100-cutlass-backend.yml\n has been continuously failing for a while. After comparing the current failed logs and the logs last passed , it appears that the third_party/cutlass directory has not been initialized, which causes try_import_cutlass to fail.\n\nFailed log does not do `/usr/bin/git submodule sync --recursive` : https://productionresultssa6.blob.core.windows.net/actions-results/381ec337-355b-4b38-bae5-ce93f13ed9d1/workflow-job-run-d40c05a5-d8db-55e0-9426-1e25164abf2f/logs/job/job-logs.txt?rsct=text%2Fplain&se=2026-03-20T05%3A55%3A45Z&sig=n5o0CxYuzebUFMUAUO3e%2BPoARQF%2BobhSOcKICR%2FSSU8%3D&ske=2026-03-20T08%3A14%3A48Z&skoid=ca7593d4-ee42-46cd-af88-8b886a2f84eb&sks=b&skt=2026-03-20T04%3A14%3A48Z&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skv=2025-11-05&sp=r&spr=https&sr=b&st=2026-03-20T05%3A45%3A40Z&sv=2025-11-05\n\nPassed log does `/usr/bin/git submodule sync --recursive`: https://productionresultssa8.blob.core.windows.net/actions-results/5960dd22-700e-434f-a877-89d6fe79baa5/workflow-job-run-859abd75-bfa7-5fda-a04d-35603207ec82/logs/job/job-logs.txt?rsct=text%2Fplain&se=2026-03-20T06%3A32%3A10Z&sig=00W%2BDR0k1TCZH0PaIr%2BYSsrikzedHyldDrfnoVmr2ec%3D&ske=2026-03-20T08%3A15%3A32Z&skoid=ca7593d4-ee42-46cd-af88-8b886a2f84eb&sks=b&skt=2026-03-20T04%3A15%3A32Z&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skv=2025-11-05&sp=r&spr=https&sr=b&st=2026-03-20T06%3A22%3A05Z&sv=2025-11-05\n\n### Versions\n\nCollecting environment information...\nPyTorch version: N/A\nIs debug build: N/A\nCUDA used to build PyTorch: N/A\nROCM used to build PyTorch: N/A\n\nOS: Ubuntu 24.04.3 LTS (x86_64)\nGCC version: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nClang version: Could not collect\nCMake version: version 4.2.3\nLibc version: glibc-2.39\n\n\ncc @seemethere @malfet @pytorch/pytorch-dev-infra",
+  "closedAt": "2026-03-21T06:37:45Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "etaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I found https://github.com/pytorch/pytorch/pull/177941 is fixing this issue.",
+      "createdAt": "2026-03-20T06:43:04Z",
+      "id": "IC_kwDOA-j9z870I9oq",
+      "url": "https://github.com/pytorch/pytorch/issues/177945#issuecomment-4095990314"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "crcrpar"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The mentioned pr landed.",
+      "createdAt": "2026-03-21T06:37:45Z",
+      "id": "IC_kwDOA-j9z870h2sV",
+      "url": "https://github.com/pytorch/pytorch/issues/177945#issuecomment-4102515477"
+    }
+  ],
+  "createdAt": "2026-03-20T06:37:59Z",
+  "id": "I_kwDOA-j9z870vmZE",
+  "labels": [
+    {
+      "name": "triage review"
+    },
+    {
+      "name": "module: ci"
+    },
+    {
+      "name": "bot-triaged"
+    }
+  ],
+  "number": 177945,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-20T06:39:31Z",
+      "label": {
+        "name": "triage review"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-20T06:39:31Z",
+      "label": {
+        "name": "module: ci"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-20T06:39:33Z",
+      "label": {
+        "name": "bot-triaged"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "crcrpar"
+      },
+      "createdAt": "2026-03-21T06:37:45Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "The CUTLASS CI has been failing for some time, blocking PRs landing",
+  "url": "https://github.com/pytorch/pytorch/issues/177945"
+}

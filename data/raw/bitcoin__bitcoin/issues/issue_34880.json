@@ -1,0 +1,41 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "psone0992-ship-it"
+  },
+  "authorAssociation": "NONE",
+  "body": ".",
+  "closedAt": "2026-03-20T13:38:02Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "DrahtBot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "\nLLM spam detection (\u2728 experimental): SPAM. The issue body is empty and the title is non-descriptive, indicating a placeholder submission with no meaningful content to evaluate.\n\n\u267b\ufe0f Automatically wiping, closing, and locking for now based on heuristics.\nGenerally, please focus on creating high-quality, original content that demonstrates a clear\nunderstanding of the project's requirements and goals.\n",
+      "createdAt": "2026-03-20T13:38:01Z",
+      "id": "IC_kwDOABII5870QvQG",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34880#issuecomment-4098028550"
+    }
+  ],
+  "createdAt": "2026-03-20T13:37:56Z",
+  "id": "I_kwDOABII58702kwG",
+  "labels": [],
+  "number": 34880,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "DrahtBot"
+      },
+      "createdAt": "2026-03-20T13:38:02Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": ".",
+  "url": "https://github.com/bitcoin/bitcoin/issues/34880"
+}

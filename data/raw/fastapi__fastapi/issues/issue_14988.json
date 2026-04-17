@@ -1,0 +1,19 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "jayvynl"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Privileged issue\n\n- [ ] #14989\n\n### Issue Content\n\n```python\nimport asyncio\n\nfrom fastapi import Depends, BackgroundTasks, FastAPI\nfrom fastapi.responses import PlainTextResponse\n\n\napp = FastAPI()\n\nasync def dep():\n    yield\n    print(\"dep done\")\n\nasync def task():\n    await asyncio.sleep(5)\n    print(\"task done\")\n\n@app.get(\"/test\", response_class=PlainTextResponse, tags=[\"test\"], dependencies=[Depends(dep)])\nasync def test(bk: BackgroundTasks):\n    bk.add_task(task)\n    return \"OK\"\n```\n\nWhen access test endpoint, Both fastapi 0.128.0 and 0.133.0 have this behavior:\n\n1. Response returns\n2. print \"dep done\"\n3. print \"task done\".\n\nBut in fastapi 0.115.12:\n\n1. print \"dep done\"\n2. Response returns\n3. print \"task done\".\n\nWhen the dependency is a database transaction, transaction is not committed after response returns, data changes are not accessable before backgroud tasks completion.",
+  "closedAt": "2026-02-24T13:35:41Z",
+  "comments": [],
+  "createdAt": "2026-02-24T12:31:01Z",
+  "id": "I_kwDOCZduT87tbrsb",
+  "labels": [],
+  "number": 14988,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [],
+  "title": "Dependency keeps going after response returns when there exists any backgroud tasks.",
+  "url": "https://github.com/fastapi/fastapi/issues/14988"
+}

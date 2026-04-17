@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from collections import Counter
+import re
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 from tbyc_dataset.models import JSONDict, RepositoryRef
+from tbyc_dataset.roles import display_role_from_association
 
 
 def normalize_issue(raw_issue: JSONDict, repo: RepositoryRef) -> JSONDict:
@@ -13,11 +15,15 @@ def normalize_issue(raw_issue: JSONDict, repo: RepositoryRef) -> JSONDict:
         raw_issue.get("timelineItems", []),
         key=lambda item: item.get("createdAt") or "",
     )
+    deliberation_thread = normalize_deliberation_thread(raw_issue, comments)
+    issue_texts = [comment["body"] for comment in deliberation_thread if comment.get("body")]
 
     return {
         "repository": repo.slug,
         "issue_number": raw_issue["number"],
         "issue_url": raw_issue["url"],
+        "files": extract_explicit_file_references(issue_texts),
+        "formatted_discussion": format_discussion(deliberation_thread),
         "issue_author": {
             "login": nested_login(raw_issue.get("author")),
             "author_association": raw_issue.get("authorAssociation"),
@@ -33,16 +39,7 @@ def normalize_issue(raw_issue: JSONDict, repo: RepositoryRef) -> JSONDict:
             "created_at": raw_issue["createdAt"],
             "closed_at": raw_issue.get("closedAt"),
         },
-        "deliberation_thread": [
-            {
-                "url": comment["url"],
-                "created_at": comment["createdAt"],
-                "author_login": nested_login(comment.get("author")),
-                "author_association": comment.get("authorAssociation"),
-                "body": comment.get("body") or "",
-            }
-            for comment in comments
-        ],
+        "deliberation_thread": deliberation_thread,
         "timeline_events": normalize_timeline_items(timeline_items),
         "resolution_artifacts": {
             "linked_pull_requests": extract_linked_pull_requests(timeline_items),
@@ -52,6 +49,38 @@ def normalize_issue(raw_issue: JSONDict, repo: RepositoryRef) -> JSONDict:
         },
         "actor_typology": build_actor_typology(raw_issue, comments, timeline_items),
     }
+
+
+def normalize_deliberation_thread(
+    raw_issue: JSONDict,
+    comments: Sequence[JSONDict],
+) -> List[JSONDict]:
+    deliberation_thread: List[JSONDict] = []
+    opening_text = compose_issue_opening_text(raw_issue.get("title"), raw_issue.get("body"))
+    if opening_text:
+        deliberation_thread.append(
+            {
+                "url": raw_issue["url"],
+                "created_at": raw_issue["createdAt"],
+                "author_login": nested_login(raw_issue.get("author")),
+                "author_association": raw_issue.get("authorAssociation"),
+                "body": opening_text,
+                "is_issue_body": True,
+            }
+        )
+
+    deliberation_thread.extend(
+        {
+            "url": comment["url"],
+            "created_at": comment["createdAt"],
+            "author_login": nested_login(comment.get("author")),
+            "author_association": comment.get("authorAssociation"),
+            "body": comment.get("body") or "",
+            "is_issue_body": False,
+        }
+        for comment in comments
+    )
+    return deliberation_thread
 
 
 def build_actor_typology(
@@ -162,6 +191,62 @@ def extract_linked_pull_requests(timeline_items: Sequence[JSONDict]) -> List[JSO
     return linked
 
 
+def compose_issue_opening_text(title: Optional[str], body: Optional[str]) -> str:
+    normalized_title = (title or "").strip()
+    normalized_body = (body or "").strip()
+    if normalized_title and normalized_body:
+        return f"{normalized_title}\n\n{normalized_body}"
+    return normalized_title or normalized_body
+
+
+def format_discussion(deliberation_thread: Sequence[JSONDict]) -> str:
+    lines = []
+    for comment in deliberation_thread:
+        body = squash_whitespace(comment.get("body") or "")
+        if not body:
+            continue
+        author_login = comment.get("author_login") or "unknown"
+        author_role = display_role_from_association(comment.get("author_association"))
+        lines.append(f"{author_login} ({author_role}):{body}")
+    return "\n".join(lines)
+
+
+FILE_EXTENSION_PATTERN = (
+    "c|cc|cpp|cxx|h|hh|hpp|hxx|py|rs|java|js|jsx|ts|tsx|go|rb|php|cs|swift|kt|kts|scala|"
+    "m|mm|sh|bash|zsh|fish|ps1|toml|yaml|yml|json|jsonl|md|txt|ini|cfg|conf|xml|html|css|"
+    "scss|sql|proto|capnp|bzl"
+)
+FILE_PATH_PATTERN = re.compile(
+    r"(?<!://)\b(?:[\w.-]+/)+[\w.-]+\.[A-Za-z_][A-Za-z0-9_+-]*\b"
+)
+FILE_NAME_PATTERN = re.compile(
+    rf"\b[\w-]+\.(?:{FILE_EXTENSION_PATTERN})\b"
+)
+
+
+def extract_explicit_file_references(texts: Sequence[str]) -> List[str]:
+    seen = set()
+    files: List[str] = []
+    for text in texts:
+        for match in FILE_PATH_PATTERN.finditer(text):
+            candidate = match.group(0).strip("`'\"()[]{}<>.,:;")
+            if candidate and candidate not in seen:
+                seen.add(candidate)
+                files.append(candidate)
+        for match in FILE_NAME_PATTERN.finditer(text):
+            candidate = match.group(0).strip("`'\"()[]{}<>.,:;")
+            if not candidate:
+                continue
+            if match.start() > 0 and text[match.start() - 1] == ".":
+                continue
+            if any(path.endswith(f"/{candidate}") for path in files):
+                continue
+            if candidate not in seen:
+                seen.add(candidate)
+                files.append(candidate)
+    return files
+
+
 def summarize_dataset(records: Iterable[JSONDict]) -> JSONDict:
     records = list(records)
     issue_states = Counter(
@@ -194,3 +279,5 @@ def nested_login(value: Any) -> Optional[str]:
     if isinstance(login, str) and login.strip():
         return login
     return None
+def squash_whitespace(text: str) -> str:
+    return " ".join(text.split())

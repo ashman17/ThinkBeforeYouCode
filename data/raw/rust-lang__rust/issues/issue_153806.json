@@ -1,0 +1,94 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "VulnHunter008"
+  },
+  "authorAssociation": "NONE",
+  "body": "<!--\nThank you for finding an Internal Compiler Error! \ud83e\uddca  If possible, try to provide\na minimal verifiable example. You can read \"Rust Bug Minimization Patterns\" for\nhow to create smaller examples.\nhttp://blog.pnkfx.org/blog/2019/11/18/rust-bug-minimization-patterns/\n-->\n\n### Code\n\n```Rust\nextern \"C\" {\n    pub static __ImageBase: u8;\n}\npub static FOO: &'static u8 = unsafe { &unsafe { __ImageBase } };\nfn main() {}\n\n```\n\n\n### Meta\n<!--\nIf you're using the stable version of the compiler, you should also check if the\nbug also exists in the beta or nightly versions.\n-->\n\n`rustc --version --verbose`:\n```\nrustc 1.91.0-nightly (7aef4bec4 2025-09-01)\nbinary: rustc\ncommit-hash: 7aef4bec4bec16cb6204d51eb633873e23b18771\ncommit-date: 2025-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.91.0-nightly\nLLVM version: 21.1.0\n```\n\n### Error output\n\n```\nerror[E0080]: cannot access extern static `__ImageBase`\n --> equiv-rust-Rule364.rs:4:50\n  |\n4 | pub static FOO: &'static u8 = unsafe { &unsafe { __ImageBase } };\n  |                                                  ^^^^^^^^^^^ evaluation of `FOO` failed here\n\nerror: internal compiler error: compiler/rustc_const_eval/src/interpret/eval_context.rs:597:33: interpret const eval failure of Unevaluated(UnevaluatedConst { def: DefId(0:5 ~ equiv_rust_Rule364[7bc5]::FOO), args: [], promoted: Some(promoted[0]) }, &'{erased} u8) which is not in required_consts\n --> equiv-rust-Rule364.rs:4:40\n  |\n4 | pub static FOO: &'static u8 = unsafe { &unsafe { __ImageBase } };\n  |                                        ^^^^^^^^^^^^^^^^^^^^^^^\n\nthread 'rustc' panicked at compiler/rustc_const_eval/src/interpret/eval_context.rs:597:33:\nBox<dyn Any>\n\nnote: we would appreciate a bug report: https://github.com/rust-lang/rust/issues/new?labels=C-bug%2C+I-ICE%2C+T-compiler&template=ice.md\nnote: please make sure that you have updated to the latest nightly\n```\n\n<!--\nInclude a backtrace in the code block by setting `RUST_BACKTRACE=1` in your\nenvironment. E.g. `RUST_BACKTRACE=1 cargo build`.\n-->\n<details><summary><strong>Backtrace</strong></summary>\n<p>\n\n```\nthread 'rustc' (2015879) panicked at compiler/rustc_const_eval/src/interpret/eval_context.rs:597:33:\nBox<dyn Any>\nstack backtrace:\n   0:     0x7f690179b3f3 - <std::sys::backtrace::BacktraceLock::print::DisplayBacktrace as core::fmt::Display>::fmt::haa9e21b9f7728e9d\n   1:     0x7f6901e01a58 - core::fmt::write::h47c537b314f2b42f\n   2:     0x7f6901750281 - std::io::Write::write_fmt::h5da305e456c839dd\n   3:     0x7f69017612d2 - std::sys::backtrace::BacktraceLock::print::hcf670bc61597714e\n   4:     0x7f6901767259 - std::panicking::default_hook::{{closure}}::hd30aa8fb7428f34c\n   5:     0x7f6901766d83 - std::panicking::default_hook::h6f511f2c07c5c455\n   6:     0x7f69007c8ee5 - std[5da760f60d7714ca]::panicking::update_hook::<alloc[1522900af3ecc125]::boxed::Box<rustc_driver_impl[16ac858b76c31f9c]::install_ice_hook::{closure#1}>>::{closure#0}\n   7:     0x7f690176770e - std::panicking::panic_with_hook::heb0ec0de58fd0d2e\n   8:     0x7f69008058c1 - std[5da760f60d7714ca]::panicking::begin_panic::<rustc_errors[ec897967084f5882]::ExplicitBug>::{closure#0}\n   9:     0x7f69007f9146 - std[5da760f60d7714ca]::sys::backtrace::__rust_end_short_backtrace::<std[5da760f60d7714ca]::panicking::begin_panic<rustc_errors[ec897967084f5882]::ExplicitBug>::{closure#0}, !>\n  10:     0x7f69007f6e4b - std[5da760f60d7714ca]::panicking::begin_panic::<rustc_errors[ec897967084f5882]::ExplicitBug>\n  11:     0x7f6900810fd1 - <rustc_errors[ec897967084f5882]::diagnostic::BugAbort as rustc_errors[ec897967084f5882]::diagnostic::EmissionGuarantee>::emit_producing_guarantee\n  12:     0x7f6900d80dfc - <rustc_errors[ec897967084f5882]::DiagCtxtHandle>::span_bug::<rustc_span[7570dc1d93289a01]::span_encoding::Span, alloc[1522900af3ecc125]::string::String>\n  13:     0x7f6900da6df7 - rustc_middle[7207d213a2a562b6]::util::bug::opt_span_bug_fmt::<rustc_span[7570dc1d93289a01]::span_encoding::Span>::{closure#0}\n  14:     0x7f6900da6e7a - rustc_middle[7207d213a2a562b6]::ty::context::tls::with_opt::<rustc_middle[7207d213a2a562b6]::util::bug::opt_span_bug_fmt<rustc_span[7570dc1d93289a01]::span_encoding::Span>::{closure#0}, !>::{closure#0}\n  15:     0x7f6900d955cb - rustc_middle[7207d213a2a562b6]::ty::context::tls::with_context_opt::<rustc_middle[7207d213a2a562b6]::ty::context::tls::with_opt<rustc_middle[7207d213a2a562b6]::util::bug::opt_span_bug_fmt<rustc_span[7570dc1d93289a01]::span_encoding::Span>::{closure#0}, !>::{closure#0}, !>\n  16:     0x7f68ff0313d7 - rustc_middle[7207d213a2a562b6]::util::bug::span_bug_fmt::<rustc_span[7570dc1d93289a01]::span_encoding::Span>\n  17:     0x7f690209d099 - <rustc_const_eval[ddd0185d600a9d90]::interpret::eval_context::InterpCx<rustc_const_eval[ddd0185d600a9d90]::const_eval::machine::CompileTimeMachine>>::eval_rvalue_into_place\n  18:     0x7f6902074518 - rustc_const_eval[ddd0185d600a9d90]::const_eval::eval_queries::eval_body_using_ecx::<rustc_middle[7207d213a2a562b6]::mir::interpret::allocation::ConstAllocation>\n  19:     0x7f6902b89b90 - rustc_const_eval[ddd0185d600a9d90]::const_eval::eval_queries::eval_static_initializer_provider\n  20:     0x7f6902b89755 - rustc_query_impl[684ab2f7647ada3b]::plumbing::__rust_begin_short_backtrace::<rustc_query_impl[684ab2f7647ada3b]::query_impl::eval_static_initializer::dynamic_query::{closure#2}::{closure#0}, rustc_middle[7207d213a2a562b6]::query::erase::Erased<[u8; 16usize]>>\n  21:     0x7f6902b89733 - <rustc_query_impl[684ab2f7647ada3b]::query_impl::eval_static_initializer::dynamic_query::{closure#2} as core[7ac50f046ab9c0d]::ops::function::FnOnce<(rustc_middle[7207d213a2a562b6]::ty::context::TyCtxt, rustc_span[7570dc1d93289a01]::def_id::DefId)>>::call_once\n  22:     0x7f6901fa37f2 - rustc_query_system[d8ada103bf964d49]::query::plumbing::try_execute_query::<rustc_query_impl[684ab2f7647ada3b]::DynamicConfig<rustc_query_system[d8ada103bf964d49]::query::caches::DefIdCache<rustc_middle[7207d213a2a562b6]::query::erase::Erased<[u8; 16usize]>>, false, false, false>, rustc_query_impl[684ab2f7647ada3b]::plumbing::QueryCtxt, false>\n  23:     0x7f69028bdb62 - rustc_query_impl[684ab2f7647ada3b]::query_impl::eval_static_initializer::get_query_non_incr::__rust_end_short_backtrace\n  24:     0x7f69028be619 - rustc_hir_analysis[56a3e766e76011e]::check_crate\n  25:     0x7f6901fdf67e - rustc_interface[c500fa999646e344]::passes::analysis\n  26:     0x7f6901fdf34b - rustc_query_impl[684ab2f7647ada3b]::plumbing::__rust_begin_short_backtrace::<rustc_query_impl[684ab2f7647ada3b]::query_impl::analysis::dynamic_query::{closure#2}::{closure#0}, rustc_middle[7207d213a2a562b6]::query::erase::Erased<[u8; 0usize]>>\n  27:     0x7f6902db97d4 - rustc_query_system[d8ada103bf964d49]::query::plumbing::try_execute_query::<rustc_query_impl[684ab2f7647ada3b]::DynamicConfig<rustc_query_system[d8ada103bf964d49]::query::caches::SingleCache<rustc_middle[7207d213a2a562b6]::query::erase::Erased<[u8; 0usize]>>, false, false, false>, rustc_query_impl[684ab2f7647ada3b]::plumbing::QueryCtxt, false>\n  28:     0x7f6902db940c - rustc_query_impl[684ab2f7647ada3b]::query_impl::analysis::get_query_non_incr::__rust_end_short_backtrace\n  29:     0x7f69030816e4 - rustc_interface[c500fa999646e344]::passes::create_and_enter_global_ctxt::<core[7ac50f046ab9c0d]::option::Option<rustc_interface[c500fa999646e344]::queries::Linker>, rustc_driver_impl[16ac858b76c31f9c]::run_compiler::{closure#0}::{closure#2}>::{closure#2}::{closure#0}\n  30:     0x7f69030724e2 - rustc_interface[c500fa999646e344]::interface::run_compiler::<(), rustc_driver_impl[16ac858b76c31f9c]::run_compiler::{closure#0}>::{closure#1}\n  31:     0x7f6902efacf8 - std[5da760f60d7714ca]::sys::backtrace::__rust_begin_short_backtrace::<rustc_interface[c500fa999646e344]::util::run_in_thread_with_globals<rustc_interface[c500fa999646e344]::util::run_in_thread_pool_with_globals<rustc_interface[c500fa999646e344]::interface::run_compiler<(), rustc_driver_impl[16ac858b76c31f9c]::run_compiler::{closure#0}>::{closure#1}, ()>::{closure#0}, ()>::{closure#0}::{closure#0}, ()>\n  32:     0x7f6902efa9dc - <<std[5da760f60d7714ca]::thread::Builder>::spawn_unchecked_<rustc_interface[c500fa999646e344]::util::run_in_thread_with_globals<rustc_interface[c500fa999646e344]::util::run_in_thread_pool_with_globals<rustc_interface[c500fa999646e344]::interface::run_compiler<(), rustc_driver_impl[16ac858b76c31f9c]::run_compiler::{closure#0}>::{closure#1}, ()>::{closure#0}, ()>::{closure#0}::{closure#0}, ()>::{closure#1} as core[7ac50f046ab9c0d]::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}\n  33:     0x7f6902f008cd - std::sys::pal::unix::thread::Thread::new::thread_start::h427fd483c5aaf6bf\n  34:     0x7f68fca6cac3 - start_thread\n                               at ./nptl/pthread_create.c:442:8\n  35:     0x7f68fcafea40 - __clone3\n                               at ./misc/../sysdeps/unix/sysv/linux/x86_64/clone3.S:81:0\n  36:                0x0 - <unknown>\n```\n\n</p>\n</details>\n",
+  "closedAt": "2026-03-13T03:50:05Z",
+  "comments": [],
+  "createdAt": "2026-03-13T03:31:53Z",
+  "id": "I_kwDOAAsO6M7ygfmi",
+  "labels": [
+    {
+      "name": "I-ICE"
+    },
+    {
+      "name": "T-compiler"
+    },
+    {
+      "name": "C-bug"
+    }
+  ],
+  "number": 153806,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "VulnHunter008"
+      },
+      "createdAt": "2026-03-13T03:31:54Z",
+      "label": {
+        "name": "I-ICE"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "VulnHunter008"
+      },
+      "createdAt": "2026-03-13T03:31:54Z",
+      "label": {
+        "name": "T-compiler"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "VulnHunter008"
+      },
+      "createdAt": "2026-03-13T03:31:54Z",
+      "label": {
+        "name": "C-bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-13T03:31:57Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "VulnHunter008"
+      },
+      "createdAt": "2026-03-13T03:50:05Z",
+      "stateReason": "COMPLETED"
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-13T03:50:07Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    }
+  ],
+  "title": "[ICE]: crash after `E0080` when taking a reference to an `extern static` in a `static` initializer",
+  "url": "https://github.com/rust-lang/rust/issues/153806"
+}

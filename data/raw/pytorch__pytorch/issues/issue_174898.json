@@ -1,0 +1,211 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "lindsayad"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "My issue is almost an exact replica of https://stackoverflow.com/questions/79234663/c-and-cuda-name-mangling-inconsistent. Quoting the relevant parts here:\n\n> I attempted to compile PyTorch from source but ran into a very strange linking error. After investigating, I discovered that a templated function defined in a C++ file and its declaration in a CUDA file generate two different mangled names.\n>\n> C++ definition: `_ZNK2at10TensorBase14const_data_ptrIdTnNSt9enable_ifIXntsr3stdE10is_const_vIT_EEiE4typeELi0EEEPKS3_v`\n>\n> CUDA declaration: `_ZNK2at10TensorBase14const_data_ptrIdTnNSt9enable_ifIXntsr4__T0E10is_const_vIT_EEiE4typeELi0EEEPKS3_v`\n>\n> The 2 names look almost identical except for the bold parts. When I use llvm-cxxfilt, the 2 mangled names returned the same function name `double const* at::TensorBase::const_data_ptr<double, 0>() const`\n\nMy clang version is 18.1.3 and `nvcc --version`\n```\nnvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Tue_May_27_02:21:03_PDT_2025\nCuda compilation tools, release 12.9, V12.9.86\nBuild cuda_12.9.r12.9/compiler.36037853_0\n```\n\nGoing a bit beyond the stack overflow post, I notice 3 different (undefined) mangled symbols in `libtorch_cuda.so` which demangle to the same function name.\n```\nU _ZNK2at10TensorBase14const_data_ptrIN3c104HalfETnNSt9enable_ifIXntgssr3stdE10is_const_vIT_EEiE4typeELi0EEEPKS5_v\nU _ZNK2at10TensorBase14const_data_ptrIN3c104HalfETnNSt9enable_ifIXntsr3stdE10is_const_vIT_EEiE4typeELi0EEEPKS5_v\nU _ZNK2at10TensorBase14const_data_ptrIN3c104HalfETnNSt9enable_ifIXntsr4__T0E10is_const_vIT_EEiE4typeELi0EEEPKS5_v\n```\n\nOne of the commenters in the stack overflow post stated that\n> The extra parts in the symbol are typically related to GPU side CUDA ABI attributes\n\nI am currently unable to finish building torch because `libtorch_cpu.so` doesn't produce all the mangled symbols expected by `libtorch_cuda.so`. Any help being able to finish building torch would be incredible\n\ncc @malfet @seemethere @ptrblck @msaroufim @eqy @jerryzh168 @tinglvv @nWEIdia",
+  "closedAt": "2026-02-20T20:15:30Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lakshayg"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Unable to reproduce with the following versions\n\n```\nroot@c671eb15d1a7:~/pytorch/4# uname -mo\nx86_64 GNU/Linux\nroot@e2ea1eab6692:~/pytorch/4# nvcc --version\nnvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Fri_Nov__7_07:23:37_PM_PST_2025\nCuda compilation tools, release 13.1, V13.1.80\nBuild cuda_13.1.r13.1/compiler.36836380_0\nroot@e2ea1eab6692:~/pytorch/4# clang --version\nUbuntu clang version 20.1.2 (0ubuntu1~24.04.2)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-20/bin\n```\n\nUnable to reproduce with clang-18\n\n```\nroot@c671eb15d1a7:~/pytorch/4# clang --version\nUbuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin\n```\n\nReproduces on aarch64\n```\nroot@88f99f25279c:~/pytorch# uname -mo\naarch64 GNU/Linux\nroot@88f99f25279c:~/pytorch# nvcc --version\nnvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Fri_Nov__7_07:24:07_PM_PST_2025\nCuda compilation tools, release 13.1, V13.1.80\nBuild cuda_13.1.r13.1/compiler.36836380_0\nroot@88f99f25279c:~/pytorch# clang --version\nUbuntu clang version 20.1.2 (0ubuntu1~24.04.2)\nTarget: aarch64-unknown-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-20/bin\n```",
+      "createdAt": "2026-02-12T23:38:41Z",
+      "id": "IC_kwDOA-j9z87oGXqR",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3893983889"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lakshayg"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Related\n- https://github.com/llvm/llvm-project/issues/85656\n- https://github.com/llvm/llvm-project/issues/102443\n- https://github.com/abseil/abseil-cpp/issues/1747",
+      "createdAt": "2026-02-13T20:23:58Z",
+      "id": "IC_kwDOA-j9z87oakd2",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3899279222"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lindsayad"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "That fixed just about all of the undefined symbols, but I do still have a sliver\n```\nundefined symbol: _ZN2at4cuda4blas4gemmIN3c108BFloat16ES4_TnPNSt9enable_ifIXntaaoosr4__T07is_sameIT_NS3_4HalfEEE5valuesr4__T07is_sameIS6_S4_EE5valuesr4__T07is_sameIT0_fEE5valueES6_E4typeELPS4_0EEEvcclllNS_10OpMathTypeIS6_E4typeEPKS6_lSH_lSF_PS8_l\t(./libtorch_cuda.so)\nundefined symbol: __atomic_store_8\t(./libtorch_cuda.so)\nundefined symbol: __atomic_load\t(./libtorch_cuda.so)\nundefined symbol: _ZN2at4cuda4blas4gemmIffTnPNSt9enable_ifIXntaaoosr4__T07is_sameIT_N3c104HalfEEE5valuesr4__T07is_sameIS4_NS5_8BFloat16EEE5valuesr4__T07is_sameIT0_fEE5valueES4_E4typeELPf0EEEvcclllNS_10OpMathTypeIS4_E4typeEPKS4_lSH_lSF_PS8_l\t(./libtorch_cuda.so)\nundefined symbol: _ZN2at4cuda4blas4gemmIddTnPNSt9enable_ifIXntaaoosr4__T07is_sameIT_N3c104HalfEEE5valuesr4__T07is_sameIS4_NS5_8BFloat16EEE5valuesr4__T07is_sameIT0_fEE5valueES4_E4typeELPd0EEEvcclllNS_10OpMathTypeIS4_E4typeEPKS4_lSH_lSF_PS8_l\t(./libtorch_cuda.so)\nundefined symbol: _ZN2at4cuda4blas4gemmIN3c104HalfES4_TnPNSt9enable_ifIXntaaoosr4__T07is_sameIT_S4_EE5valuesr4__T07is_sameIS6_NS3_8BFloat16EEE5valuesr4__T07is_sameIT0_fEE5valueES6_E4typeELPS4_0EEEvcclllNS_10OpMathTypeIS6_E4typeEPKS6_lSH_lSF_PS8_l\t(./libtorch_cuda.so)\n```",
+      "createdAt": "2026-02-13T23:50:12Z",
+      "id": "IC_kwDOA-j9z87od2D3",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3900137719"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lakshayg"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Which commit did you use to build? I force pushed on that branch a few times. 580851d4ccf71042e1d4e5724471fe58500b97f6 should build fine.",
+      "createdAt": "2026-02-14T00:19:47Z",
+      "id": "IC_kwDOA-j9z87oePs0",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3900242740"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lindsayad"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Updating to your newest commit, the only undefined references I see now are \n```\nundefined symbol: __atomic_store_8\t(./libtorch_cuda.so)\nundefined symbol: __atomic_load\t(./libtorch_cuda.so)\n```\nSeems like I might need to try to force `-latomic`. It's interesting that if I do `nm libtorch_cuda.so | grep atomic_load` on a gcc build I don't see any symbols",
+      "createdAt": "2026-02-17T05:26:59Z",
+      "id": "IC_kwDOA-j9z87pMb57",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3912351355"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lakshayg"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "That's strange, I don't get that error. If I look on Google for this message some stuff comes up but since I am unable to reproduce it locally, I don't think I'll be able to help. Can you share the output of `uname -m` on your machine?",
+      "createdAt": "2026-02-17T17:47:49Z",
+      "id": "IC_kwDOA-j9z87pa_0O",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3916168462"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lindsayad"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "`x86_64`",
+      "createdAt": "2026-02-17T20:00:39Z",
+      "id": "IC_kwDOA-j9z87pdbpM",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3916806732"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lakshayg"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Interesting! I didn't get any link errors at all on `x86_64` even before my PR. If you're interested in digging into it further, here's the setup I use to build PyTorch: https://github.com/lakshayg/pytorch-devel. You can try using this and see if it builds for you.\n\nYou'll need to make some changes to the Makefile:\n\n```diff\ndiff --git a/Makefile b/Makefile\nindex 0be163a..00f4314 100755\n--- a/Makefile\n+++ b/Makefile\n@@ -38,4 +38,4 @@ edit:\n\n-export CC:=gcc\n-export CXX:=g++\n+export CC:=clang\n+export CXX:=clang++\n export CXXFLAGS:=-Wfatal-errors\n@@ -73,3 +73,3 @@ build-%: export TORCH_CUDA_ARCH_LIST?=$(shell nvidia-smi --query-gpu=compute_cap\n build-%: export BUILD_TEST?=0\n-build-%: export BUILD_BINARY?=0\n+build-%: export BUILD_BINARY?=1\n build-%: export BUILD_FUNCTORCH?=1\n```",
+      "createdAt": "2026-02-17T20:03:21Z",
+      "id": "IC_kwDOA-j9z87pdebC",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3916818114"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lindsayad"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Since I have a successful gcc build, I'm probably not going to dig into it too much more. It appears neither libgcc nor libatomic exports those symbols on my system. I don't know why they get injected with clang. Anyway thanks for all the help with the other symbols!",
+      "createdAt": "2026-02-17T21:50:55Z",
+      "id": "IC_kwDOA-j9z87pfKdv",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3917260655"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "malfet"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm not sure if this is a CUDA vs C++ name mangling problem, but rather a C++17 vs C++20 ABIs problem. I.e. somehow parts of the code are compiled with C++20 symbols manglong, but others with C++17... ",
+      "createdAt": "2026-02-19T18:57:24Z",
+      "id": "IC_kwDOA-j9z87qM-0J",
+      "url": "https://github.com/pytorch/pytorch/issues/174898#issuecomment-3929271561"
+    }
+  ],
+  "createdAt": "2026-02-12T18:43:52Z",
+  "id": "I_kwDOA-j9z87qcxMf",
+  "labels": [
+    {
+      "name": "triage review"
+    },
+    {
+      "name": "module: build"
+    },
+    {
+      "name": "module: cuda"
+    },
+    {
+      "name": "module: abi"
+    },
+    {
+      "name": "bot-triaged"
+    }
+  ],
+  "number": 174898,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-02-12T18:45:32Z",
+      "label": {
+        "name": "triage review"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-02-12T18:45:32Z",
+      "label": {
+        "name": "module: build"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-02-12T18:45:32Z",
+      "label": {
+        "name": "module: cuda"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-02-12T18:45:32Z",
+      "label": {
+        "name": "module: abi"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-02-12T18:45:35Z",
+      "label": {
+        "name": "bot-triaged"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "pytorchmergebot"
+      },
+      "createdAt": "2026-02-20T20:15:30Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "C++ and CUDA name mangling inconsistent",
+  "url": "https://github.com/pytorch/pytorch/issues/174898"
+}

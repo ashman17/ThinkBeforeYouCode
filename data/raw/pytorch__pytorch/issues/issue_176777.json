@@ -1,0 +1,241 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "zou3519"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "my guess is one of:\n- https://github.com/pytorch/pytorch/pull/176053\n- https://github.com/pytorch/pytorch/pull/174714\n- https://github.com/pytorch/pytorch/pull/174570\n- https://github.com/pytorch/pytorch/pull/175602\n\ncc @ezyang @gchanan @kadeng @msaroufim @chauhang @penguinwu @voznesenskym @EikanWang @jgong5 @Guobing-Chen @XiaobingSuper @zhuhaozhe @blzheng @wenzhe-nrv @jiayisunx @amjames @Lucaskabela @jataylo @guilhermeleobas @anijain2305 \n\nexample logs\n\n<img width=\"1679\" height=\"709\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/642cb397-e8bb-4e5c-9c41-03358ba8a29c\" />",
+  "closedAt": "2026-03-21T00:36:02Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "guilhermeleobas"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think it is my fault with the `__dict__` migration. Let me check.",
+      "createdAt": "2026-03-07T18:39:41Z",
+      "id": "IC_kwDOA-j9z87vb_y7",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017093819"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "zou3519"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@guilhermeleobas it's 100% one of your PRs:\n\n<img width=\"1275\" height=\"162\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/67fcca59-dc02-4750-9cb0-6d5955e834a7\" />\n\nThey don't revert cleanly though",
+      "createdAt": "2026-03-07T22:08:04Z",
+      "id": "IC_kwDOA-j9z87vdivY",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017499096"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "guilhermeleobas"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm on it. Let me see if I can create a quick fix for it.",
+      "createdAt": "2026-03-07T22:20:41Z",
+      "id": "IC_kwDOA-j9z87vdpDm",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017524966"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "zou3519"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thanks, and no rush, I don't think anyone's going to commit anything else until Monday",
+      "createdAt": "2026-03-07T22:33:17Z",
+      "id": "IC_kwDOA-j9z87vdwbo",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017555176"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "guilhermeleobas"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [@guilhermeleobas](https://github.com/guilhermeleobas) it's 100% one of your PRs:\n> <img alt=\"Image\" width=\"1275\" height=\"162\" src=\"https://private-user-images.githubusercontent.com/5652049/559840047-67fcca59-dc02-4750-9cb0-6d5955e834a7.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzI5MjU1MTUsIm5iZiI6MTc3MjkyNTIxNSwicGF0aCI6Ii81NjUyMDQ5LzU1OTg0MDA0Ny02N2ZjY2E1OS1kYzAyLTQ3NTAtOWNiMC02ZDU5NTVlODM0YTcucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI2MDMwNyUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNjAzMDdUMjMxMzM1WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9NDM0NjNhZjc2OGU3YzNiNTMzNzM2MzhlZDRkZWVmY2FmZWYyYTMxYzE1OTE2YmNkN2QyZmQzM2U5M2Q2NGM3YyZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QifQ.-mmrBFGVQOqSd29c4D0PQyTbHN_GfG3KngFcZMaXtNk\">\n> \n> They don't revert cleanly though\n\nCan you share the link to this page?",
+      "createdAt": "2026-03-07T23:15:18Z",
+      "id": "IC_kwDOA-j9z87vd-9b",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017614683"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "guilhermeleobas"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Locally this benchmark gives me 62 graph breaks on cpu.",
+      "createdAt": "2026-03-08T01:11:17Z",
+      "id": "IC_kwDOA-j9z87ve15L",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017839691"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "zou3519"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "https://hud.pytorch.org/hud/pytorch/pytorch/main/1?per_page=50",
+      "createdAt": "2026-03-08T18:47:12Z",
+      "id": "IC_kwDOA-j9z87vmLs0",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4019764020"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "guilhermeleobas"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Indeed it is one of my PRs. There's something I'm missing because locally detectron gives me 62 graph breaks.",
+      "createdAt": "2026-03-09T00:21:33Z",
+      "id": "IC_kwDOA-j9z87voc1e",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4020358494"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "zou3519"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@guilhermeleobas are you able to figure out how to revert your PRs to get CI to go back to normal first?\n\nalso @Lucaskabela @mlazos you also reviewed these PRs, do you folks have thoughts on what could be wrong?",
+      "createdAt": "2026-03-09T17:20:52Z",
+      "id": "IC_kwDOA-j9z87v73zA",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4025449664"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "guilhermeleobas"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@zou3519 yes, just submitted https://github.com/pytorch/pytorch/pull/176934",
+      "createdAt": "2026-03-09T21:31:04Z",
+      "id": "IC_kwDOA-j9z87wB93v",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4027047407"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "guilhermeleobas"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@zou3519 the bug reported here is fixed in #176934. See:\n\n<img width=\"877\" height=\"461\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/71733189-34d3-499c-a4f6-3310d1ff568e\" />",
+      "createdAt": "2026-03-09T23:41:36Z",
+      "id": "IC_kwDOA-j9z87wERap",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4027651753"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "guilhermeleobas"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Closing as this is now fixed.",
+      "createdAt": "2026-03-21T00:36:02Z",
+      "id": "IC_kwDOA-j9z870eehM",
+      "url": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4101630028"
+    }
+  ],
+  "createdAt": "2026-03-07T03:35:13Z",
+  "id": "I_kwDOA-j9z87wosZU",
+  "labels": [
+    {
+      "name": "high priority"
+    },
+    {
+      "name": "triaged"
+    },
+    {
+      "name": "oncall: pt2"
+    },
+    {
+      "name": "module: dynamo"
+    }
+  ],
+  "number": 176777,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "zou3519"
+      },
+      "createdAt": "2026-03-07T03:35:23Z",
+      "label": {
+        "name": "high priority"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "zou3519"
+      },
+      "createdAt": "2026-03-07T03:35:23Z",
+      "label": {
+        "name": "module: dynamo"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "pytorch-bot"
+      },
+      "createdAt": "2026-03-07T03:35:25Z",
+      "label": {
+        "name": "oncall: pt2"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "pytorch-bot"
+      },
+      "createdAt": "2026-03-07T03:35:25Z",
+      "label": {
+        "name": "triage review"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "ezyang"
+      },
+      "createdAt": "2026-03-10T18:37:25Z",
+      "label": {
+        "name": "triage review"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "zou3519"
+      },
+      "createdAt": "2026-03-12T17:33:48Z",
+      "label": {
+        "name": "triaged"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "guilhermeleobas"
+      },
+      "createdAt": "2026-03-21T00:36:03Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "something regressed torchbench graph breaks",
+  "url": "https://github.com/pytorch/pytorch/issues/176777"
+}

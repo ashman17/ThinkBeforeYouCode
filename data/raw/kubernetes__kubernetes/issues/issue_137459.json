@@ -1,0 +1,271 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "nojnhuh"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "### Which jobs are failing?\n\nAll of the `dra-all` variants, and presumably any job that uses `-logcheck-data-race`:\n- ci-kubernetes-e2e-kind-alpha-beta-features-race\n- ci-kind-dra-all\n- pull-kubernetes-kind-dra-all\n- pull-kubernetes-kind-dra-all-canary\n\n### Which tests are failing?\n\nNo particular test, but the logcheck after tests run.\n\n### Since when has it been failing?\n\n#137080 is the exact cause. Locally I see this issue go away after reverting that commit.\n\n### Testgrid link\n\nhttps://testgrid.k8s.io/sig-node-dynamic-resource-allocation#ci-kind-dra-all\n\n### Reason for failure (if possible)\n\nThis is the error that get's logged when the jobs fail:\n```\n  [FAILED] Unexpected errors during log data collection (see stdout for full log):\n      E0305 19:22:40.427723    6324 logcheck.go:657] \"Log query failed\" err=\"the server does not allow this method on the requested resource (post nodes kind-worker2)\" logger=\"KubeletLogQuery\" node=\"kind-worker2\"\n      E0305 19:22:40.428700    6324 logcheck.go:657] \"Log query failed\" err=\"the server does not allow this method on the requested resource (post nodes kind-worker3)\" logger=\"KubeletLogQuery\" node=\"kind-worker3\"\n      E0305 19:22:40.428794    6324 logcheck.go:657] \"Log query failed\" err=\"the server does not allow this method on the requested resource (post nodes kind-worker)\" logger=\"KubeletLogQuery\" node=\"kind-worker\"\n      E0305 19:22:40.429181    6324 logcheck.go:657] \"Log query failed\" err=\"the server does not allow this method on the requested resource (post nodes kind-control-plane)\" logger=\"KubeletLogQuery\" node=\"kind-control-plane\"\n  In [ReportAfterSuite] at: k8s.io/kubernetes/test/e2e/invariants/logcheck/logcheck.go:218 @ 03/05/26 19:27:10.378\n------------------------------\nSummarizing 1 Failure:\n  [FAIL] [ReportAfterSuite] [sig-testing] Log Check\n  k8s.io/kubernetes/test/e2e/invariants/logcheck/logcheck.go:218\n```\n\n### Anything else we need to know?\n\n_No response_\n\n### Relevant SIG(s)\n\n/sig testing",
+  "closedAt": "2026-03-06T02:07:06Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "pohly"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "The error indicates a problem with the node log query feature.\n\nI don't know whether we have E2E tests for that. We should, it's being proposed for GA in 1.36 if I am not mistaken. Hard to check on my phone right now.",
+      "createdAt": "2026-03-05T22:17:16Z",
+      "id": "IC_kwDOAToIks7u59Hs",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008169964"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "CI diff has https://github.com/kubernetes/kubernetes/compare/63080a762...77c013637",
+      "createdAt": "2026-03-05T22:18:03Z",
+      "id": "IC_kwDOAToIks7u59-E",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008173444"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "pohly"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I expect kubernetes-e2e-kind-alpha-beta-racw to fail the same way. Haven't checked yet.",
+      "createdAt": "2026-03-05T22:19:58Z",
+      "id": "IC_kwDOAToIks7u5_5X",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008181335"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "lots of API server connection errors:\nhttps://storage.googleapis.com/kubernetes-ci-logs/logs/ci-kind-dra-all/2029636205263458304/artifacts/kind/kind-control-plane/containers/kube-apiserver-kind-control-plane_kube-system_kube-apiserver-9a1b1851289257b7a7e005120fdf1673ad3439afb9899e798e5b30d267507832.log\n\n```\n2026-03-05T19:23:35.3482734Z stderr F E0305 19:23:35.348081       1 conn.go:353] \"Error on socket receive\" err=\"read tcp 172.18.0.4:6443->172.18.0.1:52334: use of closed network connection\"\n2026-03-05T19:23:35.508182881Z stderr F E0305 19:23:35.507943       1 conn.go:353] \"Error on socket receive\" err=\"read tcp 172.18.0.4:6443->172.18.0.1:52356: use of closed network connection\"\n2026-03-05T19:23:35.584949983Z stderr F E0305 19:23:35.584783       1 conn.go:353] \"Error on socket receive\" err=\"read tcp 172.18.0.4:6443->172.18.0.1:52414: use of closed network connection\"\n2026-03-05T19:23:35.765477845Z stderr F E0305 19:23:35.765261       1 conn.go:353] \"Error on socket receive\" err=\"read tcp 172.18.0.4:6443->172.18.0.1:52428: use of closed network connection\"\n2026-03-05T19:23:35.859721695Z stderr F E0305 19:23:35.859462       1 conn.go:353] \"Error on socket receive\" err=\"read tcp 172.18.0.4:6443->172.18.0.1:52468: use of closed network connection\"\n2026-03-05T19:23:35.898453798Z stderr F E0305 19:23:35.898196       1 conn.go:353] \"Error on socket receive\" err=\"read tcp 172.18.0.4:6443->172.18.0.1:52502: use of closed network connection\"\n2026-03-05T19:23:37.475029902Z stderr F E0305 19:23:37.474734       1 conn.go:353] \"Error on socket receive\" err=\"read tcp 172.18.0.4:6443->172.18.0.1:52838: use of closed network connection\"\n2026-03-05T19:23:37.655783994Z stderr F E0305 19:23:37.655473       1 conn.go:353] \"Error on socket receive\" err=\"read tcp 172.18.0.4:6443->172.18.0.1:52892: use of closed network connection\"\n2026-03-05T19:23:38.461878807Z stderr F E0305 19:23:38.461674       1 conn.go:353] \"Error on socket receive\" err=\"read tcp 172.18.0.4:6443->172.18.0.1:52980: use of closed network connection\"\n```\n\nI see this in passing runs of this job as well though.",
+      "createdAt": "2026-03-05T22:20:44Z",
+      "id": "IC_kwDOAToIks7u6Av1",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008184821"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nojnhuh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I expect kubernetes-e2e-kind-alpha-beta-racw to fail the same way. Haven't checked yet.\n\nYep, I see the same errors in the most recent run there:\nhttps://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-kind-alpha-beta-features-race/2029633942696497152",
+      "createdAt": "2026-03-05T22:22:48Z",
+      "id": "IC_kwDOAToIks7u6DBC",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008194114"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "/cc @aravindhp @LorbusChris \n(owners of node log query feature)",
+      "createdAt": "2026-03-05T22:25:48Z",
+      "id": "IC_kwDOAToIks7u6Gdz",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008208243"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nojnhuh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> CI diff has [63080a7...77c0136](https://github.com/kubernetes/kubernetes/compare/63080a762...77c013637)\n\nThe diff between versions pulled for `pull-kubernetes-kind-dra-all` since it last passed and first failed is https://github.com/kubernetes/kubernetes/compare/3799fc9942a4df017e2c4f30524816fcf89045e4...3369e51e093d98c5b52791e8afa844c60ff303ae",
+      "createdAt": "2026-03-05T22:26:11Z",
+      "id": "IC_kwDOAToIks7u6G3z",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008209907"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nojnhuh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think I have a fix in #137462. Still unclear exactly why that fixes things though.",
+      "createdAt": "2026-03-05T22:44:18Z",
+      "id": "IC_kwDOAToIks7u6bMj",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008293155"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "/triage accepted\n/assign @nojnhuh ",
+      "createdAt": "2026-03-05T23:41:02Z",
+      "id": "IC_kwDOAToIks7u7LMU",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008489748"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nojnhuh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I think I have a fix in [#137462](https://github.com/kubernetes/kubernetes/pull/137462).\n\nFix is merged and CI indicates this fixes all of the affected jobs. I think the next scheduled periodic runs of those jobs are coming up.\n\n@BenTheElder Are we good to close this issue or should we keep it open in case the fix needs to be backported?",
+      "createdAt": "2026-03-06T00:27:11Z",
+      "id": "IC_kwDOAToIks7u74Zr",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008674923"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think we can close it but should probably consider backports preemptively, we'll have the same issue where the go update won't trigger the job and it will break silently?\n\nIt's also just wrong AFAICT without this fix, even if it happened to work before.",
+      "createdAt": "2026-03-06T01:34:21Z",
+      "id": "IC_kwDOAToIks7u805Q",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4008922704"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nojnhuh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Actually this code is new enough that it doesn't exist on any release branch yet so I think we're good to go. https://github.com/kubernetes/kubernetes/pull/133844\n\nPeriodic jobs have also recovered:\n- https://testgrid.k8s.io/sig-node-dynamic-resource-allocation#ci-kind-dra-all\n- https://testgrid.k8s.io/sig-testing-kind#kind-master-alpha-beta-features-race\n\n/close",
+      "createdAt": "2026-03-06T02:07:00Z",
+      "id": "IC_kwDOAToIks7u9W-H",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4009062279"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@nojnhuh: Closing this issue.\n\n<details>\n\nIn response to [this](https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4009062279):\n\n>Actually this code is new enough that it doesn't exist on any release branch yet so I think we're good to go. https://github.com/kubernetes/kubernetes/pull/133844\n>\n>Periodic jobs have also recovered:\n>- https://testgrid.k8s.io/sig-node-dynamic-resource-allocation#ci-kind-dra-all\n>- https://testgrid.k8s.io/sig-testing-kind#kind-master-alpha-beta-features-race\n>\n>/close\n\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-03-06T02:07:07Z",
+      "id": "IC_kwDOAToIks7u9XC1",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4009062581"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "aravindhp"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "/cc @jrvaldes \n\n(who is also taking co-ownership of this feature)\n\nI am surprised the POST used to work. This might predate the NodeLogQuery feature and might have been working with the log endpoint even before the feature was introduced in 1.27.",
+      "createdAt": "2026-03-06T18:24:18Z",
+      "id": "IC_kwDOAToIks7vNhwa",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4013300762"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "filed follow-up https://github.com/kubernetes/kubernetes/issues/137503",
+      "createdAt": "2026-03-06T18:29:16Z",
+      "id": "IC_kwDOAToIks7vNmzA",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4013321408"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "jrvaldes"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> filed follow-up [#137503](https://github.com/kubernetes/kubernetes/issues/137503)\n\n@BenTheElder  thanks for opening the follow-up; \n\nIs it confirmed that the \"stopped accepting POST\" is exclusive to the [query](https://github.com/kubernetes/kubernetes/pull/137462/files#diff-9b2eaad633b1ac2ad543e05ddeb831f207bfb4d034456070bc7d32ea45b7ed05R624) feature, or is this a behavior inherited from the [logs](https://github.com/kubernetes/kubernetes/pull/137462/files#diff-9b2eaad633b1ac2ad543e05ddeb831f207bfb4d034456070bc7d32ea45b7ed05L623) endpoint ",
+      "createdAt": "2026-03-06T18:36:53Z",
+      "id": "IC_kwDOAToIks7vNvk9",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137459#issuecomment-4013357373"
+    }
+  ],
+  "createdAt": "2026-03-05T22:13:16Z",
+  "id": "I_kwDOAToIks7wQ0CB",
+  "labels": [
+    {
+      "name": "sig/testing"
+    },
+    {
+      "name": "kind/failing-test"
+    },
+    {
+      "name": "triage/accepted"
+    }
+  ],
+  "number": 137459,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "nojnhuh"
+      },
+      "createdAt": "2026-03-05T22:13:17Z",
+      "label": {
+        "name": "kind/failing-test"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-05T22:13:18Z",
+      "label": {
+        "name": "sig/testing"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-05T22:13:28Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-05T23:41:06Z",
+      "label": {
+        "name": "triage/accepted"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-05T23:41:07Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-06T02:07:06Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "e2e logcheck fails with Go 1.26",
+  "url": "https://github.com/kubernetes/kubernetes/issues/137459"
+}

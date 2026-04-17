@@ -1,0 +1,29 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "jayvynl"
+  },
+  "authorAssociation": "NONE",
+  "body": "",
+  "closedAt": "2026-02-24T12:33:11Z",
+  "comments": [],
+  "createdAt": "2026-02-24T12:31:26Z",
+  "id": "I_kwDOCZduT87tbsLn",
+  "labels": [],
+  "number": 14989,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "jayvynl"
+      },
+      "createdAt": "2026-02-24T12:33:11Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "I'm @tiangolo or he asked me directly to create an issue here.",
+  "url": "https://github.com/fastapi/fastapi/issues/14989"
+}

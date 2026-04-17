@@ -1,0 +1,156 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "pacoxu"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "### Which jobs are failing?\n\n- https://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-kind-alpha-beta-features/2034425674755739648\n\n### Which tests are failing?\n\n- Kubernetes e2e suite: [It] [sig-node] PLR Pod InPlace Resize [FeatureGate:InPlacePodLevelResourcesVerticalScaling] [Alpha] [Feature:OffByDefault] PLR guaranteed qos - 1 container with resize policy cpu & mem restart + resize initContainers resizing only pod-level cpu \n- and a lot\n\n### Since when has it been failing?\n\n03-19 08:24 UTC+08\nhttps://github.com/kubernetes/kubernetes/compare/7a3a6cf4b...ca5c40e58?\n- according to #137878 , this should be failing after https://github.com/kubernetes/kubernetes/pull/137719.\n\n### Testgrid link\n\nhttps://testgrid.k8s.io/sig-testing-kind#kind-master-alpha-beta-features\n\n### Reason for failure (if possible)\n\n```\n{ failed [FAILED] [pod cgroup cpu weight verification failed: Told to stop trying after 0.301s.\nUnexpected final error while getting <nil>: value of cgroup \"/sysfscgroup/kubelet.slice/kubelet-kubepods.slice/kubelet-kubepods-pod623aeeb5_0544_414c_8b44_6bb1648c342b.slice/cpu.weight\" for container \"c1\" was \"100\"; expected one of [\"4\" \"15\"]: Expected\n    <string>: 100\nto be an element of\n    <[]string | len:2, cap:2>: [\"4\", \"15\"], pod cgroup cpu limit verification failed: Told to stop trying after 0.294s.\nUnexpected final error while getting <nil>: value of cgroup \"/sysfscgroup/kubelet.slice/kubelet-kubepods.slice/kubelet-kubepods-pod623aeeb5_0544_414c_8b44_6bb1648c342b.slice/cpu.max\" for container \"c1\" was \"max 100000\"; expected one of [\"8000 100000\"]: Expected\n    <string>: max 100000\nto be an element of\n    <[]string | len:1, cap:1>: [\"8000 100000\"], pod cgroup memory limit verification failed: Told to stop trying after 0.297s.\nUnexpected final error while getting <nil>: value of cgroup \"/sysfscgroup/kubelet.slice/kubelet-kubepods.slice/kubelet-kubepods-pod623aeeb5_0544_414c_8b44_6bb1648c342b.slice/memory.max\" for container \"c1\" was \"max\"; expected one of [\"99614720\"]: Expected\n    <string>: max\nto be an element of\n    <[]string | len:1, cap:1>: [\"99614720\"]]\nIn [It] at: k8s.io/kubernetes/test/e2e/common/node/pod_level_resources_resize.go:704 @ 03/19/26 00:33:33.542\n}\n```\n\n### Anything else we need to know?\n\n_No response_\n\n### Relevant SIG(s)\n\n/sig node",
+  "closedAt": "2026-03-19T16:02:47Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This issue is currently awaiting triage.\n\nIf a SIG or subproject determines this is a relevant issue, they will accept it by applying the `triage/accepted` label and provide further guidance.\n\nThe `triage/accepted` label can be added by org members by writing `/triage accepted` in a comment.\n\n\n<details>\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-03-19T11:23:16Z",
+      "id": "IC_kwDOAToIks7zwALZ",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137886#issuecomment-4089447129"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "pacoxu"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "cc @kubernetes/release-team-release-signal \n",
+      "createdAt": "2026-03-19T11:23:27Z",
+      "id": "IC_kwDOAToIks7zwAXq",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137886#issuecomment-4089447914"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "liggitt"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "revert open in https://github.com/kubernetes/kubernetes/pull/137878 (needs additional revert included, see https://github.com/kubernetes/kubernetes/pull/137878#issuecomment-4090718498) or fix-forward in https://github.com/kubernetes/kubernetes/pull/137889\n\n/assign @sohankunkerkar @mrunalp\n",
+      "createdAt": "2026-03-19T14:59:26Z",
+      "id": "IC_kwDOAToIks7z0-QN",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137886#issuecomment-4090749965"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "sohankunkerkar"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> revert open in [#137878](https://github.com/kubernetes/kubernetes/pull/137878) (needs additional revert included, see [#137878 (comment)](https://github.com/kubernetes/kubernetes/pull/137878#issuecomment-4090718498)) or fix-forward in [#137889](https://github.com/kubernetes/kubernetes/pull/137889)\n> \n> /assign [@sohankunkerkar](https://github.com/sohankunkerkar) [@mrunalp](https://github.com/mrunalp)\n\n@liggitt The PR got approved. It looks like it will not merge until it's being added to the `milestone v1.36`",
+      "createdAt": "2026-03-19T15:15:17Z",
+      "id": "IC_kwDOAToIks7z1YT9",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137886#issuecomment-4090856701"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "liggitt"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "thanks, commented and milestoned ",
+      "createdAt": "2026-03-19T15:19:24Z",
+      "id": "IC_kwDOAToIks7z1fSl",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137886#issuecomment-4090885285"
+    }
+  ],
+  "createdAt": "2026-03-19T11:23:08Z",
+  "id": "I_kwDOAToIks70cMST",
+  "labels": [
+    {
+      "name": "priority/critical-urgent"
+    },
+    {
+      "name": "sig/node"
+    },
+    {
+      "name": "release-blocker"
+    },
+    {
+      "name": "kind/failing-test"
+    },
+    {
+      "name": "needs-triage"
+    }
+  ],
+  "number": 137886,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "pacoxu"
+      },
+      "createdAt": "2026-03-19T11:23:09Z",
+      "label": {
+        "name": "kind/failing-test"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-19T11:23:11Z",
+      "label": {
+        "name": "sig/node"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-19T11:23:16Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "liggitt"
+      },
+      "createdAt": "2026-03-19T14:57:57Z",
+      "label": {
+        "name": "release-blocker"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "liggitt"
+      },
+      "createdAt": "2026-03-19T14:58:00Z",
+      "label": {
+        "name": "priority/critical-urgent"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-19T16:02:48Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "[Failing Test] ci-kubernetes-e2e-kind-alpha-beta-features for InPlacePodLevelResourcesVerticalScaling",
+  "url": "https://github.com/kubernetes/kubernetes/issues/137886"
+}

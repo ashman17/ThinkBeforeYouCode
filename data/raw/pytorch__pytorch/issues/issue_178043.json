@@ -1,0 +1,44 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "himi1008"
+  },
+  "authorAssociation": "NONE",
+  "body": "### \ud83d\udc1b Describe the bug\n\n\n`torch.compile` with `inductor` backend crashes during Dynamo tracing with a `ValueError: Cannot view a tensor with shape and strides` error when compiling a valid transformer model that uses `torch.index_put_` with `accumulate=True` (scatter-add pattern). The same model runs correctly in eager mode.\n\nThe error occurs because Dynamo's FakeTensor mode infers incorrect strides for the attention output tensor. When the model calls `attn_output.view(-1, self.hidden_dim)`, FakeTensor computes strides `(256, 1024, 1)` for shape `(4, 32, 256)`, making the `view` operation invalid. In eager mode, the actual tensor is contiguous with strides `(8192, 256, 1)`, so `view` succeeds.\n\nThis was discovered via a fuzzer-generated sparse gradient accumulation model targeting the `partitioned_scatter` Inductor optimization (reduced atomic contention for high-contention `index_put_`).\n\n### Minimal reproducer\n\n```python\nimport torch\nimport torch.nn as nn\nimport torch.nn.functional as F\n\nclass ScatterModel(nn.Module):\n    def __init__(self, vocab_size=5000, hidden_dim=256, num_heads=8):\n        super().__init__()\n        self.hidden_dim = hidden_dim\n        self.embedding = nn.Embedding(vocab_size, hidden_dim)\n        self.attention = nn.MultiheadAttention(hidden_dim, num_heads, batch_first=True)\n        self.norm = nn.LayerNorm(hidden_dim)\n        self.ffn = nn.Sequential(\n            nn.Linear(hidden_dim, hidden_dim * 4),\n            nn.ReLU(),\n            nn.Linear(hidden_dim * 4, hidden_dim)\n        )\n        self.output_proj = nn.Linear(hidden_dim, vocab_size)\n        self.register_buffer('buffer', torch.zeros(vocab_size, hidden_dim))\n\n    def forward(self, input_ids):\n        x = self.embedding(input_ids)\n        attn_output, _ = self.attention(x, x, x)\n        x = self.norm(x + attn_output)\n        x = self.norm(x + self.ffn(x))\n        logits = self.output_proj(x)\n\n        # Scatter-add with high contention\n        indices = input_ids.view(-1)\n        values = attn_output.view(-1, self.hidden_dim)  # <-- Crashes here in compile\n        buf = self.buffer.clone()\n        torch.index_put_(buf, (indices,), values, accumulate=True)\n\n        return F.softmax(logits, dim=-1), buf\n\ndevice = \"cuda\"\nmodel = ScatterModel().to(device).eval()\nx = torch.randint(0, 5000, (4, 32), dtype=torch.long, device=device)\n\n# Eager: works\nwith torch.no_grad():\n    probs, buf = model(x)\nprint(f\"Eager: OK, probs={probs.shape}, buf={buf.shape}\")\n\n# Compiled: crashes\ntorch._dynamo.reset()\ncompiled = torch.compile(model, backend=\"inductor\")\ntry:\n    with torch.no_grad():\n        probs2, buf2 = compiled(x)\n    print(f\"Compiled: OK\")\nexcept Exception as e:\n    print(f\"Compiled: CRASH \u2014 {type(e).__name__}: {e}\")\n```\n\n### Behavior summary\n\n| Mode | Result |\n|------|--------|\n| Eager |  Succeeds |\n| `torch.compile(backend=\"inductor\")` |  Crashes: `ValueError: Cannot view a tensor with shape torch.Size([4, 32, 256]) and strides (256, 1024, 1) as a tensor with shape (128, 256)!` |\n\n### Root cause analysis\n\nThe error message reveals a stride mismatch in Dynamo's FakeTensor:\n\n```\nCannot view a tensor with shape torch.Size([4, 32, 256]) and strides (256, 1024, 1)\nas a tensor with shape (128, 256)!\n```\n\n- **Expected strides** (contiguous): `(8192, 256, 1)` \u2014 `4*32*256, 32*256, 1`\n- **FakeTensor strides**: `(256, 1024, 1)` \u2014 incorrect, not contiguous\n\nThe `nn.MultiheadAttention` output tensor has correct contiguous strides in eager mode, but Dynamo's symbolic shape propagation / FakeTensor computes incorrect strides for the attention output, causing the subsequent `view(-1, hidden_dim)` to fail.\n\nThis is a Dynamo FakeTensor stride inference bug for `nn.MultiheadAttention` output tensors.\n\n\n### Error logs\n\n```\nRuntimeError when making fake tensor call\n  Explanation: Dynamo failed to run FX node with fake tensors:\n    call_method view(*(FakeTensor(..., device='cuda:0', size=(4, 32, 256)), -1, 256), **{}):\n    got ValueError('Cannot view a tensor with shape torch.Size([4, 32, 256]) and\n    strides (256, 1024, 1) as a tensor with shape (128, 256)!')\n  Hint: Your code may result in an error when running in eager.\n    Please double check that your code doesn't contain a similar error when actually running eager/uncompiled\n```\n\nNote: The hint is misleading \u2014 eager mode works correctly because the actual tensor IS contiguous.\n\n### Versions\n\n```\nPyTorch version: 2.12.0.dev20260315+cu126\nPython: 3.10.12\nOS: Ubuntu 22.04.5 LTS (WSL2)\nGPU: NVIDIA GeForce RTX 3060 Laptop GPU\nCUDA: 12.6\n```\n\ncc @chauhang @penguinwu",
+  "closedAt": "2026-03-21T08:00:48Z",
+  "comments": [],
+  "createdAt": "2026-03-21T08:00:01Z",
+  "id": "I_kwDOA-j9z871FJd5",
+  "labels": [
+    {
+      "name": "oncall: pt2"
+    }
+  ],
+  "number": 178043,
+  "state": "CLOSED",
+  "stateReason": "DUPLICATE",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "himi1008"
+      },
+      "createdAt": "2026-03-21T08:00:02Z",
+      "label": {
+        "name": "oncall: pt2"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "himi1008"
+      },
+      "createdAt": "2026-03-21T08:00:48Z",
+      "stateReason": "DUPLICATE"
+    }
+  ],
+  "title": "`torch.compile` crashes with FakeTensor view stride error on valid model with `index_put_` scatter",
+  "url": "https://github.com/pytorch/pytorch/issues/178043"
+}

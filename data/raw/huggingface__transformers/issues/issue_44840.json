@@ -1,0 +1,29 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "zhulinchng"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "typo in code block:\nhttps://github.com/huggingface/transformers/blob/16a5b0936dcaae6efbc03ab1a4fd98dc324bfb9e/docs/source/en/weightconverter.md?plain=1#L69",
+  "closedAt": "2026-03-19T11:56:52Z",
+  "comments": [],
+  "createdAt": "2026-03-19T01:46:22Z",
+  "id": "I_kwDOCUB6oc70TUuB",
+  "labels": [],
+  "number": 44840,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Rocketknight1"
+      },
+      "createdAt": "2026-03-19T11:56:52Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "typo in code block in docs",
+  "url": "https://github.com/huggingface/transformers/issues/44840"
+}

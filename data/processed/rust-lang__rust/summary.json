@@ -1,0 +1,14 @@
+{
+  "dataset_path": "data/processed/rust-lang__rust/curated.jsonl",
+  "issue_state_distribution": {
+    "CLOSED": 20
+  },
+  "linked_pull_request_count": 0,
+  "max_comments": null,
+  "merged_linked_pull_request_count": 0,
+  "min_comments": 0,
+  "record_count": 20,
+  "records_with_comments": 20,
+  "records_with_timeline_events": 20,
+  "repository": "rust-lang/rust"
+}

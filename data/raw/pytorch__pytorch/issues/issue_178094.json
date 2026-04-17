@@ -1,0 +1,70 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "hiahu329"
+  },
+  "authorAssociation": "NONE",
+  "body": "### \ud83d\udc1b Describe the bug\n\nSummary: For a small module (BatchNorm2d(96) \u2192 Conv2d(96\u2192256, k=5, p=2)), torch.compile(..., dynamic=True) on CUDA produces outputs that differ massively from eager mode when using the same weights and input. Max per-element relative error vs eager is ~1.7, while float-level agreement would be ~1e-7 or smaller.\n\nRepro: Load fixed input.pt and state_dict subset (bn1.*, conv2.*), run .eval(), compare eager forward to torch.compile(..., dynamic=True) on the conv2 output (same x, same sd, two separate module instances).\n\nExpected: Compiled forward matches eager within tight float tolerance.\nActual: Large relative error (~O(1)) between compiled and eager outputs.\n\n```python\nimport os\nimport torch\nimport torch.nn as nn\n_DIR = os.path.dirname(os.path.abspath(__file__))\nINPUT_PT = os.path.join(_DIR, \"input.pt\")\nSD_PT = os.path.join(_DIR, \"sd.pt\")\nTHRESHOLD = 1.19e-7\nDEVICE = torch.device(\"cuda\")\n\nclass Bn1Conv2(nn.Module):\n    def __init__(self, sd: dict):\n        super().__init__()\n        self.bn1 = nn.BatchNorm2d(96)\n        self.conv2 = nn.Conv2d(96, 256, kernel_size=5, padding=2, bias=True)\n        self.load_state_dict(sd, strict=True)\n\n    def forward(self, x: torch.Tensor) -> torch.Tensor:\n        x = self.bn1(x)\n        return self.conv2(x)\n\ndef main():\n    x = torch.load(INPUT_PT, map_location=\"cpu\").float()\n    print(f\"input min={x.min().item():.6g}  max={x.max().item():.6g}\")\n    x = x.to(DEVICE)\n    sd = torch.load(SD_PT, map_location=\"cpu\")\n    wmin = float(\"inf\")\n    wmax = float(\"-inf\")\n    for v in sd.values():\n        if torch.is_tensor(v):\n            t = v.float().cpu()\n            wmin = min(wmin, float(t.min().item()))\n            wmax = max(wmax, float(t.max().item()))\n    print(f\"weights min={wmin:.6g}  max={wmax:.6g}\")\n\n    m0 = Bn1Conv2(sd).to(DEVICE).eval()\n    with torch.no_grad():\n        y0 = m0(x)\n\n    m1 = torch.compile(Bn1Conv2(sd).to(DEVICE).eval(), dynamic=True)\n    with torch.no_grad():\n        y1 = m1(x)\n\n    o = y0.detach().float().cpu().reshape(y0.shape[0], -1)\n    s = y1.detach().float().cpu().reshape(y1.shape[0], -1)\n    eps = 1e-12\n    valid = torch.isfinite(o) & torch.isfinite(s)\n    diff = torch.where(valid, (s - o).abs() / (o.abs() + eps), torch.zeros_like(o))\n    per = diff.max(dim=1).values\n    gmax = float(per.max().item())\n\n    print(\"modes: eager  vs  torch.compile(dynamic=True)\")\n    print(\n        f\"relative error: max_rel={gmax:.6e}  \"\n        f\"threshold={THRESHOLD:.2e}\"\n    )\n\nif __name__ == \"__main__\":\n    main()\n\n```\n```\ninput min=-6.4548  max=29.5996\nweights min=-0.0204123  max=1\nmodes: eager  vs  torch.compile(dynamic=True)\nrelative error: max_rel=1.677530e+00  threshold=1.19e-07\n\n```\n\n[test4.zip](https://github.com/user-attachments/files/26167198/test4.zip)\n\n### Versions\n\nVersions\nPyTorch version: 2.6.0+cu126\nIs debug build: False\nCUDA used to build PyTorch: 12.6\nROCM used to build PyTorch: N/A\n\nOS: Ubuntu 24.04.3 LTS (x86_64)\nGCC version: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0\nClang version: Could not collect\nCMake version: Could not collect\nLibc version: glibc-2.39\n\nPython version: 3.9.23 (main, Jun 5 2025, 13:40:20) [GCC 11.2.0] (64-bit runtime)\nPython platform: Linux-6.8.0-90-generic-x86_64-with-glibc2.39\nIs CUDA available: True\nCUDA runtime version: 12.6.20\nCUDA_MODULE_LOADING set to: LAZY\nGPU models and configuration:\nGPU 0: NVIDIA GeForce RTX 3090\nGPU 1: NVIDIA GeForce RTX 3090\n\nNvidia driver version: 560.35.03\ncuDNN version: Could not collect\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nArchitecture: x86_64\nCPU op-mode(s): 32-bit, 64-bit\nAddress sizes: 40 bits physical, 48 bits virtual\nByte Order: Little Endian\nCPU(s): 48\nOn-line CPU(s) list: 0-47\nVendor ID: GenuineIntel\nModel name: QEMU Virtual CPU version 2.5+\nCPU family: 15\nModel: 107\nThread(s) per core: 1\nCore(s) per socket: 48\nSocket(s): 1\nStepping: 1\nBogoMIPS: 4190.15\nFlags: fpu de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx lm constant_tsc nopl xtopology cpuid tsc_known_freq pni ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c hypervisor lahf_lm abm cpuid_fault pti bmi1 avx2 bmi2 avx512f avx512dq avx512cd avx512bw avx512vl\nHypervisor vendor: KVM\nVirtualization type: full\nL1d cache: 1.5 MiB (48 instances)\nL1i cache: 1.5 MiB (48 instances)\nL2 cache: 192 MiB (48 instances)\nL3 cache: 16 MiB (1 instance)\nNUMA node(s): 1\nNUMA node0 CPU(s): 0-47\nVulnerability Gather data sampling: Not affected\nVulnerability Itlb multihit: KVM: Mitigation: VMX unsupported\nVulnerability L1tf: Mitigation; PTE Inversion\nVulnerability Mds: Vulnerable: Clear CPU buffers attempted, no microcode; SMT Host state unknown\nVulnerability Meltdown: Mitigation; PTI\nVulnerability Mmio stale data: Unknown: No mitigations\nVulnerability Reg file data sampling: Not affected\nVulnerability Retbleed: Not affected\nVulnerability Spec rstack overflow: Not affected\nVulnerability Spec store bypass: Vulnerable\nVulnerability Spectre v1: Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2: Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Retpoline\nVulnerability Srbds: Not affected\nVulnerability Tsx async abort: Not affected\nVulnerability Vmscape: Not affected\n\nVersions of relevant libraries:\n[pip3] numpy==2.0.2\n[pip3] nvidia-cublas-cu12==12.6.4.1\n[pip3] nvidia-cuda-cupti-cu12==12.6.80\n[pip3] nvidia-cuda-nvrtc-cu12==12.6.77\n[pip3] nvidia-cuda-runtime-cu12==12.6.77\n[pip3] nvidia-cudnn-cu12==9.5.1.17\n[pip3] nvidia-cufft-cu12==11.3.0.4\n[pip3] nvidia-curand-cu12==10.3.7.77\n[pip3] nvidia-cusolver-cu12==11.7.1.2\n[pip3] nvidia-cusparse-cu12==12.5.4.2\n[pip3] nvidia-cusparselt-cu12==0.6.3\n[pip3] nvidia-nccl-cu12==2.21.5\n[pip3] nvidia-nvjitlink-cu12==12.6.85\n[pip3] nvidia-nvtx-cu12==12.6.77\n[pip3] onnx==1.19.1\n[pip3] onnxruntime==1.19.2\n[pip3] open_clip_torch==3.2.0\n[pip3] pytorch-lightning==0.7.1\n[pip3] torch==2.6.0+cu126\n[pip3] torch-geometric==2.6.1\n[pip3] torchaudio==2.6.0+cu126\n[pip3] torchversion==0.21.0+cu126\n[pip3] triton==3.2.0\n[conda] numpy 2.0.2 pypi_0 pypi\n[conda] nvidia-cublas-cu12 12.6.4.1 pypi_0 pypi\n[conda] nvidia-cuda-cupti-cu12 12.6.80 pypi_0 pypi\n[conda] nvidia-cuda-nvrtc-cu12 12.6.77 pypi_0 pypi\n[conda] nvidia-cuda-runtime-cu12 12.6.77 pypi_0 pypi\n[conda] nvidia-cudnn-cu12 9.5.1.17 pypi_0 pypi\n[conda] nvidia-cufft-cu12 11.3.0.4 pypi_0 pypi\n[conda] nvidia-curand-cu12 10.3.7.77 pypi_0 pypi\n[conda] nvidia-cusolver-cu12 11.7.1.2 pypi_0 pypi\n[conda] nvidia-cusparse-cu12 12.5.4.2 pypi_0 pypi\n[conda] nvidia-cusparselt-cu12 0.6.3 pypi_0 pypi\n[conda] nvidia-nccl-cu12 2.21.5 pypi_0 pypi\n[conda] nvidia-nvjitlink-cu12 12.6.85 pypi_0 pypi\n[conda] nvidia-nvtx-cu12 12.6.77 pypi_0 pypi\n[conda] open-clip-torch 3.2.0 pypi_0 pypi\n[conda] pytorch-lightning 0.7.1 pypi_0 pypi\n[conda] torch 2.6.0+cu126 pypi_0 pypi\n[conda] torch-geometric 2.6.1 pypi_0 pypi\n[conda] torchaudio 0.6.0+cu126 pypi_0 pypi\n[conda] torchvision 0.21.0+cu126 pypi_0 pypi\n[conda] triton 3.2.0 pypi_0 pypi",
+  "closedAt": "2026-03-22T16:23:30Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thanks for the report! To help us investigate:\n\n1. Can you reproduce this without the external files? (e.g., using random weights or synthetic data)\n2. Are there any extreme or special values in the weights/inputs? (e.g., very large values, NaN, inf)\n\nA self-contained script that doesn't require downloading files helps maintainers reproduce and debug the issue faster.",
+      "createdAt": "2026-03-22T16:14:06Z",
+      "id": "IC_kwDOA-j9z870xKLk",
+      "url": "https://github.com/pytorch/pytorch/issues/178094#issuecomment-4106527460"
+    }
+  ],
+  "createdAt": "2026-03-22T16:11:32Z",
+  "id": "I_kwDOA-j9z871W6NG",
+  "labels": [
+    {
+      "name": "needs reproduction"
+    },
+    {
+      "name": "bot-triaged"
+    }
+  ],
+  "number": 178094,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-22T16:13:56Z",
+      "label": {
+        "name": "needs reproduction"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-22T16:13:58Z",
+      "label": {
+        "name": "bot-triaged"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "hiahu329"
+      },
+      "createdAt": "2026-03-22T16:23:30Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "torch.compile(dynamic=True) on CUDA gives large output mismatch vs eager for BatchNorm2d + Conv2d",
+  "url": "https://github.com/pytorch/pytorch/issues/178094"
+}

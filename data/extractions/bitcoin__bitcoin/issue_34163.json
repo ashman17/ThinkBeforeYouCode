@@ -1,0 +1,758 @@
+{
+  "issue": {
+    "artifact_count": 49,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "coverage_target": "wallet initialization",
+              "expected_outcome": "successful test execution",
+              "test_level": "functional"
+            },
+            "summary": "QA framework fails when initiating node from cached chain with deterministic coinbase privkeys setup error",
+            "tags": [
+              "test_flakiness",
+              "test_timeout",
+              "test_infra_issue"
+            ],
+            "type": "test_case"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163"
+      },
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "wallet_initialization",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "potentially fails on specific distro"
+            },
+            "summary": "The difference in wallet directory location impacts wallet initialization with a clean datadir vs a datadir with a chain, potentially leading to issues on OpenIndiana.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "question_kind": "clarification_request",
+              "target_area": "reproducibility_and_platform_support",
+              "urgency": "unknown"
+            },
+            "summary": "Querying whether the difference in wallet directory location can be reproduced outside the test framework and if OpenIndiana is the only failing distribution.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "maflcko",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3696088086"
+      },
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification",
+              "target_area": "Linux compatibility",
+              "urgency": "unknown"
+            },
+            "summary": "Is OpenIndiana the only distro that fails?",
+            "tags": [
+              "compatibility_issue",
+              "config_issue"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "certainty": "confident",
+              "resolution_status": "confirmed",
+              "target_question_topic": "Linux compatibility issues on OpenIndiana"
+            },
+            "summary": "Yes, as far I'm aware of. OmniOS, another illumos-based distro, works fine.",
+            "tags": [
+              "compatibility_issue",
+              "config_issue"
+            ],
+            "type": "answer_clarification"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3696193843"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "wallet_creation",
+              "urgency": "unknown"
+            },
+            "summary": "Can try creating a wallet in the /tmp/ dir manually to test it?",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "furszy",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3697100259"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "hebasto",
+              "deliverable": "#34176",
+              "due_context": "unknown"
+            },
+            "summary": "ask for a run of a test to be performed",
+            "tags": [
+              "test_infra_issue"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "furszy",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3697357735"
+      },
+      {
+        "artifact_count": 27,
+        "artifacts": [
+          {
+            "metadata": {
+              "coverage_target": "wallet creation and loading functionality",
+              "expected_outcome": "successful wallet creation and loading without errors",
+              "test_level": "unit"
+            },
+            "summary": "Test case for creating a wallet and importing deterministic coinbase privkeys failed due to database file opening issues.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "test_case"
+          },
+          {
+            "metadata": {
+              "determinism": "Always fails on wallet creation step",
+              "environment": "regtest mode, using deterministic coinbase privkeys",
+              "prerequisites": "Test framework set up with multiple nodes and deterministic coinbase keys"
+            },
+            "summary": "Steps to reproduce the bug during wallet initialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "evidence_type": "log file",
+              "reliability": "high",
+              "sample_source": "/tmp/bitcoin_func_test_3_be70q7/test_framework.log"
+            },
+            "summary": "Error logs from the failed test case execution.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "empirical_evidence"
+          },
+          {
+            "metadata": {
+              "affected_area": "wallet subsystem",
+              "problem_kind": "database access issue",
+              "user_or_system_impact": "System impact (test framework failure)"
+            },
+            "summary": "Failed wallet initialization and creation process due to database file opening errors.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "alternative_to": "current setup with deterministic coinbase privkeys",
+              "comparison_focus": "Ease of testing",
+              "differentiator": "Simpler setup without complex private keys"
+            },
+            "summary": "Alternative approach to test wallet creation without deterministic coinbase privkeys.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "chosen_option": "SQLite database engine",
+              "decision_status": "finalized but failed in practice",
+              "rejected_options": [
+                "another database system"
+              ]
+            },
+            "summary": "Decision to use SQLite for wallet storage and the failure during initialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "design_decision"
+          },
+          {
+            "metadata": {
+              "comparison_axes": [
+                "ease of setup",
+                "performance"
+              ],
+              "options_compared": [
+                "SQLite",
+                "Another DB system"
+              ],
+              "preferred_option": "SQLite"
+            },
+            "summary": "Trade-off between using SQLite and another database for wallet storage.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "trade_off_argument"
+          },
+          {
+            "metadata": {
+              "impact_scope": "entire test suite",
+              "reasoning_kind": "ease of implementation and maintenance",
+              "supports_artifact_type": "test framework design"
+            },
+            "summary": "Reasoning behind using SQLite for wallet storage.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "constraint_type": "filesystem access issue",
+              "scope": "test framework directory permissions",
+              "severity": "critical for test execution"
+            },
+            "summary": "System constraint preventing successful wallet initialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "assumption_scope": "local environment setup",
+              "confidence": "high, based on local setup and permissions issues",
+              "failure_mode": "wallet creation fails due to permission errors"
+            },
+            "summary": "Assumption about filesystem permissions impacting test case results.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "assumption"
+          },
+          {
+            "metadata": {
+              "component": "test framework (wallet subsystem)",
+              "implementation_action": "initialize wallets using deterministic coinbase privkeys",
+              "lifecycle_stage": "setup and teardown phases of tests"
+            },
+            "summary": "Implementation steps for wallet initialization during test case execution.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "config_scope": "local test environment",
+              "parameter": "wallet file path configuration",
+              "selected_value": "/tmp/bitcoin_func_test_3_be70q7/node0/regtest/default_wallet/wallet.dat"
+            },
+            "summary": "Configuration settings for wallet storage file paths.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "configuration_choice"
+          },
+          {
+            "metadata": {
+              "claim_direction": "SQLite performs well under high transaction loads",
+              "metric_focus": "read/write speed of wallet file",
+              "workload": "small to medium-sized datasets"
+            },
+            "summary": "Performance claim that SQLite is fast enough for wallet storage.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "performance_claim"
+          },
+          {
+            "metadata": {
+              "determinism": "Fails consistently during wallet creation",
+              "environment": "regtest environment, using deterministic coinbase privkeys",
+              "prerequisites": "Test framework set up with specific nodes and wallets"
+            },
+            "summary": "Reproducible steps to isolate the issue with wallet initialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "impact": "Wallet cannot be created and loaded for testing",
+              "rarity": "Could be more common in environments with strict security policies",
+              "trigger": "specific file system permissions or configurations"
+            },
+            "summary": "Edge case where wallet initialization fails due to filesystem issues.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "edge_case"
+          },
+          {
+            "metadata": {
+              "question_kind": "database selection",
+              "target_area": "wallet subsystem",
+              "urgency": "high, due to test failures and performance concerns"
+            },
+            "summary": "Question about the best database choice for wallet storage.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "certainty": "based on empirical evidence from test cases",
+              "resolution_status": "ongoing, seeking input from community",
+              "target_question_topic": "filesystem permissions impact on wallet initialization"
+            },
+            "summary": "Clarification on the need for robust filesystem handling in tests.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "answer_clarification"
+          },
+          {
+            "metadata": {
+              "blocker_type": "filesystem permissions issue",
+              "blocking_target": "test case execution",
+              "unblock_condition": "correct filesystem permissions or alternative wallet storage solution"
+            },
+            "summary": "Blocking issue preventing successful completion of the test case.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "blocking_issue"
+          },
+          {
+            "metadata": {
+              "dependency_target": "test framework directory structure and permissions",
+              "dependency_type": "filesystem configuration",
+              "relationship": "Test case results depend on correct filesystem settings"
+            },
+            "summary": "Dependency on local file system setup for test cases.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "dependency"
+          },
+          {
+            "metadata": {
+              "blocking": "Test case failures due to wallet initialization issues",
+              "progress_state": "Identified but not yet resolved",
+              "status_kind": "in-progress"
+            },
+            "summary": "Status update on the test case issue resolution.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          },
+          {
+            "metadata": {
+              "compared_against": "other development tasks and bug fixes",
+              "priority_level": "high, impacting automated testing capabilities",
+              "scope": "entire test suite relying on wallet functionality"
+            },
+            "summary": "Discussion on the priority of resolving the test framework issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "priority_discussion"
+          },
+          {
+            "metadata": {
+              "contention_point": "file system permissions versus alternative database systems",
+              "severity": "moderate, affects multiple stakeholders",
+              "target": "current vs alternative solutions for wallet storage and initialization"
+            },
+            "summary": "Disagreement on the best approach to resolve filesystem permission issues.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "disagreement"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "more reliable test cases and less dependency on environment setup",
+              "target_area": "wallet storage and initialization process",
+              "urgency": "high, given current test failures"
+            },
+            "summary": "Suggestion to use a different database or handle filesystem permissions more robustly.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          },
+          {
+            "metadata": {
+              "critique_dimension": "dependency on local environment setup and permissions",
+              "severity": "high, causing frequent test failures",
+              "target": "test framework implementation"
+            },
+            "summary": "Critique of the current wallet initialization approach.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "critique"
+          },
+          {
+            "metadata": {
+              "assignee": "Development team responsible for test framework and wallet subsystems",
+              "deliverable": "Resolved test cases with improved wallet initialization process",
+              "due_context": "Within next sprint or release cycle"
+            },
+            "summary": "Assigning tasks to resolve the wallet initialization issues.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          },
+          {
+            "metadata": {
+              "blocker_type": "test case failures due to wallet initialization issues",
+              "blocking_target": "new feature implementation and testing",
+              "unblock_condition": "Resolved test cases with stable wallet creation and loading"
+            },
+            "summary": "Blocking issue preventing further progress on new feature development.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "blocking_issue"
+          },
+          {
+            "metadata": {
+              "dependency_target": "new feature development and testing phases",
+              "dependency_type": "test case resolution",
+              "relationship": "New features can only be implemented once this issue is resolved"
+            },
+            "summary": "Dependency on resolving the test framework issue before proceeding.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "dependency"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3697507193"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Wallet creation",
+              "problem_kind": "Bug",
+              "user_or_system_impact": "The user encounters an issue while attempting to create a wallet in certain directories due to permission issues."
+            },
+            "summary": "user_or_system_impact: The issue is related to permissions when creating a wallet in specific directories; problem_kind: Bug; affected_area: Wallet creation",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3697512352"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "how_to_reproduce",
+              "target_area": "testing",
+              "urgency": "unknown"
+            },
+            "summary": "How to reproduce the issue outside of the test framework by starting and stopping the node with specific conditions.",
+            "tags": [
+              "test_infra_issue",
+              "test_flakiness"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "maflcko",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3698591093"
+      },
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "wallet/sqlite.cpp",
+              "problem_kind": "runtime_error",
+              "user_or_system_impact": "system"
+            },
+            "summary": "SQLite error during lstat() call on OpenIndiana due to permission issues",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "resolve permission error",
+              "target_area": "directory permission handling",
+              "urgency": "unknown"
+            },
+            "summary": "Setting broader permissions or checking directory permissions before wallet creation",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "furszy",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3699920517"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "coverage_target": "unknown",
+              "expected_outcome": "wallet created successfully",
+              "test_level": "unknown"
+            },
+            "summary": "Test to reproduce wallet creation scenario outside test framework",
+            "tags": [
+              "test_adjustment"
+            ],
+            "type": "test_case"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3703543097"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "database",
+              "problem_kind": "failure_to_function",
+              "user_or_system_impact": "functional_test_failure"
+            },
+            "summary": "sqlite3_open_v2 fails only in functional test context without filesystem permission violations",
+            "tags": [
+              "test_infra_issue",
+              "functional_test"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3703927806"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "verification",
+              "target_area": "filesystem_operations",
+              "urgency": "unknown"
+            },
+            "summary": "Testing the impact of shutil.copytree on permissions and verifying the datadir setup.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "maflcko",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3703940232"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "sqlite_database_operations",
+              "problem_kind": "failure_to_function",
+              "user_or_system_impact": "functional_tests_failure"
+            },
+            "summary": "functional_test_context sqlite3_open_v2_fails_without_filesystem_permission_violation",
+            "tags": [
+              "bug",
+              "runtime_error",
+              "test_infra_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3704000717"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "wallet_creation",
+              "problem_kind": "functional_failure",
+              "user_or_system_impact": "unsuccessful_wallet_file_creation"
+            },
+            "summary": "Wallet file verification fails when running `bitcoin-cli` with the datadir set to the cache node directory or a similar test directory.",
+            "tags": [
+              "incorrect_behavior",
+              "test_infra_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3704139748"
+      },
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "Reproducible issue",
+              "environment": "Linux system with sqlite-3@3.51.1-2025.0.0.0 package installed",
+              "prerequisites": "bitcoind compiled and built for regtest network"
+            },
+            "summary": "Steps to reproduce the SQLite database verification failure when using the -bind option in bitcoind.",
+            "tags": [
+              "bug",
+              "database"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "affected_area": "bitcoind wallet creation functionality",
+              "problem_kind": "Database access error",
+              "user_or_system_impact": "Wallet cannot be created due to failed SQLite database file verification"
+            },
+            "summary": "Issue with SQLite database file verification when using -bind option in bitcoind.",
+            "tags": [
+              "bug",
+              "database"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3704208650"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification_request",
+              "target_area": "upstream_reporting",
+              "urgency": "unknown"
+            },
+            "summary": "asked about reporting upstream and next steps for an issue determined to be an upstream problem.",
+            "tags": [
+              "bug"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3854210521"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "upstream_reporting",
+              "problem_kind": "code_issue",
+              "user_or_system_impact": "development_process"
+            },
+            "summary": "Failed to generate MRE for an upstream issue report.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3854258724"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "platform_features",
+              "problem_kind": "user_or_system_impact",
+              "user_or_system_impact": "unclear"
+            },
+            "summary": "determining the nature and handling of an unreportable issue for a platform with no known users",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3972754204"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "environment: Bitcoin Core regtest mode; prerequisites: running test environment with -regtest and -datadir=$HOME/dd flags; determinism: steps should be repeated without issue to confirm fix.",
+            "tags": [
+              "bug",
+              "test_infra_issue",
+              "unit_test"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "maflcko",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34163#issuecomment-3973134630"
+      }
+    ],
+    "issue_number": 34163,
+    "issue_title": "qa: Framework fails when initiating node from cached chain",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34163"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34163.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

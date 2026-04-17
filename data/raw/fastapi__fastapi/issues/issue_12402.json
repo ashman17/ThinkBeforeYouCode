@@ -1,0 +1,217 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "insistence"
+  },
+  "authorAssociation": "NONE",
+  "body": "Thank you for all the work you have done. I have initiated the [discussion ](https://github.com/fastapi/fastapi/discussions/12401)as requested, but I think this issue is quite important. Initiating this issue is just to prevent the discussion from being drowned out, and I apologize for any offense.\r\n\r\n### Example Code\r\n\r\n```python\r\nimport uvicorn\r\nfrom typing import Literal\r\n\r\nfrom fastapi import FastAPI, Query\r\nfrom pydantic import BaseModel, ConfigDict, Field\r\nfrom pydantic.alias_generators import to_camel\r\n\r\napp = FastAPI()\r\n\r\n\r\nclass FilterParams(BaseModel):\r\n    model_config = ConfigDict(alias_generator=to_camel)\r\n\r\n    limit: int = Field(100, gt=0, le=100)\r\n    offset: int = Field(0, ge=0)\r\n    order_by: Literal['created_at', 'updated_at'] = 'created_at'\r\n    tags: list[str] = []\r\n\r\n\r\n@app.get('/items/')\r\nasync def read_items(filter_query: FilterParams = Query()):\r\n    return filter_query\r\n\r\n\r\nif __name__ == '__main__':\r\n    uvicorn.run(app='app:app')\r\n```\r\n\r\n\r\n### Description\r\n\r\nRunning the code in the example above, I encountered an incorrect result when accessing http://127.0.0.1:8000/items/?offset=1&orderBy=updated_at in the browser, orderBy did not receive successfully.\r\n```\r\n{\r\n    \"limit\": 100,\r\n    \"offset\": 1,\r\n    \"orderBy\": \"created_at\",\r\n    \"tags\": []\r\n}\r\n```\r\nThe correct result should be as follows\r\n```\r\n{\r\n    \"limit\": 100,\r\n    \"offset\": 1,\r\n    \"orderBy\": \"updated_at\",\r\n    \"tags\": []\r\n}\r\n```\r\n\r\n### Operating System\r\n\r\nWindows\r\n\r\n### Operating System Details\r\n\r\n_No response_\r\n\r\n### FastAPI Version\r\n\r\n0.115.0\r\n\r\n### Pydantic Version\r\n\r\n2.9.2\r\n\r\n### Python Version\r\n\r\n3.9.19\r\n\r\n### Additional Context\r\n\r\n_No response_",
+  "closedAt": "2025-12-02T09:33:22Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "aless10"
+      },
+      "authorAssociation": "NONE",
+      "body": "Did you try with the `Annotated` version as in the docs?\r\n```\r\nfrom fastapi import FastAPI, Query\r\nfrom pydantic import BaseModel, Field\r\nfrom typing_extensions import Annotated, Literal\r\n\r\napp = FastAPI()\r\n\r\n\r\nclass FilterParams(BaseModel):\r\n    limit: int = Field(100, gt=0, le=100)\r\n    offset: int = Field(0, ge=0)\r\n    order_by: Literal[\"created_at\", \"updated_at\"] = \"created_at\"\r\n    tags: list[str] = []\r\n\r\n\r\n@app.get(\"/items/\")\r\nasync def read_items(filter_query: Annotated[FilterParams, Query()]):\r\n    return filter_query\r\n```",
+      "createdAt": "2024-10-08T21:27:32Z",
+      "id": "IC_kwDOCZduT86PGht2",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2400852854"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Usernamelesss"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hello everyone! Can you confirm that it is not possible to have other query params along with the pydantic model ?\r\n```\r\nfrom typing import Annotated, Literal\r\n\r\nimport uvicorn\r\nfrom fastapi import FastAPI, Query\r\nfrom pydantic import BaseModel, Field\r\n\r\napp = FastAPI()\r\n\r\n\r\nclass FilterParams(BaseModel):\r\n    limit: int = Field(100, gt=0, le=100)\r\n    offset: int = Field(0, ge=0)\r\n    order_by: Literal[\"created_at\", \"updated_at\"] = \"created_at\"\r\n    tags: list[str] = []\r\n\r\n\r\n@app.get(\"/items/\")\r\nasync def read_items(\r\n        filter_query: Annotated[FilterParams, Query()],\r\n        another_param: Annotated[int, Query()]\r\n):\r\n    print(filter_query, another_param)\r\n```\r\n\r\nThe generated swagger looks like a bit messy in this case \r\n![image](https://github.com/user-attachments/assets/22127fd4-cc7a-4dd0-807c-0c47a6416b9c)\r\n",
+      "createdAt": "2024-10-09T08:28:40Z",
+      "id": "IC_kwDOCZduT86PJrYn",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2401678887"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "mjurenka"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Hello everyone! Can you confirm that it is not possible to have other query params along with the pydantic model ?\r\n> \r\n> ```\r\n> from typing import Annotated, Literal\r\n> \r\n> import uvicorn\r\n> from fastapi import FastAPI, Query\r\n> from pydantic import BaseModel, Field\r\n> \r\n> app = FastAPI()\r\n> \r\n> \r\n> class FilterParams(BaseModel):\r\n>     limit: int = Field(100, gt=0, le=100)\r\n>     offset: int = Field(0, ge=0)\r\n>     order_by: Literal[\"created_at\", \"updated_at\"] = \"created_at\"\r\n>     tags: list[str] = []\r\n> \r\n> \r\n> @app.get(\"/items/\")\r\n> async def read_items(\r\n>         filter_query: Annotated[FilterParams, Query()],\r\n>         another_param: Annotated[int, Query()]\r\n> ):\r\n>     print(filter_query, another_param)\r\n> ```\r\n> \r\n> The generated swagger looks like a bit messy in this case ![image](https://private-user-images.githubusercontent.com/40054825/374874000-22127fd4-cc7a-4dd0-807c-0c47a6416b9c.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjkwMDc4NTEsIm5iZiI6MTcyOTAwNzU1MSwicGF0aCI6Ii80MDA1NDgyNS8zNzQ4NzQwMDAtMjIxMjdmZDQtY2M3YS00ZGQwLTgwN2MtMGM0N2E2NDE2YjljLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDEwMTUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQxMDE1VDE1NTIzMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWNjZTllMjg2NmNmODlmMjc2YmUzZTc1Y2E0MWJmMjNmOTQwYmRjZWE3YjEwOTE0MzViYjkxMGJmZTc0MjVkY2YmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.a8ylWR2Yxs7BmYMckXcNlBRnNlhgAjFIqssvsHtS4Gs)\r\n\r\nYes I believe you cannot use both Pydantic Models and regular Query parameters. You have to pick one.",
+      "createdAt": "2024-10-15T15:54:05Z",
+      "id": "IC_kwDOCZduT86P6P2b",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2414411163"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "jd-solanki"
+      },
+      "authorAssociation": "NONE",
+      "body": "Refs: https://github.com/fastapi/fastapi/discussions/12379 https://github.com/fastapi/fastapi/discussions/12236 https://github.com/fastapi/fastapi/discussions/12212",
+      "createdAt": "2024-10-16T12:36:10Z",
+      "id": "IC_kwDOCZduT86QDDtj",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2416720739"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "KristofMerey"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Did you try with the `Annotated` version as in the docs?\n> ```\n> from fastapi import FastAPI, Query\n> from pydantic import BaseModel, Field\n> from typing_extensions import Annotated, Literal\n> \n> app = FastAPI()\n> \n> \n> class FilterParams(BaseModel):\n>     limit: int = Field(100, gt=0, le=100)\n>     offset: int = Field(0, ge=0)\n>     order_by: Literal[\"created_at\", \"updated_at\"] = \"created_at\"\n>     tags: list[str] = []\n> \n> \n> @app.get(\"/items/\")\n> async def read_items(filter_query: Annotated[FilterParams, Query()]):\n>     return filter_query\n> ```\n\nHello, Same issue here. I also tried the annotated version, there is no difference. (And I used a simple alias like `Field(None, alias='test')` instead of an alias generator.)",
+      "createdAt": "2024-10-17T08:25:27Z",
+      "id": "IC_kwDOCZduT86QLVfi",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2418890722"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kyle-sandeman-mrdfood"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hi, given what I see in the docs screenshot above, this is the same issue I am facing with Header parameter models.\r\nfastapi==0.115.2\r\n\r\nTo be clear this does NOT happen with the example in the docs, which is likely the only case that was tested (I don't intend to be rude, this is just an observation)\r\n\r\nGiven this code:\r\n\r\n```python\r\nclass CommonHeaders(BaseModel):\r\n    host: str\r\nclass CommonHeaders2(BaseModel):\r\n    host2: str\r\n\r\n@app.get(\"/items/\")\r\nasync def read_items(headers: Annotated[CommonHeaders, Header()],):\r\n                     #headers2: Annotated[CommonHeaders2, Header()]):\r\n    return {}\r\n```\r\nWe get image 1: \r\n![image](https://github.com/user-attachments/assets/05a56fac-0bea-4168-853e-1d9af1aeb732)\r\n\r\nWhen we uncomment the headers2 we get image 2:\r\n![image](https://github.com/user-attachments/assets/caf8534f-a8e2-4e04-9f58-deb4689217f4)\r\n\r\n",
+      "createdAt": "2024-10-17T10:43:11Z",
+      "id": "IC_kwDOCZduT86QMctG",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2419182406"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "KristofMerey"
+      },
+      "authorAssociation": "NONE",
+      "body": "Although the origin of these issues can be the same, there are two problems here. This issue is about the alias handling in query parameter models. @Usernamelesss introduced another problem (using multiple query parameter models together), and @Kyle-sandeman-mrdfood 's comment with header parameter models seems very similar to that. @jd-solanki linked question #12212 about this topic. I think, a proper issue should be converted from #12212 as well.",
+      "createdAt": "2024-10-17T11:45:58Z",
+      "id": "IC_kwDOCZduT86QM6eO",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2419304334"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JoseKilo"
+      },
+      "authorAssociation": "NONE",
+      "body": "I'm having the same issue on `fastapi==0.115.6`\r\n\r\nAs a workaround, I've been able to combine a pydantic model + extra query params by abusing `fastapi.Depends`:\r\n\r\n```python\r\nfrom typing import Annotated\r\n\r\nimport fastapi\r\nimport pydantic\r\n\r\napp = fastapi.FastAPI()\r\n\r\n\r\nclass FilterParams(pydantic.BaseModel):\r\n    limit: int\r\n    offset: int\r\n\r\n\r\n@app.get(\"/items/\")\r\nasync def read_items(\r\n    filter_query: Annotated[FilterParams, fastapi.Depends(FilterParams)],\r\n    serial_number: Annotated[str, fastapi.Query(alias=\"serial-number\")],\r\n):\r\n    return {}\r\n```\r\n\r\nI.e we can aggregate several query parameters using `Depends` + some callable. In this case, the callable happens to be a pydantic model constructor.\r\nhttps://fastapi.tiangolo.com/tutorial/dependencies/#create-a-dependency-or-dependable\r\n\r\nThis seems to handle validation errors as expected.\r\n\r\nThe only remaining issue is that aliases are still not properly handled if they're part of the pydantic model.\r\nBut at least we can have those as independent arguments, which is not possible when annotating the model with `Query()`.\r\n\r\nInterestingly, this also works:\r\n```python\r\nclass FilterParams(pydantic.BaseModel):\r\n    serial_number: str = pydantic.Field(alias=\"alias\")\r\n\r\n\r\n@app.get(\"/items/\")\r\nasync def read_items(\r\n    filter_query: Annotated[FilterParams, fastapi.Depends(FilterParams)],\r\n```\r\n\r\nBut it doesn't work if the alias is not a valid python identifier, like `serial-number` in my first example (because of the hyphen `-`).\r\n\r\nwhy ?: because pydantic changes the callable signature if the alias is a valid python identifier, but it doesn't otherwise:\r\n```python\r\nimport inspect\r\n\r\nclass FilterParams(pydantic.BaseModel):\r\n    serial_number: str = pydantic.Field(alias=\"alias\")\r\n\r\ninspect.signature(FilterParams)\r\n> <Signature (*, alias: str) -> None>\r\n\r\nclass FilterParams(pydantic.BaseModel):\r\n    serial_number: str = pydantic.Field(alias=\"serial-number\")\r\n\r\ninspect.signature(FilterParams)\r\n> <Signature (*, serial_number: str) -> None>\r\n```\r\nSo when `fastapi.Depends` inspects the callable, it doesn't see the alias if it isn't a valid python identifier.",
+      "createdAt": "2024-12-05T12:36:55Z",
+      "id": "IC_kwDOCZduT86WN0jA",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2520205504"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Viicos"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Also reported in https://github.com/pydantic/pydantic/issues/11166:\r\n\r\n```python\r\nfrom fastapi import FastAPI, Query\r\nfrom pydantic import BaseModel, Field\r\n\r\n\r\nclass ParamFilter(BaseModel):\r\n    model_config = {'extra': 'forbid'}\r\n\r\n    age: int = Field(default=30, alias='ag')\r\n\r\napp = FastAPI()\r\n\r\n@app.get('/hello')\r\ndef hello(filter_query: Annotated[ParamFilter, Query()]):\r\n    return {'query': filter_query}\r\n```\r\n\r\nThis will fail if you try hitting `/hello` without any query params:\r\n\r\n```json\r\n{\"detail\":[{\"type\":\"extra_forbidden\",\"loc\":[\"query\",\"age\"],\"msg\":\"Extra inputs are not permitted\",\"input\":30}]}\r\n```\r\n\r\nIn `fastapi.dependencies.utils.request_params_to_args()`, `_get_multidict_value()` is called and this function does not account for aliases when defaulting to the default value:\r\n\r\nhttps://github.com/fastapi/fastapi/blob/dd0b335052619ab5f28749d720aa00a061d6dcce/fastapi/dependencies/utils.py#L716-L737\r\n\r\nI'll note that this is somewhat inefficient, FastAPI is not relying on Pydantic validation here (that would account for the default value anyway) and is instead manually fetching the default value. But there's probably design constraints behind this choice (it also unnecessarily deepcopies the default if a default factory is used).",
+      "createdAt": "2024-12-23T10:35:51Z",
+      "id": "IC_kwDOCZduT86YjWX3",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2559403511"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "RicarTang"
+      },
+      "authorAssociation": "NONE",
+      "body": "Why haven't the changes been committed yet\ud83d\ude02",
+      "createdAt": "2025-01-21T06:56:00Z",
+      "id": "IC_kwDOCZduT86bMt3n",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2603802087"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JobyGeJo"
+      },
+      "authorAssociation": "NONE",
+      "body": "\ud83d\udeab Query() with a BaseModel: Not Allowed\n\n```python\n@app.get(\"/items/\")\nasync def read_items(filter_query: FilterParams = Query()):\n    ...\n```\n\n- Query() is used to declare individual query parameters.\n- You can\u2019t use Query() to inject an entire Pydantic model.\n- This will raise an error: FastAPI expects a plain type (like str, int, etc.), not a Pydantic model.\n\n---\n\n\u2705 Depends() with a BaseModel: The Correct Way\n\n```python\n@app.get(\"/items/\")\nasync def read_items(filter_query: FilterParams = Depends()):\n    ...\n```\n\n- Depends() is FastAPI\u2019s way of injecting dependencies.\n- FastAPI reads the query parameters and populates the Pydantic model for you, field by field.\n- It\u2019s how you cleanly parse groups of query params into structured data.\n\n---\n\nThink of it this way:\n- Query(), Path(), Body() \u2014 these are field-level declarations.\n- Depends() \u2014 this is function-level dependency injection, and that\u2019s how FastAPI knows to \u201cbuild\u201d the whole FilterParams object from query parameters.\n\n\u2e3b\n\n\ud83d\udca1 Visual Analogy\n\n```python\n# This:\n@app.get(\"/search/\")\nasync def search_items(limit: int = Query(10), offset: int = Query(0)):\n    ...\n\n# Is equivalent to:\nclass SearchParams(BaseModel):\n    limit: int = 10\n    offset: int = 0\n```\n\nUsing a model is cleaner when you\u2019re dealing with multiple parameters that logically belong together (like filtering or pagination).",
+      "createdAt": "2025-04-24T09:03:14Z",
+      "id": "IC_kwDOCZduT86ofwAh",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2826895393"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "jannis701"
+      },
+      "authorAssociation": "NONE",
+      "body": "thank you for pointing out the `Depends()`-Syntax to use with pydantic-Models @JobyGeJo . I did not get this possibility from the documentation https://fastapi.tiangolo.com/tutorial/dependencies/ which talks only about functions for `Depends(...)`.\n\nWhen I use this `Depends()`-syntax, aliases in models are working for me (using `Annotaded` + `Query()` Syntax the paramter `test_paramter` in the following example would not work at all) BUT ~~field_validators are not working anymore... `v` will be an empty object, regardless of `another_test_parameter`'s value (which again works using  `Annotaded` + `Query()` Syntax...)~~ \n- field_validators behave different (raised `ValueError` will be handled differently)\n- list-parameters do not work: they will not be part of the query but of the request-body\n\n```python\nfrom typing import Annotated, Any\nfrom fastapi import FastAPI, Query\nfrom pydantic import BaseModel, Field\n\nclass FilterParams(BaseModel):\n    test_parameter: str = Field(alias='testParameter')\n    another_test_parameter: str | None = None\n    list_test_parameter: list[str] | None = None # will not be part of query, but of request-body when using Depends()\n\n    @field_validator(\"another_test_parameter\", mode=\"before\")\n    @classmethod\n    def ensure_foobar(cls, v: Any):\n        if 'foobar' not in v:\n            raise ValueError('\"foobar\" not found in another_test_parameter')\n        return v\n\napp = FastAPI()\n\n# alias does work, list_test_parameter is not part of the filter_query\n@app.get(\"/items/\")\nasync def read_items(filter_query: FilterParams = Depends()):\n   return filter_query\n\n# alias does not work, list_test_parameter IS part of the filter_query\n@app.get(\"/items2/\")\nasync def read_items2(filter_query: Annotated[FilterParams, Query()]):\n   return filter_query\n```\n\nunfortunately I did not find a way to get both (aliases and list-fields in query) working together...\n\nEDIT: sorry, cannot reproduce it anymore... it seems the `Depends()`-Syntax is also working for `field_validator`, but only the `ValueError` is handled less elegant by default....\nEDIT2: ok, I figured it out: the issue with the `Depends()`-syntax is more about `list`-Parameters than about `field_validator`",
+      "createdAt": "2025-04-25T09:37:46Z",
+      "id": "IC_kwDOCZduT86orN-9",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2829901757"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JobyGeJo"
+      },
+      "authorAssociation": "NONE",
+      "body": "Glad it helped @jannis701, and thanks for sharing your findings! Yeah, FastAPI treats ```Depends()``` differently because it expects it to load models from the body by default (which explains why lists go to the body, not the query). For query parameters, ```Annotated[Model, Depends(Query(...))]``` or other custom handling might be needed to get full control over both aliasing and list parsing.",
+      "createdAt": "2025-04-27T18:14:38Z",
+      "id": "IC_kwDOCZduT86o5PcG",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2833577734"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "jannis701"
+      },
+      "authorAssociation": "NONE",
+      "body": "following the Documentation at https://fastapi.tiangolo.com/tutorial/query-param-models/ I would expect that the `Annotated[FilterParams, Query()]`-Syntax should work, so I would still consider it a bug, that aliases of Pydantic-Fields are broken with this syntax. I found this workaround, but I don't like it, as I would have to include FastApi-Query-Functions in my Pydantic-Models:\n\n```python\nfrom typing import Annotated\nfrom fastapi import FastAPI, Query\nfrom pydantic import BaseModel, Field\n\nclass FilterParams(BaseModel):\n    test_parameter_pydantic: str = Field(alias='testParameterPydantic') # does not work, I consider this a bug\n    test_parameter: str = Query(alias='testParameter') # WORKAROUND: use Query instead of Field\n    another_test_parameter: str | None = None\n    list_test_parameter: list[str] | None = None\n\napp = FastAPI()\n\n@app.get(\"/items2/\")\nasync def read_items2(filter_query: Annotated[FilterParams, Query()]):\n   return filter_query\n```",
+      "createdAt": "2025-04-28T09:47:55Z",
+      "id": "IC_kwDOCZduT86o9TTS",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2834642130"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JobyGeJo"
+      },
+      "authorAssociation": "NONE",
+      "body": "You're absolutely right in showing that when using `Annotated[FilterParams, Query()]`, the `alias` defined via `Field(...)` is not respected, while it works as expected when using `Depends()`. This reinforces the point that FastAPI handles Pydantic models differently depending on whether you're using `Depends()` or `Query()`.\n\nAlso, a small clarification: even with `Depends()`, `list_test_parameter` *is* parsed from the query parameters on `GET` requests \u2014 it's not treated as part of the body unless you're using `POST` or explicitly define it as such. So the issue really comes down to the alias support, not the data location in this case.\n\nI agree this feels like inconsistent behavior, and I still consider it a bug in how `Query()` interacts with Pydantic models and field aliases. For now, I\u2019ll stick with using `Depends()` since it preserves alias mappings cleanly and keeps the query parsing behavior intuitive.",
+      "createdAt": "2025-04-29T06:16:23Z",
+      "id": "IC_kwDOCZduT86pIlf7",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2837600251"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "jannis701"
+      },
+      "authorAssociation": "NONE",
+      "body": "It seems to me, that this bug has been fixed here: https://github.com/fastapi/fastapi/commit/88d4f2cb1814392f54011b2bbd3fe55c5f2a3278 but this commit re-introduced it: https://github.com/fastapi/fastapi/commit/55035f440bf852f739e3ccd71b67034016ae9bba#diff-aef3dac481b68359f4edd6974fa3a047cfde595254a4567a560cebc9ccb0673fR765\n\nFor me changing [this Line](https://github.com/fastapi/fastapi/blob/master/fastapi/dependencies/utils.py#L783) to     \n\n```python\nvalues[field.alias] = value\n```\n\n(as it was done by the first mentioned commit) makes everything work as expected using the `Annotated[FilterParams, Query()]`-syntax\n",
+      "createdAt": "2025-04-29T07:37:55Z",
+      "id": "IC_kwDOCZduT86pJYgK",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2837809162"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "tiangolo"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "It seems this was solved in https://github.com/fastapi/fastapi/pull/14360, available in FastAPI 0.123.3 \ud83c\udf89 ",
+      "createdAt": "2025-12-02T09:33:22Z",
+      "id": "IC_kwDOCZduT87WpDmh",
+      "url": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-3601086881"
+    }
+  ],
+  "createdAt": "2024-10-08T06:42:41Z",
+  "id": "I_kwDOCZduT86ZUThI",
+  "labels": [],
+  "number": 12402,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "tiangolo"
+      },
+      "createdAt": "2025-12-02T09:33:23Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "[BUG] In version 0.115.0 of FastAPI, the pydantic model that has declared an alias cannot correctly receive query parameters",
+  "url": "https://github.com/fastapi/fastapi/issues/12402"
+}
