@@ -47,6 +47,22 @@ def annotated_discussion_entities_path(output_root: Path, repo: RepositoryRef) -
     return extraction_repo_dir(output_root, repo) / "langextract_annotated.jsonl"
 
 
+def viewer_index_path(output_root: Path) -> Path:
+    return output_root / "viewer" / "index.html"
+
+
+def discussion_artifacts_records_path(output_root: Path, repo: RepositoryRef) -> Path:
+    return extraction_repo_dir(output_root, repo) / "discussion_artifacts.jsonl"
+
+
+def discussion_artifacts_summary_path(output_root: Path, repo: RepositoryRef) -> Path:
+    return extraction_repo_dir(output_root, repo) / "discussion_artifacts_summary.json"
+
+
+def discussion_artifacts_flat_path(output_root: Path, repo: RepositoryRef) -> Path:
+    return extraction_repo_dir(output_root, repo) / "discussion_artifacts_flat.jsonl"
+
+
 def write_json(path: Path, payload: Mapping[str, Any]) -> None:
     ensure_directory(path.parent)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
