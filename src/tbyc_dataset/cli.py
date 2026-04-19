@@ -214,7 +214,10 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         )
 
     LOGGER.info("command completed")
-    print(json.dumps(result, indent=2, sort_keys=True))
+    if args.command == "retrieve-code-chunks":
+        print(json.dumps({"manifest": result.get("manifest")}, indent=2, sort_keys=True))
+    else:
+        print(json.dumps(result, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

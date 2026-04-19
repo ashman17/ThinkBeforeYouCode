@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import pickle
 from pathlib import Path
 
 from tbyc_dataset.evaluation.pipeline import (
@@ -96,3 +97,62 @@ def test_bm25_tokenizer_preserves_identifiers() -> None:
     tokens = tokenize_for_bm25("RepoMappingManifestAction foo_bar Bazel8")
 
     assert tokens == ["repomappingmanifestaction", "foo_bar", "bazel8"]
+
+
+def test_run_reuses_cached_indexes_without_snapshot_restore(tmp_path: Path) -> None:
+    issue_dir = tmp_path / "raw" / "octo__repo" / "issues"
+    issue_dir.mkdir(parents=True)
+    (issue_dir / "issue_1.json").write_text(
+        json.dumps(
+            {
+                "number": 1,
+                "title": "Issue",
+                "body": "Body",
+                "createdAt": "2024-01-01T00:00:00Z",
+                "url": "https://example.com/1",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    output_root = tmp_path / "evaluation" / "octo__repo"
+    index_dir = output_root / "indexes" / "deadbeef"
+    index_dir.mkdir(parents=True)
+    (index_dir / "chunks.jsonl").write_text(
+        json.dumps(
+            {
+                "chunk_id": "src/main.py::1-1",
+                "file_path": "src/main.py",
+                "symbol_name": "main",
+                "language": "py",
+                "start_line": 1,
+                "end_line": 1,
+                "text": "def main(): pass",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    with (index_dir / "bm25.pkl").open("wb") as handle:
+        pickle.dump(object(), handle)
+    (index_dir / "embeddings.npy").write_bytes(b"placeholder")
+
+    pipeline = CodeRetrievalPipeline(cache_dir=str(tmp_path))
+
+    def _should_not_be_called(*_args: object, **_kwargs: object) -> str:
+        raise AssertionError("snapshot resolution should be skipped when cached indexes exist")
+
+    pipeline._resolve_snapshot_commit = _should_not_be_called  # type: ignore[method-assign]
+    pipeline._ensure_repo_snapshot = _should_not_be_called  # type: ignore[method-assign]
+    pipeline._cleanup_repo_snapshot = lambda *_args, **_kwargs: None  # type: ignore[method-assign]
+    pipeline._load_or_build_indexes = (  # type: ignore[method-assign]
+        lambda _chunks, _index_dir: {"bm25": object(), "faiss_index": object()}
+    )
+    pipeline._retrieve_for_issue = (  # type: ignore[method-assign]
+        lambda issue, _chunks, _bundle: {"issue": issue.to_json(), "results": []}
+    )
+
+    result = pipeline.run("octo", "repo", str(tmp_path / "evaluation"))
+
+    assert result["manifest"]["snapshot_commit"] == "deadbeef"
+    assert result["manifest"]["index_dir"].endswith("/indexes/deadbeef")
