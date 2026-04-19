@@ -7,7 +7,7 @@ from typing import Optional, Sequence
 
 from tbyc_dataset.config import github_settings_from_env, pipeline_settings
 from tbyc_dataset.dataset.pipeline import build_dataset, curate_repository, fetch_repository
-from tbyc_dataset.evaluation import CodeRetrievalPipeline
+from tbyc_dataset.evaluation import CodeRetrievalPipeline, IssueThoughtPipeline, IssueThoughtSettings
 from tbyc_dataset.extraction.pipeline import ExtractionSettings, extract_discussion_artifacts
 from tbyc_dataset.models import RepositoryRef
 from tbyc_dataset.viewer import build_processed_viewer
@@ -29,6 +29,7 @@ def build_parser() -> argparse.ArgumentParser:
         "extract-discussion-entities",
         "extract-discussion-artifacts",
         "retrieve-code-chunks",
+        "generate-issue-thoughts",
     ):
         subparser = subparsers.add_parser(command)
         subparser.add_argument("--repo", required=True, help="Repository in owner/name format.")
@@ -115,6 +116,60 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Number of top results to return per issue.",
             )
 
+        if command == "generate-issue-thoughts":
+            subparser.add_argument(
+                "--model-id",
+                default="qwen2.5:14b",
+                help="Ollama model identifier for issue thought generation.",
+            )
+            subparser.add_argument(
+                "--model-url",
+                default="http://localhost:11434",
+                help="Ollama server URL.",
+            )
+            subparser.add_argument(
+                "--num-ctx",
+                type=int,
+                default=32768,
+                help="Ollama context window size (num_ctx).",
+            )
+            subparser.add_argument(
+                "--include-context",
+                dest="include_context",
+                action="store_true",
+                default=True,
+                help="Include retrieved code chunks in the prompt context.",
+            )
+            subparser.add_argument(
+                "--exclude-context",
+                dest="include_context",
+                action="store_false",
+                help="Exclude retrieved code chunks from prompt context.",
+            )
+            subparser.add_argument(
+                "--max-context-chars",
+                type=int,
+                default=32768,
+                help="Maximum total prompt characters (instructions + issue + context).",
+            )
+            subparser.add_argument(
+                "--max-context-chunks",
+                type=int,
+                default=10,
+                help="Maximum number of retrieved chunks to include.",
+            )
+            subparser.add_argument(
+                "--issue-number",
+                type=int,
+                default=None,
+                help="Optional issue number filter.",
+            )
+            subparser.add_argument(
+                "--no-skip-existing",
+                action="store_true",
+                help="Regenerate response files even when they already exist.",
+            )
+
         if command in {"fetch-repo", "build-dataset"}:
             subparser.add_argument(
                 "--max-issues",
@@ -186,6 +241,23 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             repo=repo.name,
             output_dir=str(p_settings.output_root / "evaluation")
         )
+    elif args.command == "generate-issue-thoughts":
+        LOGGER.info("stage=generate-issue-thoughts model=%s", args.model_id)
+        thought_settings = IssueThoughtSettings(
+            model_id=args.model_id,
+            model_url=args.model_url,
+            include_context=args.include_context,
+            max_context_chars=args.max_context_chars,
+            max_context_chunks=args.max_context_chunks,
+            num_ctx=args.num_ctx,
+            issue_number=args.issue_number,
+            skip_existing=not args.no_skip_existing,
+        )
+        pipeline = IssueThoughtPipeline(
+            output_root=str(p_settings.output_root),
+            settings=thought_settings,
+        )
+        result = pipeline.run(owner=repo.owner, repo=repo.name)
     elif args.command in {"extract-discussion-artifacts", "extract-discussion-entities"}:
         LOGGER.info("stage=extract model=%s issue_number=%s", args.model_id, args.issue_number)
         e_settings = ExtractionSettings(
@@ -216,6 +288,18 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     LOGGER.info("command completed")
     if args.command == "retrieve-code-chunks":
         print(json.dumps({"manifest": result.get("manifest")}, indent=2, sort_keys=True))
+    elif args.command == "generate-issue-thoughts":
+        print(
+            json.dumps(
+                {
+                    "repository": result.get("repository"),
+                    "response_dir": result.get("response_dir"),
+                    "issue_count": result.get("issue_count"),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
     else:
         print(json.dumps(result, indent=2, sort_keys=True))
 
