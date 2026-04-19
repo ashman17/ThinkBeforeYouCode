@@ -156,3 +156,79 @@ def test_run_reuses_cached_indexes_without_snapshot_restore(tmp_path: Path) -> N
 
     assert result["manifest"]["snapshot_commit"] == "deadbeef"
     assert result["manifest"]["index_dir"].endswith("/indexes/deadbeef")
+
+
+def test_run_skips_precomputed_issue_results(tmp_path: Path) -> None:
+    issue_dir = tmp_path / "raw" / "octo__repo" / "issues"
+    issue_dir.mkdir(parents=True)
+    (issue_dir / "issue_1.json").write_text(
+        json.dumps(
+            {
+                "number": 1,
+                "title": "Issue 1",
+                "body": "Body 1",
+                "createdAt": "2024-01-01T00:00:00Z",
+                "url": "https://example.com/1",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (issue_dir / "issue_2.json").write_text(
+        json.dumps(
+            {
+                "number": 2,
+                "title": "Issue 2",
+                "body": "Body 2",
+                "createdAt": "2024-01-02T00:00:00Z",
+                "url": "https://example.com/2",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    output_root = tmp_path / "evaluation" / "octo__repo"
+    index_dir = output_root / "indexes" / "deadbeef"
+    index_dir.mkdir(parents=True)
+    (index_dir / "chunks.jsonl").write_text(
+        json.dumps(
+            {
+                "chunk_id": "src/main.py::1-1",
+                "file_path": "src/main.py",
+                "symbol_name": "main",
+                "language": "py",
+                "start_line": 1,
+                "end_line": 1,
+                "text": "def main(): pass",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    with (index_dir / "bm25.pkl").open("wb") as handle:
+        pickle.dump(object(), handle)
+    (index_dir / "embeddings.npy").write_bytes(b"placeholder")
+
+    results_dir = output_root / "results"
+    results_dir.mkdir(parents=True)
+    (results_dir / "issue_1.json").write_text(
+        json.dumps({"issue": {"number": 1}, "results": [{"chunk_id": "cached"}]}),
+        encoding="utf-8",
+    )
+
+    pipeline = CodeRetrievalPipeline(cache_dir=str(tmp_path))
+    pipeline._load_or_build_indexes = (  # type: ignore[method-assign]
+        lambda _chunks, _index_dir: {"bm25": object(), "faiss_index": object()}
+    )
+
+    retrieved_issue_numbers: List[int] = []
+
+    def _retrieve(issue, _chunks, _bundle):
+        retrieved_issue_numbers.append(issue.number)
+        return {"issue": issue.to_json(), "results": []}
+
+    pipeline._retrieve_for_issue = _retrieve  # type: ignore[method-assign]
+
+    result = pipeline.run("octo", "repo", str(tmp_path / "evaluation"))
+
+    assert retrieved_issue_numbers == [2]
+    assert len(result["issues"]) == 2

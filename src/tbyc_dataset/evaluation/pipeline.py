@@ -124,6 +124,8 @@ class CodeRetrievalPipeline:
             LOGGER.info("indexes ready")
             self._cleanup_repo_snapshot(owner, repo, snapshot_commit)
 
+        results_dir = output_root / "results"
+        ensure_directory(results_dir)
         issue_results: List[Dict[str, Any]] = []
         for issue in self._progress_iter(
             issues,
@@ -131,9 +133,16 @@ class CodeRetrievalPipeline:
             unit="issue",
             total=len(issues),
         ):
+            result_path = results_dir / f"issue_{issue.number}.json"
+            if result_path.exists():
+                try:
+                    issue_results.append(read_json(result_path))
+                    continue
+                except Exception:
+                    pass
             result = self._retrieve_for_issue(issue, chunks, bundle)
             issue_results.append(result)
-            write_json(output_root / "results" / f"issue_{issue.number}.json", result)
+            write_json(result_path, result)
 
         manifest = {
             "repository": repo_ref.slug,
@@ -141,7 +150,7 @@ class CodeRetrievalPipeline:
             "snapshot_commit": snapshot_commit,
             "snapshot_dir": None,
             "index_dir": str(index_dir),
-            "results_dir": str(output_root / "results"),
+            "results_dir": str(results_dir),
             "settings": {
                 "embedding_model": self.settings.embedding_model,
                 "top_n": self.settings.top_n,
