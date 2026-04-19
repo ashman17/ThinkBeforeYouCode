@@ -1,1 +1,3 @@
-"""Future evaluation pipelines comparing model outputs against extracted discussion entities."""
+from .pipeline import CodeRetrievalPipeline
+
+__all__ = ["CodeRetrievalPipeline"]
