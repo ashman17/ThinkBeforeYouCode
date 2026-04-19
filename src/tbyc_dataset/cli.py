@@ -7,7 +7,13 @@ from typing import Optional, Sequence
 
 from tbyc_dataset.config import github_settings_from_env, pipeline_settings
 from tbyc_dataset.dataset.pipeline import build_dataset, curate_repository, fetch_repository
-from tbyc_dataset.evaluation import CodeRetrievalPipeline, IssueThoughtPipeline, IssueThoughtSettings
+from tbyc_dataset.evaluation import (
+    CodeRetrievalPipeline,
+    DerivedExtractionSettings,
+    IssueThoughtPipeline,
+    IssueThoughtSettings,
+    extract_derived_artifacts_from_responses,
+)
 from tbyc_dataset.extraction.pipeline import ExtractionSettings, extract_discussion_artifacts
 from tbyc_dataset.models import RepositoryRef
 from tbyc_dataset.viewer import build_processed_viewer
@@ -30,6 +36,7 @@ def build_parser() -> argparse.ArgumentParser:
         "extract-discussion-artifacts",
         "retrieve-code-chunks",
         "generate-issue-thoughts",
+        "extract-derived-artifacts",
     ):
         subparser = subparsers.add_parser(command)
         subparser.add_argument("--repo", required=True, help="Repository in owner/name format.")
@@ -170,6 +177,35 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Regenerate response files even when they already exist.",
             )
 
+        if command == "extract-derived-artifacts":
+            subparser.add_argument(
+                "--model-id",
+                default="qwen2.5:14b",
+                help="Ollama model identifier for derived artifact extraction.",
+            )
+            subparser.add_argument(
+                "--model-url",
+                default="http://localhost:11434",
+                help="Ollama server URL.",
+            )
+            subparser.add_argument(
+                "--num-ctx",
+                type=int,
+                default=32768,
+                help="Ollama context window size (num_ctx).",
+            )
+            subparser.add_argument(
+                "--issue-number",
+                type=int,
+                default=None,
+                help="Optional issue number filter.",
+            )
+            subparser.add_argument(
+                "--no-skip-existing",
+                action="store_true",
+                help="Regenerate derived files even when they already exist.",
+            )
+
         if command in {"fetch-repo", "build-dataset"}:
             subparser.add_argument(
                 "--max-issues",
@@ -258,6 +294,21 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             settings=thought_settings,
         )
         result = pipeline.run(owner=repo.owner, repo=repo.name)
+    elif args.command == "extract-derived-artifacts":
+        LOGGER.info("stage=extract-derived-artifacts model=%s", args.model_id)
+        derived_settings = DerivedExtractionSettings(
+            model_id=args.model_id,
+            model_url=args.model_url,
+            num_ctx=args.num_ctx,
+            issue_number=args.issue_number,
+            skip_existing=not args.no_skip_existing,
+        )
+        result = extract_derived_artifacts_from_responses(
+            owner=repo.owner,
+            repo=repo.name,
+            output_root=str(p_settings.output_root),
+            settings=derived_settings,
+        )
     elif args.command in {"extract-discussion-artifacts", "extract-discussion-entities"}:
         LOGGER.info("stage=extract model=%s issue_number=%s", args.model_id, args.issue_number)
         e_settings = ExtractionSettings(
@@ -295,6 +346,20 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                     "repository": result.get("repository"),
                     "response_dir": result.get("response_dir"),
                     "issue_count": result.get("issue_count"),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    elif args.command == "extract-derived-artifacts":
+        print(
+            json.dumps(
+                {
+                    "repository": result.get("repository"),
+                    "issue_count": result.get("issue_count"),
+                    "total_comment_count": result.get("total_comment_count"),
+                    "failed_comment_count": result.get("failed_comment_count"),
+                    "total_artifact_count": result.get("total_artifact_count"),
                 },
                 indent=2,
                 sort_keys=True,
