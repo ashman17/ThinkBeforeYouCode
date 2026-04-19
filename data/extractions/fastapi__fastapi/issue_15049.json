@@ -1,0 +1,35 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "improved coding experience for Cursor IDE users",
+              "solution_kind": "documentation",
+              "target_area": "IDE integration"
+            },
+            "summary": "Add a `.cursorrules` file to help Cursor IDE users follow FastAPI conventions; covers Pydantic v2 model patterns, `Depends()` injection patterns, async-first with `asyncio.gather()`, `pytest` + `httpx.AsyncClient` testing patterns, strict type annotation conventions",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "survivorforge",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/15049"
+      }
+    ],
+    "issue_number": 15049,
+    "issue_title": "Add .cursorrules file to help Cursor IDE users follow FastAPI conventions",
+    "issue_url": "https://github.com/fastapi/fastapi/issues/15049"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/fastapi__fastapi/issue_15049.json",
+  "repository": "fastapi/fastapi",
+  "status": "completed"
+}

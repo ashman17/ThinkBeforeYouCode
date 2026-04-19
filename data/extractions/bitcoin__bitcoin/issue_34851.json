@@ -1,0 +1,140 @@
+{
+  "issue": {
+    "artifact_count": 6,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "chainstate/database",
+              "problem_kind": "fatal_error",
+              "user_or_system_impact": "system_unstable"
+            },
+            "summary": "bitcoin core encounters a fatal internal error due to block checksum mismatch in LevelDB",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "josephgal007",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34851"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Bitcoin Core",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "potential system instability or data corruption"
+            },
+            "summary": "Hardware defects might cause issues with Bitcoin Core.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "maflcko",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4083144387"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "resolved",
+              "status_kind": "resolution_reported"
+            },
+            "summary": "user reported a resolution to the issue by performing a power down and restart",
+            "tags": [
+              "incorrect_behavior",
+              "incorrect_output"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "josephgal007",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4085314801"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Core Database Handling",
+              "problem_kind": "Data Corruption",
+              "user_or_system_impact": "System May Experience Unpredictable Behavior"
+            },
+            "summary": "The issue is a local chainstate LevelDB corruption during flushing, possibly due to faulty hardware.",
+            "tags": [
+              "data_corruption",
+              "incorrect_behavior",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "l0rinc",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4085383763"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "better understanding of the issue",
+              "target_area": "hardware diagnosis",
+              "urgency": "unknown"
+            },
+            "summary": "run hardware checks suggested by l0rinc to diagnose the issue",
+            "tags": [
+              "bug"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "josephgal007",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4085454135"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "awaiting additional info",
+              "status_kind": "resolved"
+            },
+            "summary": "Closed the issue after suggesting further checks and stating that discussion can continue.",
+            "tags": [
+              "test_infra_issue",
+              "bug"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "maflcko",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4087888618"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "josephgal007",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4090972968"
+      }
+    ],
+    "issue_number": 34851,
+    "issue_title": "[error] A fatal internal error occurred, see debug.log for details: System error while flushing: Fatal LevelDB error: Corruption: block checksum mismatch: C:\\Bitcoin Core\\chainstate/1131523.ldb",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34851"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34851.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

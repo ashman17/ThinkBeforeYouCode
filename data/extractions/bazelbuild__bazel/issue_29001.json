@@ -1,0 +1,111 @@
+{
+  "issue": {
+    "artifact_count": 6,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "bazelrc file processing",
+              "problem_kind": "functional",
+              "user_or_system_impact": "Bazel fails to parse and execute certain Bazel rc configurations on Windows."
+            },
+            "summary": "Windows backslashes in Bazel rc files are not supported due to path handling issues.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Fantasime",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29001"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "100%",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "A 100% reproducible way is presented for the bug.",
+            "tags": [
+              "bug"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "Fantasime",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29001#issuecomment-4069734662"
+      },
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rc file configuration",
+              "problem_kind": "configuration_issue",
+              "user_or_system_impact": "System impact: Bazel will not treat '\\\\' as the correct path separator."
+            },
+            "summary": "The path separator in the rc file should be '\\\\' not '\\'. The comment in src/main/cpp/rc_file.cc explains Bazel's handling of '\\'.",
+            "tags": [
+              "runtime_error",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "impact_scope": "codebase understanding",
+              "reasoning_kind": "documentation",
+              "supports_artifact_type": "comment"
+            },
+            "summary": "Bazel treats '\\\\' as an escape character and the comment in src/main/cpp/rc_file.cc explains this.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "alternative_to": "using '\\' as path separator in rc file",
+              "comparison_focus": "compatibility with Bazel's handling of escape characters",
+              "differentiator": "use of '//' instead of '\\\\'"
+            },
+            "summary": "The alternative solution is to change the path separator from '\\\\' to '\\'. The current steps are incorrect.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "constraint_type": "configuration_constraint",
+              "scope": "rc file configuration",
+              "severity": "medium"
+            },
+            "summary": "The constraint is that the correct path separator in the rc file should be '\\\\'.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          }
+        ],
+        "comment_author": "Fantasime",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29001#issuecomment-4077016041"
+      }
+    ],
+    "issue_number": 29001,
+    "issue_title": "Windows: backslashes are not supported in other \"rc\" files",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/29001"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_29001.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

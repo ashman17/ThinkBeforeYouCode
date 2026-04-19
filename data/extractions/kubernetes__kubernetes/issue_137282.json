@@ -1,0 +1,385 @@
+{
+  "issue": {
+    "artifact_count": 18,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "client-go",
+              "problem_kind": "flaky_test",
+              "user_or_system_impact": "test flaking"
+            },
+            "summary": "TestSharedInformerHandlerAbuse occasionally panics in smoke tests.",
+            "tags": [
+              "test_flakiness",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "akhilerm",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3971283757"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "changelog",
+              "problem_kind": "regression",
+              "user_or_system_impact": "known change introduced by PR"
+            },
+            "summary": "affected_area: changelog; problem_kind: regression; user_or_system_impact: known change introduced by PR",
+            "tags": [
+              "regression"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "akhilerm",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3972235729"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "environment: local; prerequisites: `stress` command available; determinism: yes (reproducible)",
+            "tags": [
+              "bug",
+              "test_infra_issue"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3972620530"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3972623424"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "debugging",
+              "target_area": "test_reproducibility",
+              "urgency": "unknown"
+            },
+            "summary": "how did you bisect? the author is asking for details on a debugging process; user cannot reproduce an issue with specific test command and high parallelism.",
+            "tags": [
+              "bug"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3972641468"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "reproduced with 60s and 600s timeouts",
+              "environment": "stress tool",
+              "prerequisites": "/tmp/cache_test.bin, sufficient test environment"
+            },
+            "summary": "Reproduced with stress command and different timeout settings.",
+            "tags": [
+              "bug",
+              "test_flakiness"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "akhilerm",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3973314246"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "testing infrastructure",
+              "problem_kind": "performance issue",
+              "user_or_system_impact": "developer experience"
+            },
+            "summary": "A performance degradation was observed during a stress test with a lowered timeout.",
+            "tags": [
+              "performance_degradation",
+              "test_infra_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3973436915"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "baseline": "5ff323de791",
+              "candidate": "59cddedb04dcb2c3c5550e9f508b9771ba99f29c",
+              "environment": "local machine",
+              "metric": "runs per time period"
+            },
+            "summary": "Compared performance using `stress -p 16` between two versions of the code.",
+            "tags": [
+              "performance_issue"
+            ],
+            "type": "benchmark_result"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3973532662"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "publishing-bot tests",
+              "problem_kind": "random bug occurrence",
+              "user_or_system_impact": "potential delay in deployments"
+            },
+            "summary": "Random performance degradation in publishing-bot runs.",
+            "tags": [
+              "performance_degradation",
+              "runtime"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "akhilerm",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3973609781"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "TestSharedInformerHandlerAbuse",
+              "problem_kind": "performance_degradation",
+              "user_or_system_impact": "unclear"
+            },
+            "summary": "The performance issue of TestSharedInformerHandlerAbuse is observed on ppc64le and lacks a clear explanation.",
+            "tags": [
+              "performance_issue",
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3973994069"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "shared informers",
+              "problem_kind": "behavioral issue",
+              "user_or_system_impact": "unknown"
+            },
+            "summary": "There have been recent changes to shared informers that could potentially cause issues.",
+            "tags": [
+              "runtime_error",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "michaelasp",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3974031779"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "goroutine management",
+              "problem_kind": "blocking",
+              "user_or_system_impact": "system unresponsiveness"
+            },
+            "summary": "Many goroutines are blocked trying to acquire s.startedLock due to timeout issues.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3974267263"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification",
+              "target_area": "testing infrastructure",
+              "urgency": "unknown"
+            },
+            "summary": "The author questions why the test fails after 5m given the expected time.",
+            "tags": [
+              "test_infra_issue",
+              "test_timeout"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "michaelasp",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3974277829"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "correcting synchronization issue in shared_informer.go",
+              "language": "unknown",
+              "snippet_kind": "patch"
+            },
+            "summary": "shared_informer.go code fix for informer factory synchronization issue; timing out with specific commit.",
+            "tags": [
+              "fix_proposed",
+              "runtime_error"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3974328933"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "cache testing infrastructure",
+              "problem_kind": "unexpected_test_failure",
+              "user_or_system_impact": "flaky test"
+            },
+            "summary": "k8s.io/client-go/tools/cache/testing (*FakeControllerSource) List causes unexpected goroutines to be detected in tests.",
+            "tags": [
+              "test_infra_issue",
+              "test_flakiness"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3974449569"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "shared_processor.run",
+              "problem_kind": "deadlock",
+              "user_or_system_impact": "system hangs"
+            },
+            "summary": "Adding a time.Sleep in sharedProcessor.run function triggers a deadlock issue where watchSynced goroutines are spawned before the run method starts.",
+            "tags": [
+              "race_condition",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "michaelasp",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3974456626"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "reducing test time and improving code quality",
+              "target_area": "testing hooks",
+              "urgency": "low"
+            },
+            "summary": "suggest using existing hook for testing instead of intentional delay in PR",
+            "tags": [
+              "test_adjustment",
+              "api"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "michaelasp",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3974560585"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "testing",
+              "problem_kind": "behavior",
+              "user_or_system_impact": "system"
+            },
+            "summary": "The timeout setting for tests does not reliably detect deadlocks due to the absence of an explicit `-test.timeout`.",
+            "tags": [
+              "performance_issue",
+              "timeout",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3974779550"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "michaelasp",
+              "deliverable": "unknown",
+              "due_context": "unknown"
+            },
+            "summary": "Assign task to 'michaelasp'",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "michaelasp",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137282#issuecomment-3975203392"
+      }
+    ],
+    "issue_number": 137282,
+    "issue_title": "TestSharedInformerHandlerAbuse is panicking occasionally in publishing-bot smoke tests",
+    "issue_url": "https://github.com/kubernetes/kubernetes/issues/137282"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/kubernetes__kubernetes/issue_137282.json",
+  "repository": "kubernetes/kubernetes",
+  "status": "completed"
+}

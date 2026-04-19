@@ -1,0 +1,41 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "psone0992-ship-it",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34880"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "spam_detection",
+              "problem_kind": "empty_issue_body_and_title",
+              "user_or_system_impact": "wiping, closing, and locking the issue"
+            },
+            "summary": "The issue body is empty and the title is non-descriptive, indicating a placeholder submission with no meaningful content to evaluate.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "DrahtBot",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34880#issuecomment-4098028550"
+      }
+    ],
+    "issue_number": 34880,
+    "issue_title": ".",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34880"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34880.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

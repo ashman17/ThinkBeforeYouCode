@@ -1,0 +1,36 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "_get_tied_weight_keys",
+              "problem_kind": "runtime_error",
+              "user_or_system_impact": "Crashes the full finetune process"
+            },
+            "summary": "The function _get_tied_weight_keys crashes with an AttributeError when _tied_weights_keys is a list.",
+            "tags": [
+              "api_misuse",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "gh-wf",
+        "comment_link": "https://github.com/huggingface/transformers/issues/44861"
+      }
+    ],
+    "issue_number": 44861,
+    "issue_title": "_get_tied_weight_keys crashes with AttributeError when _tied_weights_keys is a list",
+    "issue_url": "https://github.com/huggingface/transformers/issues/44861"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/huggingface__transformers/issue_44861.json",
+  "repository": "huggingface/transformers",
+  "status": "completed"
+}

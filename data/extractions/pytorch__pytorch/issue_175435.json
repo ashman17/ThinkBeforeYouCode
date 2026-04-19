@@ -1,0 +1,495 @@
+{
+  "issue": {
+    "artifact_count": 31,
+    "comments": [
+      {
+        "artifact_count": 13,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "Identifying and correcting the issue in VllmConfig initialization.",
+              "language": "Python",
+              "snippet_kind": "Error handling"
+            },
+            "summary": "Code snippet of the VllmConfig instantiation with unexpected keyword argument error.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "affected_area": "VLLM model configuration",
+              "problem_kind": "Configuration error",
+              "user_or_system_impact": "Prevents successful creation of VllmConfig instance"
+            },
+            "summary": "Problem statement of the configuration error encountered during VllmConfig instantiation.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "alternative_to": "Directly setting configuration parameters in the constructor",
+              "comparison_focus": "Ensuring only valid configuration parameters are passed",
+              "differentiator": "Removing or renaming invalid keyword arguments"
+            },
+            "summary": "Alternative approaches to resolve the VllmConfig initialization issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "chosen_option": "Remove invalid keyword arguments or raise an exception",
+              "decision_status": "Undecided",
+              "rejected_options": [
+                "Allowing unknown parameters"
+              ]
+            },
+            "summary": "Decision on how to handle unexpected keyword arguments during VllmConfig instantiation.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "design_decision"
+          },
+          {
+            "metadata": {
+              "constraint_type": "Validation error",
+              "scope": "Initialization of VllmConfig",
+              "severity": "High, blocks model usage"
+            },
+            "summary": "Constraints related to the VllmConfig configuration.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "component": "VllmConfig class",
+              "implementation_action": "Identifying invalid keyword arguments",
+              "lifecycle_stage": "Development and maintenance"
+            },
+            "summary": "Implementation detail regarding the VllmConfig constructor parameters and validation.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "api_surface": "VllmConfig class",
+              "compatibility_impact": "None, requires parameter validation",
+              "interface_kind": "Constructor API"
+            },
+            "summary": "API design for VllmConfig initialization with a list of valid configuration parameters.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "api_design"
+          },
+          {
+            "metadata": {
+              "question_kind": "Configuration and initialization",
+              "target_area": "VLLM model setup",
+              "urgency": "High, prevents model usage"
+            },
+            "summary": "Questions for further clarification on the VllmConfig configuration.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "certainty": "Certain, based on error message",
+              "resolution_status": "Pending",
+              "target_question_topic": "Validating VllmConfig initialization"
+            },
+            "summary": "Clarification on the VllmConfig configuration parameters.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "answer_clarification"
+          },
+          {
+            "metadata": {
+              "assignee": "@chauhang @penguinwu @zou3519",
+              "deliverable": "A fix or clarification on how to configure VllmConfig correctly",
+              "due_context": "As soon as possible"
+            },
+            "summary": "Task assignment for resolving the VllmConfig configuration issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          },
+          {
+            "metadata": {
+              "compared_against": "Other pending issues",
+              "priority_level": "High",
+              "scope": "VLLM model setup and usage"
+            },
+            "summary": "Discussion on the priority of resolving the VllmConfig configuration issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "priority_discussion"
+          },
+          {
+            "metadata": {
+              "blocker_type": "Initialization failure",
+              "blocking_target": "VllmConfig instantiation",
+              "unblock_condition": "Fix or clarification on valid parameters"
+            },
+            "summary": "Blocking issue related to the VllmConfig configuration.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "blocking_issue"
+          },
+          {
+            "metadata": {
+              "dependency_target": "VllmConfig class implementation",
+              "dependency_type": "VLLM library version and dependencies",
+              "relationship": "Correctness of parameters in instantiation"
+            },
+            "summary": "Dependencies related to the VllmConfig configuration issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "dependency"
+          }
+        ],
+        "comment_author": "atalman",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "quantization tests",
+              "problem_kind": "compatibility_issue",
+              "user_or_system_impact": "tests are failing"
+            },
+            "summary": "Tests are failing due to version mismatch and unexpected keyword arguments in model configurations.",
+            "tags": [
+              "test_flakiness",
+              "assertion_failure"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "angelayi",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-3937628423"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "yes",
+              "environment": "latest buildkite run",
+              "prerequisites": "https://buildkite.com/vllm/ci/builds/52665"
+            },
+            "summary": "environment=latest buildkite run; prerequisites=https://buildkite.com/vllm/ci/builds/52665; determinism=yes",
+            "tags": [
+              "bug",
+              "runtime_error",
+              "test_flakiness"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "atalman",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-3945116894"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "self",
+              "deliverable": "regenerated models",
+              "due_context": "when Jerry returns"
+            },
+            "summary": "Jerry is out, regenerate models and potentially change model string in text assigned to self.",
+            "tags": [
+              "bug",
+              "fix_proposed"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "jcaip",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-3961107665"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "jcaip",
+              "deliverable": "Migrating `drisspg/fp8-opt-125m` to specified config and removing associated tests",
+              "due_context": "Not specified"
+            },
+            "summary": "Migrate a model and remove its test; @jcaip is assigned to the task.",
+            "tags": [
+              "refactor"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "jcaip",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-3961511109"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification",
+              "target_area": "VLLM PR status",
+              "urgency": "unknown"
+            },
+            "summary": "ask about the resolution of an issue after a PR merge",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "azahed98",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-3986165203"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "justification": "comment indicates current state",
+              "strength": "acknowledgment",
+              "target": "issue resolution status"
+            },
+            "summary": "Agreed that the issue should be resolved.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "agreement"
+          }
+        ],
+        "comment_author": "jcaip",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-3992312761"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": "unknown",
+              "progress_state": "complete",
+              "status_kind": "resolution"
+            },
+            "summary": "closing an issue as vllm oncall",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "zhxchen17",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-3998168807"
+      },
+      {
+        "artifact_count": 6,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "PyTorch integration testing with vLLM and torchao",
+              "problem_kind": "Quantization issue",
+              "user_or_system_impact": "Functional failures in quantized models"
+            },
+            "summary": "user_or_system_impact: Int4 and fp8 quantization issues persist in newer torchao versions with PyTorch 2.11 RC.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "blocking": "No known blockers, ongoing investigation",
+              "progress_state": "Investigating specific quantization failures in torchao and PyTorch versions",
+              "status_kind": "Investigation update"
+            },
+            "summary": "status_kind: Investigation into persistent issues, progress_state: Ongoing investigation with specific examples provided.",
+            "tags": [
+              "performance_issue",
+              "runtime_error"
+            ],
+            "type": "status_update"
+          },
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "Quantization compatibility between PyTorch and torchao",
+              "urgency": "High, due to ongoing failures in integration testing."
+            },
+            "summary": "question_kind: Urgency of addressing quantization compatibility issues with newer torchao.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "Resolve functional failures in integration testing with newer PyTorch RCs",
+              "target_area": "Quantization compatibility between PyTorch and torchao",
+              "urgency": "High, as seen in recent test failures."
+            },
+            "summary": "expected_improvement: Investigate and resolve quantization issues for newer torchao versions.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "suggestion"
+          },
+          {
+            "metadata": {
+              "constraint_type": "Version compatibility",
+              "scope": "Quantized models with newer PyTorch RCs and torchao nightly",
+              "severity": "Functional failures in integration testing."
+            },
+            "summary": "constraint_type: Compatibility constraint, scope: PyTorch and torchao versions, severity: Major functional failure.",
+            "tags": [
+              "compatibility_issue"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "assignee": "@jainapurva",
+              "deliverable": "Investigate and resolve quantization compatibility in integration testing with newer PyTorch RCs and torchao versions.",
+              "due_context": "Ongoing investigation, no specific deadline mentioned."
+            },
+            "summary": "assignee: @jainapurva, deliverable: Investigate and potentially fix quantization issues for newer torchao versions.",
+            "tags": [
+              "bug"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "huydhn",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-4015058209"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "jcaip",
+              "deliverable": "regenerating models and updating the hf space",
+              "due_context": "unknown"
+            },
+            "summary": "Assignee requested access to regenerate models and update the hf space.",
+            "tags": [
+              "api_misuse",
+              "config_issue"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "jcaip",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-4025583826"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "access request",
+              "target_area": "model management",
+              "urgency": "low"
+            },
+            "summary": "regenerating models access request",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "huydhn",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-4025676203"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "transformers_version",
+              "problem_kind": "code_incompatibility",
+              "user_or_system_impact": "tests_failures"
+            },
+            "summary": "The problem is related to the transformers version (v4.57.5) used by vLLM, which doesn't support full_attention/sliding_attention in ALLOWED_LAYER_TYPES.",
+            "tags": [
+              "incorrect_behavior",
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "huydhn",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-4040384455"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "resolved",
+              "status_kind": "test_execution"
+            },
+            "summary": "The CI run on VLLM benchmarks has been successfully completed after updating the models on HF.",
+            "tags": [
+              "ci_failure"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "jainapurva",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-4042048235"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "resolved",
+              "status_kind": "resolution_confirmation"
+            },
+            "summary": "Issue has been resolved as confirmed by a specific test run.",
+            "tags": [
+              "test_infra_issue"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "huydhn",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/175435#issuecomment-4058204579"
+      }
+    ],
+    "issue_number": 175435,
+    "issue_title": "[release 2.11][vllm] Quantization - test_pre_quantized_model, torchao",
+    "issue_url": "https://github.com/pytorch/pytorch/issues/175435"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/pytorch__pytorch/issue_175435.json",
+  "repository": "pytorch/pytorch",
+  "status": "completed"
+}

@@ -1,0 +1,342 @@
+{
+  "issue": {
+    "artifact_count": 17,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "cross_compilation",
+              "problem_kind": "compilation",
+              "user_or_system_impact": "system"
+            },
+            "summary": "Miri fails to link on macOS",
+            "tags": [
+              "build_failure",
+              "macos"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "RalfJung",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rust compiler",
+              "problem_kind": "specific_code_change_issues",
+              "user_or_system_impact": "builder failure"
+            },
+            "summary": "The problem is a specific rustc PR (#153026) that introduces an issue on macOS dist builder.",
+            "tags": [
+              "bug",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "RalfJung",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3957502527"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "build_steps/dist.rs",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "inaccurate build process"
+            },
+            "summary": "A fix for an error on macOS does not work as intended.",
+            "tags": [
+              "bug",
+              "macos"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "nikic",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3957797108"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "compiler/rustc_llvm/build.rs",
+              "problem_kind": "configuration",
+              "user_or_system_impact": "potential build issues"
+            },
+            "summary": "On macOS, the `LLVM` library name should be used instead of a versioned name to avoid naming conflicts.",
+            "tags": [
+              "api_misuse",
+              "config_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "bjorn3",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3957947041"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "technical",
+              "target_area": "LLVM linking",
+              "urgency": "low"
+            },
+            "summary": "How is LLVM linked on Linux/Windows?",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "RalfJung",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3958324494"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "LLVM linking across Windows, Linux, and MinGW",
+              "problem_kind": "API misuse or compatibility issue",
+              "user_or_system_impact": "Requires platform-specific handling"
+            },
+            "summary": "Problem of LLVM linking on different platforms due to export symbol limits.",
+            "tags": [
+              "api_misuse",
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "bjorn3",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3958443646"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "in_progress",
+              "status_kind": "technical_status"
+            },
+            "summary": "reverting a PR fixes CI and allows time for proper fix without blocking Miri syncs",
+            "tags": [
+              "ci_failure",
+              "fix_proposed"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "RalfJung",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3958504087"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "separate discussion of dynamic linking on macOS",
+              "target_area": "dynamic linking on macOS",
+              "urgency": "request"
+            },
+            "summary": "suggesting dynamic linking for macOS and requesting separate measurement and discussion",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "madsmtm",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3959168739"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "ZuseZ4",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3959227144"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "unspecified",
+              "target_area": "unknown",
+              "urgency": "unknown"
+            },
+            "summary": "A question without much of an answer regarding some unspecified issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "RalfJung",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3959318884"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rust compiler build process",
+              "problem_kind": "build_failure",
+              "user_or_system_impact": "user-unfriendly"
+            },
+            "summary": "Building rustc on macOS with default developer settings fails due to missing libLLVM-22-rust-1.95.0-nightly.dylib.",
+            "tags": [
+              "compile_error",
+              "build_failure"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "ehuss",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3967194248"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rustc",
+              "problem_kind": "build_failure",
+              "user_or_system_impact": "user"
+            },
+            "summary": "User experiencing an issue with their local rustc build despite the PR only affecting dist builder.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "RalfJung",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3967283928"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "CI/CD process",
+              "problem_kind": "regression_delay",
+              "user_or_system_impact": "delays in fixing issues"
+            },
+            "summary": "PRs fixing a regression get overtaken by other PRs and are delayed due to GitHub Actions breaking.",
+            "tags": [
+              "ci_failure",
+              "runtime"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "RalfJung",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3967293073"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rustc compilation process",
+              "problem_kind": "build",
+              "user_or_system_impact": "build system"
+            },
+            "summary": "Building rustc on macOS with default developer settings fails due to missing libLLVM.",
+            "tags": [
+              "build_failure",
+              "compile_error",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "jieyouxu",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3967359203"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "ZuseZ4",
+              "deliverable": "successful `try jobs=dist-aarch64-apple` build and Miri build check",
+              "due_context": "as soon as possible"
+            },
+            "summary": "Assign task to ZuseZ4 for re-land of change and Miri build check.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "RalfJung",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3967907658"
+      },
+      {
+        "artifact_count": 3,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "source control integration",
+              "problem_kind": "code behavior mismatch",
+              "user_or_system_impact": "incorrect code build or execution"
+            },
+            "summary": "confirmed issue with shallow clone and new hash not being picked up",
+            "tags": [
+              "bug",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "blocking": "issue with non-shallow clone handling",
+              "progress_state": "partial resolution",
+              "status_kind": "bug report update"
+            },
+            "summary": "current status: issue partially resolved but still affects non-shallow clones",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          },
+          {
+            "metadata": {
+              "question_kind": "technical problem",
+              "target_area": "source control integration",
+              "urgency": "medium"
+            },
+            "summary": "how to fix the issue without a shallow clone",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "ehuss",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153077#issuecomment-3968260617"
+      }
+    ],
+    "issue_number": 153077,
+    "issue_title": "Miri fails to link on macOS",
+    "issue_url": "https://github.com/rust-lang/rust/issues/153077"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/rust-lang__rust/issue_153077.json",
+  "repository": "rust-lang/rust",
+  "status": "completed"
+}

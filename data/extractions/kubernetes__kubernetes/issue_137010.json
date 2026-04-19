@@ -1,0 +1,182 @@
+{
+  "issue": {
+    "artifact_count": 7,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kubelet_checkpoint_manager",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "misleading information in checkpoint file"
+            },
+            "summary": "pod deletion does not remove device info from checkpoint file",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "maxin93",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3895698474"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "maxin93",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3895699790"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "ibm-adarsh",
+              "deliverable": "contribution to the issue",
+              "due_context": "unspecified"
+            },
+            "summary": "Assign issue to new contributor for development work",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "ibm-adarsh",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3896596348"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "ibm-adarsh",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3897132669"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "The issue is reproducible.",
+              "environment": "Reproduced on local setup.",
+              "prerequisites": "No specific prerequisites mentioned, but user suggests they were able to reproduce it successfully."
+            },
+            "summary": "Provided environment and steps to reproduce the issue.",
+            "tags": [
+              "bug",
+              "test_infra_issue"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "ibm-adarsh",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3897397690"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": "no_blocking",
+              "progress_state": "work_in_progress",
+              "status_kind": "ongoing_work"
+            },
+            "summary": "In-progress: https://github.com/kubernetes/kubernetes/compare/master...ibm-adarsh:kubernetes:fix-checkpoint-cleanup",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "ibm-adarsh",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3897568546"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "impact_scope": "system",
+              "reasoning_kind": "bug_classification",
+              "supports_artifact_type": "behavioral_rationale"
+            },
+            "summary": "the checkpoint data is updated lazily when a new pod is admitted and devices are garbage collected. If devices are held indefinitely, this is a bug. Otherwise the system is behaving as expected.",
+            "tags": [
+              "bug"
+            ],
+            "type": "rationale"
+          }
+        ],
+        "comment_author": "ffromani",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3899013650"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "impact_scope": "system",
+              "reasoning_kind": "behavior_explanation",
+              "supports_artifact_type": "design_decision"
+            },
+            "summary": "Explains the behavior of checkpoint data updates in response to pod admissions and device garbage collection. Confirms that the current system is behaving as expected.",
+            "tags": [
+              "performance_issue",
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          }
+        ],
+        "comment_author": "maxin93",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3900394384"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "certainty": "high",
+              "resolution_status": "resolved",
+              "target_question_topic": "current method for learning resource allocation state"
+            },
+            "summary": "Explains the current approach for users to learn resource allocation state via podresources API.",
+            "tags": [
+              "api"
+            ],
+            "type": "answer_clarification"
+          }
+        ],
+        "comment_author": "ffromani",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3902203607"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "SergeyKanzhelev",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3961215080"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137010#issuecomment-3961215667"
+      }
+    ],
+    "issue_number": 137010,
+    "issue_title": "checkpoint info doesn't removed after pod deleted",
+    "issue_url": "https://github.com/kubernetes/kubernetes/issues/137010"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/kubernetes__kubernetes/issue_137010.json",
+  "repository": "kubernetes/kubernetes",
+  "status": "completed"
+}

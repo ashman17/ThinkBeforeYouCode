@@ -1,0 +1,132 @@
+{
+  "issue": {
+    "artifact_count": 7,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "FSDPParam",
+              "problem_kind": "crash",
+              "user_or_system_impact": "crashes"
+            },
+            "summary": "nn.Parameter creation in FSDPParam crashes for non-floating point tensors.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "roycho96",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/177844"
+      },
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "FSDP training and inference with uint8 tensors",
+              "problem_kind": "misuse of quantized data types in FSDP for inference",
+              "user_or_system_impact": "potential runtime error due to invalid usage"
+            },
+            "summary": "user_is_troubleshooting_quantization_for_integers_in_fsdp",
+            "tags": [
+              "incorrect_behavior",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "correct usage to avoid runtime errors",
+              "target_area": "quantization and use of uint8 tensors in FSDP",
+              "urgency": "unknown"
+            },
+            "summary": "suggesting_alternative_approach_for_quantization",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "suggestion"
+          },
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "FSDP training and inference with uint8 tensors",
+              "urgency": "medium, since it's unclear if user is trying to use FSDP for quantization"
+            },
+            "summary": "user_is_investigating_if_quantization_is_their_goal_for_inference_with_fsdp",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "certainty": "unknown",
+              "resolution_status": "resolved, user needs to consider a different approach",
+              "target_question_topic": "compatibility of uint8 tensors with autograd in PyTorch for training"
+            },
+            "summary": "clarifying_the_incompatibility_of_uint8_tensors_with_autograd_for_training",
+            "tags": [
+              "incorrect_behavior",
+              "runtime_error"
+            ],
+            "type": "answer_clarification"
+          }
+        ],
+        "comment_author": "xmfan",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/177844#issuecomment-4095552004"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "nn.Parameter constructor",
+              "problem_kind": "Initialization Bug",
+              "user_or_system_impact": "Crashes during initialization"
+            },
+            "summary": "The parameter in question is frozen (`requires_grad=False`), but `nn.Parameter(data)` defaults to `requires_grad=True`, crashing before the next line can set it back.",
+            "tags": [
+              "bug",
+              "crash"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "roycho96",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/177844#issuecomment-4095598144"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "correctness and robustness",
+              "solution_kind": "code fix",
+              "target_area": "mixed precision support"
+            },
+            "summary": "proposed a fix for mixed precision handling in non-float dtypes",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "weifengpy",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/177844#issuecomment-4096433642"
+      }
+    ],
+    "issue_number": 177844,
+    "issue_title": "nn.Parameter creation in FSDPParam crashes for non floating point tensors",
+    "issue_url": "https://github.com/pytorch/pytorch/issues/177844"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/pytorch__pytorch/issue_177844.json",
+  "repository": "pytorch/pytorch",
+  "status": "completed"
+}

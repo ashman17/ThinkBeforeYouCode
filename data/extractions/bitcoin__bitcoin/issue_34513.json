@@ -1,0 +1,476 @@
+{
+  "issue": {
+    "artifact_count": 26,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "build_system",
+              "problem_kind": "configuration_failure",
+              "user_or_system_impact": "development_halted"
+            },
+            "summary": "CMake 4.1.0+ fails to configure cross-build for macOS with Ninja generator when using the Ninja generator.",
+            "tags": [
+              "build_failure"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3853644743"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification_request",
+              "target_area": "error_output",
+              "urgency": "unknown"
+            },
+            "summary": "ask about the current actions to be taken based on error output",
+            "tags": [
+              "bug",
+              "runtime_error"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3853667339"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "CMake configuration",
+              "problem_kind": "configuration issue",
+              "user_or_system_impact": "potential performance degradation and test failures"
+            },
+            "summary": "The problem of needing to change RPATH in the build process may lead to slow builds or unit test failures.",
+            "tags": [
+              "config_issue",
+              "build_failure",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "purpleKarrot",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3854067297"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "upstream_support",
+              "target_area": "CMake configuration",
+              "urgency": "low"
+            },
+            "summary": "asked about an upstream question that did not receive a reply",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3854092828"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "build process",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "binary clients"
+            },
+            "summary": "make sure that a workaround for making mpgen usable at build time does not affect RPATH in shipped binaries such as bitcoind",
+            "tags": [
+              "build_failure",
+              "runtime_error",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "purpleKarrot",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3854312277"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "config_scope": "release",
+              "parameter": "CMAKE_SKIP_RPATH",
+              "selected_value": "on"
+            },
+            "summary": "The configuration choice of CMAKE_SKIP_RPATH is made to prevent RPATH information from being added to release binaries.",
+            "tags": [
+              "build_failure",
+              "config_issue"
+            ],
+            "type": "configuration_choice"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3854345744"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "CMake configuration and linking process",
+              "problem_kind": "Build and Linking Issue",
+              "user_or_system_impact": "Potential build failures"
+            },
+            "summary": "The need for changing the RPATH is causing issues with relinking during installation.",
+            "tags": [
+              "build_failure"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "ryanofsky",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3854349573"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "Prevent issues with shipped binaries",
+              "solution_kind": "configuration",
+              "target_area": "RPATH usage in build system"
+            },
+            "summary": "Ensuring RPATH usage does not affect shipped binaries; `INSTALL_RPATH_USE_LINK_PATH` is set only on the `mpgen` target and `CMAKE_INSTALL_RPATH` is set by dependencies.",
+            "tags": [
+              "build_failure",
+              "config_issue"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "ryanofsky",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3854428082"
+      },
+      {
+        "artifact_count": 5,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "build_configuration",
+              "problem_kind": "issue_identification",
+              "user_or_system_impact": "unclear"
+            },
+            "summary": "reported issue is likely unrelated to use of `INSTALL_RPATH_USE_LINK_PATH` / `CMAKE_INSTALL_RPATH` settings and may be a new bug or limitation in cmake 4.1.0.",
+            "tags": [
+              "bug",
+              "config_issue",
+              "api_misuse"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "impact_scope": "build_configuration",
+              "reasoning_kind": "elimination_of_causes",
+              "supports_artifact_type": "reported_issue"
+            },
+            "summary": "The author rationalizes that the `INSTALL_RPATH_USE_LINK_PATH` and `CMAKE_INSTALL_RPATH` settings are not causing the reported error about `bitcoind`.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "constraint_type": "setting_scope",
+              "scope": "build_configuration",
+              "severity": "low"
+            },
+            "summary": "The `INSTALL_RPATH_USE_LINK_PATH` is only set on the `mpgen` target and `CMAKE_INSTALL_RPATH` inside depends cmake package builds for native executable tools.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "question_kind": "clarification_request",
+              "target_area": "build_configuration",
+              "urgency": "unknown"
+            },
+            "summary": "The author questions why cmake thinks \"The install of the bitcoind target requires changing an RPATH\" when it doesn't seem like this should be true.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "certainty": "probable",
+              "resolution_status": "inquiry",
+              "target_question_topic": "issue_identification"
+            },
+            "summary": "The author clarifies that the reported issue is probably not related to cmake settings and suggests it could be a new bug or limitation in cmake 4.1.0.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "answer_clarification"
+          }
+        ],
+        "comment_author": "ryanofsky",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3854592260"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "build_system",
+              "problem_kind": "behavior_change",
+              "user_or_system_impact": "potential build failures"
+            },
+            "summary": "the issue may be related to a change in behavior between cmake versions 4.0.x and 4.1.0",
+            "tags": [
+              "bug",
+              "config_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3870643123"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "coverage_target": "unknown",
+              "expected_outcome": "successful build",
+              "test_level": "unknown"
+            },
+            "summary": "determinism of bug reproduction steps on macOS arm64 architecture with CMake 4.2.3",
+            "tags": [
+              "macos"
+            ],
+            "type": "test_case"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3877125243"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "Issue only manifests on Linux",
+              "environment": "arm64 macOS",
+              "prerequisites": "CMake 4.2.3"
+            },
+            "summary": "Repro steps for the issue do not work on arm64 macOS with CMake 4.2.3.",
+            "tags": [
+              "bug"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3883129727"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Linux",
+              "problem_kind": "building issue",
+              "user_or_system_impact": "requires detailed information and latest CMake version"
+            },
+            "summary": "problem_kind: building issue; affected_area: Linux; user_or_system_impact: requires detailed information and latest CMake version.",
+            "tags": [
+              "build_failure",
+              "compile_error",
+              "linux"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3883147476"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "CMakeLists.txt",
+              "problem_kind": "build_failure",
+              "user_or_system_impact": "Build failure"
+            },
+            "summary": "The issue only manifests on Linux.",
+            "tags": [
+              "bug",
+              "compile_error",
+              "linux"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3883398936"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "CMake migration",
+              "problem_kind": "behavior_change",
+              "user_or_system_impact": "unknown"
+            },
+            "summary": "The issue is caused by a code change since migration to CMake; upstream investigation needed.",
+            "tags": [
+              "bug",
+              "regression"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3883751359"
+      },
+      {
+        "artifact_count": 5,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "build_system",
+              "problem_kind": "behavior_change",
+              "user_or_system_impact": "development_workflow"
+            },
+            "summary": "The issue is caused by a change in CMake behavior due to a commit from MR #10721, affecting the bitcoin codebase.",
+            "tags": [
+              "api_misuse",
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "identifying the cause of the issue",
+              "target_area": "build_system",
+              "urgency": "high"
+            },
+            "summary": "The suggestion is to investigate the commit from MR #10721 to understand what caused the behavior change.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          },
+          {
+            "metadata": {
+              "constraint_type": "time_frame",
+              "scope": "historical",
+              "severity": "moderate"
+            },
+            "summary": "The constraint is that the behavior change has existed since the migration to CMake, limiting the time frame for investigation.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "assignee": "@purpleKarrot",
+              "deliverable": "identification of the cause of the issue",
+              "due_context": "as soon as possible"
+            },
+            "summary": "The task is assigned to investigate the commit from MR #10721.",
+            "tags": [
+              "bug"
+            ],
+            "type": "task_assignment"
+          },
+          {
+            "metadata": {
+              "blocking": "none",
+              "progress_state": "identified potential cause",
+              "status_kind": "progress"
+            },
+            "summary": "The status update is that bisecting pointed at a specific commit from MR #10721 causing the behavior change.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3898600856"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "version_specific",
+              "target_area": "codebase",
+              "urgency": "low"
+            },
+            "summary": "user asked if the issue affects 30.x version",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3933780423"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "justification": "unknown",
+              "strength": "unknown",
+              "target": "unknown"
+            },
+            "summary": "hebasto confirms that the issue does not affect 30.x version.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "agreement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34513#issuecomment-3934086513"
+      }
+    ],
+    "issue_number": 34513,
+    "issue_title": "CMake 4.1.0+ fails to configure cross-build for macOS with Ninja generator",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34513"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34513.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

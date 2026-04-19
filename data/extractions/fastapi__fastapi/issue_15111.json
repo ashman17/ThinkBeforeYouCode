@@ -1,0 +1,146 @@
+{
+  "issue": {
+    "artifact_count": 10,
+    "comments": [
+      {
+        "artifact_count": 10,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "background_tasks",
+              "problem_kind": "behavior",
+              "user_or_system_impact": "hard-to-debug issues in production"
+            },
+            "summary": "Background tasks are silently discarded when an endpoint returns a Response with its own background attribute.",
+            "tags": [
+              "incorrect_behavior",
+              "runtime_error",
+              "bug"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "improved developer awareness",
+              "solution_kind": "warn",
+              "target_area": "background_tasks_handler"
+            },
+            "summary": "Emit a UserWarning to inform the developer about the discarded background tasks.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "alternative_to": "silent discard",
+              "comparison_focus": "developer feedback",
+              "differentiator": "user awareness"
+            },
+            "summary": "Add a warning in such cases, as suggested by maintainer @YuriiMotov.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "chosen_option": "emit warning",
+              "decision_status": "finalized",
+              "rejected_options": "silent discard"
+            },
+            "summary": "Decide on the handling of BackgroundTasks when a Response with its own background is returned.",
+            "tags": [
+              "runtime"
+            ],
+            "type": "design_decision"
+          },
+          {
+            "metadata": {
+              "constraint_type": "functional",
+              "scope": "background_tasks_handler",
+              "severity": "high"
+            },
+            "summary": "The current behavior does not allow for injected BackgroundTasks to be attached if the Response already has a background.",
+            "tags": [
+              "runtime",
+              "bug"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "component": "fastapi/routing.py",
+              "implementation_action": "attach background tasks",
+              "lifecycle_stage": "execution"
+            },
+            "summary": "The current implementation checks if `raw_response.background is None` before attaching injected tasks.",
+            "tags": [
+              "runtime"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "intended_use": "demonstrate bug",
+              "language": "python",
+              "snippet_kind": "issue_example"
+            },
+            "summary": "Example code showing the issue with injected BackgroundTasks being discarded.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "impact_scope": "background_tasks",
+              "reasoning_kind": "developer assistance",
+              "supports_artifact_type": "warning"
+            },
+            "summary": "A warning is necessary to help developers understand and resolve the issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "blocking": "false",
+              "progress_state": "in progress",
+              "status_kind": "discussion"
+            },
+            "summary": "The issue is related to the discussion in #11215 and a PR addressing it has been suggested.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          },
+          {
+            "metadata": {
+              "dependency_target": "#11215",
+              "dependency_type": "discussion",
+              "relationship": "follow-up"
+            },
+            "summary": "The issue is related to the discussion in #11215.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "dependency"
+          }
+        ],
+        "comment_author": "mango766",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/15111"
+      }
+    ],
+    "issue_number": 15111,
+    "issue_title": "Injected BackgroundTasks silently discarded when Response has its own background",
+    "issue_url": "https://github.com/fastapi/fastapi/issues/15111"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/fastapi__fastapi/issue_15111.json",
+  "repository": "fastapi/fastapi",
+  "status": "completed"
+}

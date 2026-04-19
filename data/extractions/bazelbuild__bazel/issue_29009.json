@@ -1,0 +1,35 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "file_reference",
+              "problem_kind": "warning",
+              "user_or_system_impact": "user"
+            },
+            "summary": "BEP referenced local file (Is a directory) warning appears on Bazel 9.0.0rc6 when referencing a local file",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "bazel-io",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29009"
+      }
+    ],
+    "issue_number": 29009,
+    "issue_title": "[9.0.2] BEP referenced local file (Is a directory) warning on Bazel 9.0.0rc6",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/29009"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_29009.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

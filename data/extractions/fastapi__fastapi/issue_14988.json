@@ -1,0 +1,37 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Dependency handling and background tasks",
+              "problem_kind": "Behavioral issue",
+              "user_or_system_impact": "Database transactions are not properly committed."
+            },
+            "summary": "Background tasks and dependencies execute concurrently in FastAPI, causing issues with database transactions.",
+            "tags": [
+              "incorrect_behavior",
+              "database",
+              "dependency_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "jayvynl",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/14988"
+      }
+    ],
+    "issue_number": 14988,
+    "issue_title": "Dependency keeps going after response returns when there exists any backgroud tasks.",
+    "issue_url": "https://github.com/fastapi/fastapi/issues/14988"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/fastapi__fastapi/issue_14988.json",
+  "repository": "fastapi/fastapi",
+  "status": "completed"
+}

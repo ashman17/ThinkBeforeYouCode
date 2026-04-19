@@ -1,0 +1,99 @@
+{
+  "issue": {
+    "artifact_count": 3,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "memory management",
+              "problem_kind": "functional_test",
+              "user_or_system_impact": "system stability"
+            },
+            "summary": "Test MemoryQoS [Serial] feature rollback fails to reset memory protection as expected.",
+            "tags": [
+              "test_flakiness",
+              "test_timeout",
+              "timeout"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "kannon92",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137891"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "kannon92",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137891#issuecomment-4090054276"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "kannon92",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137891#issuecomment-4090077256"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "compared_against": "unknown",
+              "priority_level": "important-soon",
+              "scope": "issue"
+            },
+            "summary": "Priority set to important-soon for issue resolution.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "priority_discussion"
+          }
+        ],
+        "comment_author": "kannon92",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137891#issuecomment-4090078176"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": "unknown",
+              "progress_state": "in_progress",
+              "status_kind": "progress_state"
+            },
+            "summary": "Issue is being addressed by PR 137889 that checks QoS cgroup tier.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "QiWang19",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137891#issuecomment-4090231122"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "kannon92",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137891#issuecomment-4093754504"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137891#issuecomment-4093755359"
+      }
+    ],
+    "issue_number": 137891,
+    "issue_title": "[Failing Test] MemoryQoS [Serial] feature rollback should reset memory protection to 0 when MemoryQoS is disabled",
+    "issue_url": "https://github.com/kubernetes/kubernetes/issues/137891"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/kubernetes__kubernetes/issue_137891.json",
+  "repository": "kubernetes/kubernetes",
+  "status": "completed"
+}

@@ -1,0 +1,36 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "crypto/sha256_sse4.cpp",
+              "problem_kind": "crash",
+              "user_or_system_impact": "system"
+            },
+            "summary": "GCC + ASan debug builds cause runtime SEGV in `sha256_sse4::Transform` on CPUs without SHA-NI.",
+            "tags": [
+              "runtime_error",
+              "assertion_failure"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "deadmanoz",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34881"
+      }
+    ],
+    "issue_number": 34881,
+    "issue_title": "GCC + ASan debug builds: runtime SEGV in `sha256_sse4::Transform` on CPUs without SHA-NI",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34881"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34881.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

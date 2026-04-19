@@ -1,0 +1,131 @@
+{
+  "issue": {
+    "artifact_count": 6,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "node pod-level resources vertical scaling",
+              "problem_kind": "regression",
+              "user_or_system_impact": "system"
+            },
+            "summary": "Multiple e2e tests failed due to cgroup and memory verification issues in the Kubernetes cluster.",
+            "tags": [
+              "test_flakiness",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "dims",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137894"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4090617563"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "dims",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4090619481"
+      },
+      {
+        "artifact_count": 3,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "unknown",
+              "problem_kind": "unknown",
+              "user_or_system_impact": "unknown"
+            },
+            "summary": "affected_area: alpha/beta feature job for InPlacePodLevelResourcesVerticalScaling; user_or_system_impact: failing cluster and test failures",
+            "tags": [
+              "test_flakiness"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "alternative_to": "unknown",
+              "comparison_focus": "unknown",
+              "differentiator": "unknown"
+            },
+            "summary": "alternative_to: revert in PR #137878, fix-forward in PR #137889; comparison_focus: alpha/beta kind job is passing with both solutions",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "blocking": "unknown",
+              "progress_state": "unknown",
+              "status_kind": "unknown"
+            },
+            "summary": "status_kind: ongoing, progress_state: discussed and proposed fixes; blocking: unblocked by PR #137889",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "dims",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4090950970"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "partially recovered",
+              "status_kind": "recovery"
+            },
+            "summary": "e2e tests are recovering; a new failure has been identified",
+            "tags": [
+              "test_infra_issue",
+              "ci_failure"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4092518761"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "pending validation",
+              "status_kind": "resolved"
+            },
+            "summary": "The cluster should be resolved based on recent results.",
+            "tags": [
+              "test_infra_issue",
+              "ci_failure"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4092718049"
+      }
+    ],
+    "issue_number": 137894,
+    "issue_title": "Failure cluster [e469f041...] failures in `ci-kubernetes-e2e-kind-alpha-beta-features`",
+    "issue_url": "https://github.com/kubernetes/kubernetes/issues/137894"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/kubernetes__kubernetes/issue_137894.json",
+  "repository": "kubernetes/kubernetes",
+  "status": "completed"
+}

@@ -1,0 +1,319 @@
+{
+  "issue": {
+    "artifact_count": 17,
+    "comments": [
+      {
+        "artifact_count": 6,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kubeadm/kinder test jobs",
+              "problem_kind": "failure_in_test",
+              "user_or_system_impact": "tests failing"
+            },
+            "summary": "kubeadm/kinder test jobs are failing due to an etcd version error; cluster-info task is not able to parse the etcd version returned by the binary.",
+            "tags": [
+              "test_flakiness",
+              "performance_issue",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "constraint_type": "binary_output_format_change",
+              "scope": "etcd_binary_version",
+              "severity": "high"
+            },
+            "summary": "The etcd binary version is no longer being returned in a parseable format, causing issues with kubeadm/kinder test jobs.",
+            "tags": [
+              "runtime_error",
+              "performance_issue"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "determinism": "not deterministic, depends on the etcd version",
+              "environment": "Kubernetes testgrid environment",
+              "prerequisites": "kubeadm/kinder test jobs running with specific etcd image versions"
+            },
+            "summary": "kubeadm/kinder test jobs are failing due to an etcd version error when the binary returns a non-parseable version string.",
+            "tags": [
+              "test_flakiness",
+              "runtime_error"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "alternative_to": "current etcd binary output format",
+              "comparison_focus": "kubeadm/kinder test job success",
+              "differentiator": "parseable vs non-parseable"
+            },
+            "summary": "The alternative is to ensure that the etcd binary returns its version in a parseable format.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "blocking": "false",
+              "progress_state": "root_cause_analysis_in_progress",
+              "status_kind": "known_issue"
+            },
+            "summary": "The issue has been known since March 6, 2026, and a root cause analysis is being conducted.",
+            "tags": [
+              "performance_issue"
+            ],
+            "type": "status_update"
+          },
+          {
+            "metadata": {
+              "assignee": "@ahrtr, @pacoxu",
+              "deliverable": "fix for etcd version parsing in kubeadm/kinder tests",
+              "due_context": "unspecified"
+            },
+            "summary": "The task of fixing the issue has been assigned to @ahrtr and @pacoxu.",
+            "tags": [
+              "bug"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "neolit123",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "coverage_target": "etcd_image_pull",
+              "expected_outcome": "image should be successfully pulled and etcd version should match",
+              "test_level": "unit_test"
+            },
+            "summary": "environment: docker; prerequisites: none specified; determinism: unknown",
+            "tags": [
+              "docker"
+            ],
+            "type": "test_case"
+          }
+        ],
+        "comment_author": "neolit123",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4016263751"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "kind base image with containerd v1.5.9",
+              "prerequisites": "unknown"
+            },
+            "summary": "user attempted to reproduce a bug but failed; environment includes kind base image with pinned containerd version.",
+            "tags": [
+              "bug"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "neolit123",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4016272253"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "constraint_type": "label removal",
+              "scope": "issue management",
+              "severity": "low"
+            },
+            "summary": "The constraint is about removing the sig etcd label.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          }
+        ],
+        "comment_author": "neolit123",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4016272430"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "cli/kubectl",
+              "problem_kind": "command_output_parsing_issue",
+              "user_or_system_impact": "inaccurate_user_experience"
+            },
+            "summary": "Problem in parsing the output of `kubectl exec` command due to new line character.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "neolit123",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4016281181"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "test_infra",
+              "problem_kind": "failure_to_function_as_expected",
+              "user_or_system_impact": "reduced_test_reliability"
+            },
+            "summary": "Multiple issue reports are suspected to be related failures.",
+            "tags": [
+              "bug",
+              "regression"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "tico88612",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4018798724"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "testing",
+              "problem_kind": "reliability",
+              "user_or_system_impact": "system availability"
+            },
+            "summary": "Multiple issues reported to be similar failures",
+            "tags": [
+              "bug",
+              "regression"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "neolit123",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4018840307"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Logging API",
+              "problem_kind": "Output redirection",
+              "user_or_system_impact": "Potential misconfiguration"
+            },
+            "summary": "Determine the output destination for machine parseable log messages.",
+            "tags": [
+              "api_misuse",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4026020294"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kubectl",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "confusion"
+            },
+            "summary": "stdout and stderr stream combination issue for `--version` flag in kubectl",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "neolit123",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4026227153"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kubectl",
+              "problem_kind": "UI",
+              "user_or_system_impact": "User experience"
+            },
+            "summary": "Low verbosity for pod with single default container is problematic as it may not provide enough information to the user.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "pacoxu",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4028794749"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "pacoxu",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4028802478"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kubeadm-kinder",
+              "problem_kind": "release_blocker",
+              "user_or_system_impact": "potential release delay"
+            },
+            "summary": "The release cut v1.36.0-beta.0 is failing tests and may block the release.",
+            "tags": [
+              "test_infra_issue",
+              "ci_failure",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Prajyot-Parab",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4036195659"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocker_type": "unknown",
+              "blocking_target": "unknown",
+              "unblock_condition": "unknown"
+            },
+            "summary": "v1.36.0-beta.0 cut is blocked due to an open discussion on a PR related to kubectl and SIG CLI consensus required.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "blocking_issue"
+          }
+        ],
+        "comment_author": "neolit123",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137532#issuecomment-4037197739"
+      }
+    ],
+    "issue_number": 137532,
+    "issue_title": "kubeadm/kinder test jobs are failing due to an etcd version error",
+    "issue_url": "https://github.com/kubernetes/kubernetes/issues/137532"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/kubernetes__kubernetes/issue_137532.json",
+  "repository": "kubernetes/kubernetes",
+  "status": "completed"
+}

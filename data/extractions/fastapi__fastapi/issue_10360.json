@@ -1,0 +1,311 @@
+{
+  "issue": {
+    "artifact_count": 15,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Pydantic versioning and FastAPI integration",
+              "problem_kind": "incompatibility",
+              "user_or_system_impact": "Error during model definition"
+            },
+            "summary": "Working with Pydantic v1 while having v2 installed leads to an error in FastAPI 0.100.0.",
+            "tags": [
+              "api_misuse",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Kludex",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "chbndrhnns",
+              "deliverable": "PR review of #10223",
+              "due_context": "unknown"
+            },
+            "summary": "Assigning PR review to chbndrhnns for #10223.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "chbndrhnns",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-1741990541"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "API Method Usage",
+              "problem_kind": "Runtime Error",
+              "user_or_system_impact": "User Encountered Bug"
+            },
+            "summary": "User reports a TypeError related to BaseModel.validate() method.",
+            "tags": [
+              "api_misuse",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "mike0sv",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-1743746249"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "dependency_upgrades",
+              "problem_kind": "technical_mismatch",
+              "user_or_system_impact": "delayed_upgrades"
+            },
+            "summary": "Users face difficulties upgrading to pydantic v2 due to FastAPI not supporting the backwards compatibility with pydantic v1 models.",
+            "tags": [
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "dariota",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2307468271"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": "unknown",
+              "progress_state": "unknown",
+              "status_kind": "unknown"
+            },
+            "summary": "PR #10223 is abandoned and needs rebasing but requires feedback.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "chbndrhnns",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2307678913"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "status_request",
+              "target_area": "issue_status",
+              "urgency": "low"
+            },
+            "summary": "asked for an update on the issue status from @tiangolo",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "derekahuang",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2375479432"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "large_code_bases",
+              "problem_kind": "migrating_to_new_library",
+              "user_or_system_impact": "difficulty"
+            },
+            "summary": "Large code bases face difficulties in migrating to FastAPI.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "tomtom103",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2401060479"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "schema_generation",
+              "problem_kind": "incompatible_migration",
+              "user_or_system_impact": "development_holds"
+            },
+            "summary": "Migration from Pydantic V1 to V2 causes issues with OpenAPI schema generation in FastAPI.",
+            "tags": [
+              "api_misuse",
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "EldarSehayekZenity",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2416929776"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "Facilitates migration in large codebases",
+              "solution_kind": "migration strategy",
+              "target_area": "APIRouter implementation"
+            },
+            "summary": "Proposed solution for per-APIRouter Pydantic v1 vs v2 logic.",
+            "tags": [
+              "refactor"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "Kilo59",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2417343917"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "upgrading libraries",
+              "problem_kind": "compatibility_issue",
+              "user_or_system_impact": "blocking"
+            },
+            "summary": "upgrade of fastapi and pydantic v2 blocks the user due to unknown issues",
+            "tags": [
+              "bug",
+              "version_mismatch"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "AlonMorgen",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2466755879"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Pydantic v2 migration",
+              "problem_kind": "difficulty",
+              "user_or_system_impact": "users"
+            },
+            "summary": "Users facing difficulty in migrating large codebases to Pydantic v2.",
+            "tags": [
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hduce",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2482435050"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": "unknown",
+              "progress_state": "unknown",
+              "status_kind": "unknown"
+            },
+            "summary": "asking for an update on a specific issue",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "7adidaz",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2490782009"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Pydantic and FastAPI integration",
+              "problem_kind": "compatibility_issue",
+              "user_or_system_impact": "Development time"
+            },
+            "summary": "Incompatibility between Pydantic v1 and v2 with FastAPI's architecture prevents monkeypatching solution.",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "phillipuniverse",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2510216562"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "jackklika",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2641170943"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "smooth transition without breaking the application",
+              "solution_kind": "migration strategy",
+              "target_area": "Pydantic project upgrade"
+            },
+            "summary": "Strangler Fig pattern for upgrading big projects from Pydantic V1 to V2; two projects approach with gradual migration and testing.",
+            "tags": [
+              "refactor"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "YuriiMotov",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-2981636129"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "easier transition from Pydantic v1 to v2",
+              "solution_kind": "migration support",
+              "target_area": "compatibility"
+            },
+            "summary": "Introduced support for pydantic.v1 and v2 in FastAPI to facilitate migration.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "tiangolo",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/10360#issuecomment-3393546384"
+      }
+    ],
+    "issue_number": 10360,
+    "issue_title": "Working with Pydantic v1 while having v2 installed",
+    "issue_url": "https://github.com/fastapi/fastapi/issues/10360"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/fastapi__fastapi/issue_10360.json",
+  "repository": "fastapi/fastapi",
+  "status": "completed"
+}

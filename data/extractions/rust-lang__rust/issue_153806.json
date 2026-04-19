@@ -1,0 +1,35 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "static_initialization",
+              "problem_kind": "internal_compiler_error",
+              "user_or_system_impact": "crashes the compiler"
+            },
+            "summary": "ICE when taking a reference to an `extern static` in a `static` initializer.",
+            "tags": [
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "VulnHunter008",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153806"
+      }
+    ],
+    "issue_number": 153806,
+    "issue_title": "[ICE]: crash after `E0080` when taking a reference to an `extern static` in a `static` initializer",
+    "issue_url": "https://github.com/rust-lang/rust/issues/153806"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/rust-lang__rust/issue_153806.json",
+  "repository": "rust-lang/rust",
+  "status": "completed"
+}

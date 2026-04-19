@@ -1,0 +1,305 @@
+{
+  "issue": {
+    "artifact_count": 16,
+    "comments": [
+      {
+        "artifact_count": 5,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "torch.compile, GGUF dequant function",
+              "problem_kind": "silent runtime error",
+              "user_or_system_impact": "incorrect output"
+            },
+            "summary": "Silent bug in torch.compile with GGUF dequant using `view(dtype)`",
+            "tags": [
+              "bug",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "intended_use": "bug reproduction",
+              "language": "python",
+              "snippet_kind": "reproducer"
+            },
+            "summary": "Reproducer for the silent bug in torch.compile with GGUF dequant using `view(dtype)`",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "coverage_target": "GGUF dequant function correctness",
+              "expected_outcome": "same output for both compiled and non-compiled versions",
+              "test_level": "unit_test"
+            },
+            "summary": "Test case to check the correctness of GGUF dequant functions before and after torch.compile",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "test_case"
+          },
+          {
+            "metadata": {
+              "determinism": "Fails on both CPU and CUDA",
+              "environment": "Windows 11, Nvidia GPU (RTX 3080 Ti), torch 2.10 RC version",
+              "prerequisites": "Install necessary dependencies and libraries"
+            },
+            "summary": "Steps to reproduce the silent bug in torch.compile with GGUF dequant using `view(dtype)`",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "constraint_type": "code lines presence/absence",
+              "scope": "GGUF dequant function",
+              "severity": "medium"
+            },
+            "summary": "Silent bug occurs only when certain lines are present in the function",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          }
+        ],
+        "comment_author": "woct0rdho",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "torch.compile",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "wrong kernel results"
+            },
+            "summary": "torch.compile miscompiles dtype-changing view() operations by treating them as safe aliasing views, leading to incorrect behavior in compiled kernels.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "pythongiant",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3766423705"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "unknown",
+              "urgency": "unknown"
+            },
+            "summary": "Is the proposed fix for handling `aten.view.dtype` in Inductor correct? Should it be treated as unsafe to prevent cross-graph buffer reuse and miscompilation?",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "pythongiant",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3766429974"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "handling dtype conversion in torch.compile",
+              "language": "unknown",
+              "snippet_kind": "workaround"
+            },
+            "summary": "woct0rdho is providing a workaround for handling `view(dtype)` in the context of `torch.compile`.",
+            "tags": [
+              "workaround"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "woct0rdho",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3766843587"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "torch.compile and inductor backend",
+              "problem_kind": "model_accuracy",
+              "user_or_system_impact": "ComfyUI functionality"
+            },
+            "summary": "incorrect_behavior: torch.compile backend affects model accuracy; high priority due to impact on ComfyUI.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "anijain2305",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3775689637"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "compilation",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "incorrect output"
+            },
+            "summary": "shapes in compile of QK_6 are created as dynamic_shape leading to incorrect behavior when using factory wrapper with different closures",
+            "tags": [
+              "incorrect_behavior",
+              "api_misuse"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "krastogi-in",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3804723925"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "compilation",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "occasional bug"
+            },
+            "summary": "The problem happens only when a closure is used. Directly calling `torch.compile` does not trigger the issue.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "woct0rdho",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3804839211"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "laithsakka",
+              "deliverable": "reproducibility of the issue with dynamic shapes and recompilation.",
+              "due_context": "unknown"
+            },
+            "summary": "eellison assigned the bug reproduction task to laithsakka.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "eellison",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3923961207"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "laithsakka",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3930706243"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "lakshayg",
+              "deliverable": "self-removal",
+              "due_context": "issue status"
+            },
+            "summary": "lakshayg removes self from assignees in issue 172747.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "lakshayg",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3937097298"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "cache key generation",
+              "language": "Python",
+              "snippet_kind": "fix"
+            },
+            "summary": "Fix in CodeID hashing to include closure variables to differentiate factory-generated functions",
+            "tags": [
+              "fix_proposed",
+              "bug",
+              "runtime_error",
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "Cheng-Logic",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3964321090"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "Cheng-Logic",
+              "deliverable": "PR review",
+              "due_context": "unknown"
+            },
+            "summary": "krastogi-in requests Cheng-Logic to review a PR.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "krastogi-in",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3964362003"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "Prevent cache collision and ensure deterministic remote PGO caching.",
+              "solution_kind": "Bug fix",
+              "target_area": "Dynamo caching logic"
+            },
+            "summary": "Handle ValueError per-cell to prevent hash generation abort; prioritize object hashing for remote cache determinism; update CodeId class to safely hash closure contents.",
+            "tags": [
+              "fix_proposed",
+              "logic_bug",
+              "runtime_error"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "Cheng-Logic",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172747#issuecomment-3964841785"
+      }
+    ],
+    "issue_number": 172747,
+    "issue_title": "`torch.compile` silent bug in GGUF dequant, possibly because of `view(dtype)`",
+    "issue_url": "https://github.com/pytorch/pytorch/issues/172747"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/pytorch__pytorch/issue_172747.json",
+  "repository": "pytorch/pytorch",
+  "status": "completed"
+}
