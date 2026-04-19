@@ -7,6 +7,7 @@ from typing import Optional, Sequence
 
 from tbyc_dataset.config import github_settings_from_env, pipeline_settings
 from tbyc_dataset.dataset.pipeline import build_dataset, curate_repository, fetch_repository
+from tbyc_dataset.evaluation import CodeRetrievalPipeline
 from tbyc_dataset.extraction.pipeline import ExtractionSettings, extract_discussion_artifacts
 from tbyc_dataset.models import RepositoryRef
 from tbyc_dataset.viewer import build_processed_viewer
@@ -27,6 +28,7 @@ def build_parser() -> argparse.ArgumentParser:
         "build-dataset",
         "extract-discussion-entities",
         "extract-discussion-artifacts",
+        "retrieve-code-chunks",
     ):
         subparser = subparsers.add_parser(command)
         subparser.add_argument("--repo", required=True, help="Repository in owner/name format.")
@@ -94,6 +96,25 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Unused compatibility flag kept for CLI stability.",
             )
 
+        if command == "retrieve-code-chunks":
+            subparser.add_argument(
+                "--embedding-model",
+                default="microsoft/codebert-base",
+                help="HuggingFace model for embeddings (CodeBERT).",
+            )
+            subparser.add_argument(
+                "--chunk-size",
+                type=int,
+                default=50,
+                help="Lines per chunk for code chunking.",
+            )
+            subparser.add_argument(
+                "--top-n",
+                type=int,
+                default=20,
+                help="Number of top results to return per issue.",
+            )
+
         if command in {"fetch-repo", "build-dataset"}:
             subparser.add_argument(
                 "--max-issues",
@@ -151,6 +172,19 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             pipeline_settings=p_settings,
             states=args.states,
             max_issues=args.max_issues,
+        )
+    elif args.command == "retrieve-code-chunks":
+        LOGGER.info("stage=retrieve-code-chunks")
+        pipeline = CodeRetrievalPipeline(
+            cache_dir=str(args.output_root),
+            embedding_model=args.embedding_model,
+            chunk_size=args.chunk_size,
+            top_n=args.top_n,
+        )
+        result = pipeline.run(
+            owner=repo.owner,
+            repo=repo.name,
+            output_dir=str(p_settings.output_root / "evaluation")
         )
     elif args.command in {"extract-discussion-artifacts", "extract-discussion-entities"}:
         LOGGER.info("stage=extract model=%s issue_number=%s", args.model_id, args.issue_number)
