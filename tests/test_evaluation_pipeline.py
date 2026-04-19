@@ -9,6 +9,12 @@ from tbyc_dataset.evaluation.pipeline import (
     reciprocal_rank_fusion,
     tokenize_for_bm25,
 )
+from tbyc_dataset.evaluation.prompt import build_issue_thought_prompt
+from tbyc_dataset.evaluation.thoughts import (
+    _build_prompt_issue,
+    build_prompt_with_budget,
+    select_shortest_context_chunks,
+)
 
 
 def test_load_issues_sorts_by_created_at(tmp_path: Path) -> None:
@@ -232,3 +238,83 @@ def test_run_skips_precomputed_issue_results(tmp_path: Path) -> None:
 
     assert retrieved_issue_numbers == [2]
     assert len(result["issues"]) == 2
+
+
+def test_select_shortest_context_chunks_respects_max_chunks_and_char_budget() -> None:
+    chunks = [
+        {"chunk_id": "c1", "text": "x" * 120},
+        {"chunk_id": "c2", "text": "x" * 30},
+        {"chunk_id": "c3", "text": "x" * 20},
+        {"chunk_id": "c4", "text": "x" * 40},
+    ]
+
+    selected = select_shortest_context_chunks(chunks, max_chunks=10, max_chars=55)
+
+    assert [chunk["chunk_id"] for chunk in selected] == ["c3", "c2"]
+    assert sum(len(str(chunk["text"])) for chunk in selected) <= 55
+
+
+def test_build_issue_thought_prompt_toggles_context() -> None:
+    issue = {"number": 1, "title": "Bug title", "body": "Bug body"}
+    context = [{"file_path": "main.py", "start_line": 1, "end_line": 3, "text": "def f():\n    pass"}]
+
+    with_context = build_issue_thought_prompt(issue, include_context=True, context_blocks=context)
+    without_context = build_issue_thought_prompt(issue, include_context=False, context_blocks=context)
+
+    assert "Code context:" in with_context
+    assert "main.py:1-3" in with_context
+    assert "Code context omitted by configuration." in without_context
+
+
+def test_build_prompt_with_budget_caps_total_prompt_length() -> None:
+    issue = {"number": 1, "title": "Bug", "body": "Body"}
+    context = [
+        {"chunk_id": "c1", "file_path": "a.py", "start_line": 1, "end_line": 1, "text": "x" * 600},
+        {"chunk_id": "c2", "file_path": "b.py", "start_line": 1, "end_line": 1, "text": "x" * 700},
+        {"chunk_id": "c3", "file_path": "c.py", "start_line": 1, "end_line": 1, "text": "x" * 1200},
+    ]
+
+    prompt, selected = build_prompt_with_budget(
+        issue=issue,
+        include_context=True,
+        candidate_context_blocks=context,
+        max_prompt_chars=1000,
+        max_context_chunks=10,
+    )
+
+    assert len(prompt) <= 1000
+    assert len(selected) <= 10
+
+
+def test_build_prompt_with_budget_returns_issue_only_when_description_exceeds_budget() -> None:
+    issue = {"number": 1, "title": "Bug", "body": "x" * 2000}
+
+    prompt, selected = build_prompt_with_budget(
+        issue=issue,
+        include_context=True,
+        candidate_context_blocks=[
+            {"chunk_id": "c1", "file_path": "a.py", "start_line": 1, "end_line": 1, "text": "x" * 200}
+        ],
+        max_prompt_chars=300,
+        max_context_chunks=10,
+    )
+
+    assert selected == []
+    assert "Code context omitted by configuration." in prompt
+
+
+def test_build_prompt_issue_prefers_processed_issue_opening_text() -> None:
+    raw_issue = {"number": 7, "title": "Raw title", "body": "Raw body"}
+    processed_issue = {
+        "input_vector": {"title": "Processed title", "body": "Processed body"},
+        "deliberation_thread": [
+            {"is_issue_body": True, "body": "Processed title\n\nFull issue description"},
+            {"is_issue_body": False, "body": "Other comment"},
+        ],
+    }
+
+    prompt_issue = _build_prompt_issue(raw_issue, processed_issue)
+
+    assert prompt_issue["title"] == "Processed title"
+    assert "Full issue description" in prompt_issue["body"]
+    assert "Other comment" not in prompt_issue["body"]
