@@ -98,18 +98,31 @@ class CodeRetrievalPipeline:
 
         output_root = Path(output_dir) / repo_ref.fs_slug
         ensure_directory(output_root)
+        index_dir = self._find_resumable_index_dir(output_root)
 
         LOGGER.info("loaded %s issues from %s", len(issues), issue_dir)
-        LOGGER.info("resolving snapshot commit before earliest issue")
-        snapshot_commit = self._resolve_snapshot_commit(owner, repo, issues)
-        LOGGER.info("using snapshot commit %s", snapshot_commit)
-        snapshot_dir = self._ensure_repo_snapshot(owner, repo, snapshot_commit)
-        LOGGER.info("snapshot ready at %s", snapshot_dir)
-        chunks = self._load_or_build_chunks(snapshot_dir, output_root / "indexes" / snapshot_commit)
-        LOGGER.info("loaded %s code chunks", len(chunks))
-        bundle = self._load_or_build_indexes(chunks, output_root / "indexes" / snapshot_commit)
-        LOGGER.info("indexes ready")
-        self._cleanup_repo_snapshot(owner, repo, snapshot_commit)
+        if index_dir is not None:
+            snapshot_commit = index_dir.name
+            LOGGER.info(
+                "reusing cached indexes from %s; skipping snapshot download and index rebuild",
+                index_dir,
+            )
+            chunks = self._read_chunks(index_dir / "chunks.jsonl")
+            LOGGER.info("loaded %s code chunks", len(chunks))
+            bundle = self._load_or_build_indexes(chunks, index_dir)
+            LOGGER.info("indexes ready")
+        else:
+            LOGGER.info("resolving snapshot commit before earliest issue")
+            snapshot_commit = self._resolve_snapshot_commit(owner, repo, issues)
+            LOGGER.info("using snapshot commit %s", snapshot_commit)
+            index_dir = output_root / "indexes" / snapshot_commit
+            snapshot_dir = self._ensure_repo_snapshot(owner, repo, snapshot_commit)
+            LOGGER.info("snapshot ready at %s", snapshot_dir)
+            chunks = self._load_or_build_chunks(snapshot_dir, index_dir)
+            LOGGER.info("loaded %s code chunks", len(chunks))
+            bundle = self._load_or_build_indexes(chunks, index_dir)
+            LOGGER.info("indexes ready")
+            self._cleanup_repo_snapshot(owner, repo, snapshot_commit)
 
         issue_results: List[Dict[str, Any]] = []
         for issue in self._progress_iter(
@@ -127,7 +140,7 @@ class CodeRetrievalPipeline:
             "issue_count": len(issues),
             "snapshot_commit": snapshot_commit,
             "snapshot_dir": None,
-            "index_dir": str(output_root / "indexes" / snapshot_commit),
+            "index_dir": str(index_dir),
             "results_dir": str(output_root / "results"),
             "settings": {
                 "embedding_model": self.settings.embedding_model,
@@ -145,6 +158,49 @@ class CodeRetrievalPipeline:
             "manifest": manifest,
             "issues": issue_results,
         }
+
+    def _find_resumable_index_dir(self, output_root: Path) -> Optional[Path]:
+        manifest_path = output_root / "manifest.json"
+        if manifest_path.exists():
+            try:
+                manifest = read_json(manifest_path)
+                snapshot_commit = str(manifest.get("snapshot_commit") or "").strip()
+                if snapshot_commit:
+                    manifest_index_dir = output_root / "indexes" / snapshot_commit
+                    if self._is_usable_index_dir(manifest_index_dir):
+                        return manifest_index_dir
+            except Exception as exc:
+                LOGGER.warning("failed to read cached manifest %s: %s", manifest_path, exc)
+
+        indexes_root = output_root / "indexes"
+        if not indexes_root.exists():
+            return None
+
+        candidates = [
+            path
+            for path in indexes_root.iterdir()
+            if path.is_dir() and self._is_usable_index_dir(path)
+        ]
+        if not candidates:
+            return None
+        if len(candidates) == 1:
+            return candidates[0]
+
+        candidates.sort(key=lambda path: path.stat().st_mtime, reverse=True)
+        LOGGER.warning(
+            "multiple cached index directories found under %s; using most recent %s",
+            indexes_root,
+            candidates[0],
+        )
+        return candidates[0]
+
+    def _is_usable_index_dir(self, index_dir: Path) -> bool:
+        required_paths = (
+            index_dir / "chunks.jsonl",
+            index_dir / "bm25.pkl",
+            index_dir / "embeddings.npy",
+        )
+        return all(path.exists() for path in required_paths)
 
     def _load_issues(self, issue_dir: Path) -> List[IssueRecord]:
         issues: List[IssueRecord] = []
