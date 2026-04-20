@@ -11,7 +11,10 @@ from tbyc_dataset.evaluation.pipeline import (
 )
 from tbyc_dataset.evaluation.prompt import build_issue_thought_prompt
 from tbyc_dataset.evaluation.thoughts import (
+    IssueThoughtSettings,
+    _build_issue_thought_completion_runner,
     _build_prompt_issue,
+    _resolve_issue_thought_provider,
     build_prompt_with_budget,
     select_shortest_context_chunks,
 )
@@ -318,3 +321,44 @@ def test_build_prompt_issue_prefers_processed_issue_opening_text() -> None:
     assert prompt_issue["title"] == "Processed title"
     assert "Full issue description" in prompt_issue["body"]
     assert "Other comment" not in prompt_issue["body"]
+
+
+def test_resolve_issue_thought_provider_routes_by_prefix_and_tag() -> None:
+    assert _resolve_issue_thought_provider("api/gpt-4.1-mini") == ("api", "gpt-4.1-mini")
+    assert _resolve_issue_thought_provider("openai/gpt-4o-mini") == ("api", "gpt-4o-mini")
+    assert _resolve_issue_thought_provider("ollama/qwen2.5:14b") == ("ollama", "qwen2.5:14b")
+    assert _resolve_issue_thought_provider("qwen2.5:14b") == ("ollama", "qwen2.5:14b")
+    assert _resolve_issue_thought_provider("gpt-4.1") == ("api", "gpt-4.1")
+
+
+def test_build_issue_thought_completion_runner_ollama(monkeypatch) -> None:
+    class _FakeOllamaClient:
+        def __init__(self, host: str) -> None:
+            self.host = host
+
+        def chat(self, model, messages, options):
+            assert model == "qwen2.5:14b"
+            assert messages and messages[0]["role"] == "user"
+            assert "content" in messages[0]
+            assert options["num_ctx"] >= 512
+            return {"message": {"content": "hello from ollama"}}
+
+    monkeypatch.setattr("tbyc_dataset.evaluation.thoughts.Client", _FakeOllamaClient)
+
+    settings = IssueThoughtSettings(model_id="qwen2.5:14b", model_url="http://localhost:11434")
+    provider, resolved_model_id, run_completion = _build_issue_thought_completion_runner(settings)
+
+    assert provider == "ollama"
+    assert resolved_model_id == "qwen2.5:14b"
+    assert run_completion("prompt") == "hello from ollama"
+
+
+def test_build_issue_thought_completion_runner_api_requires_key(monkeypatch) -> None:
+    monkeypatch.delenv("LLM_KEY", raising=False)
+
+    settings = IssueThoughtSettings(model_id="api/gpt-4.1-mini")
+    try:
+        _build_issue_thought_completion_runner(settings)
+        assert False, "expected ValueError"
+    except ValueError as exc:
+        assert "LLM_KEY" in str(exc)
