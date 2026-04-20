@@ -157,3 +157,14 @@ def test_compute_summary_matching_metrics_unmatched_type_scores_are_zero(monkeyp
     assert per_type["question"]["scores"]["codebert"]["cosine"] == 0.0
     assert per_type["question"]["scores"]["bertscore"]["f1"] == 0.0
     assert per_type["question"]["scores"]["bleurt"]["score"] == 0.0
+
+
+def test_normalize_bleurt_score_sigmoid_is_relaxed() -> None:
+    negative = summary_matching._normalize_bleurt_score(-0.73)
+    positive = summary_matching._normalize_bleurt_score(0.21)
+    assert 0.0 < negative < positive < 1.0
+
+
+def test_normalize_bleurt_score_clip_and_raw_modes() -> None:
+    assert summary_matching._normalize_bleurt_score(-0.73, postprocess="clip", clip_min=0.0) == 0.0
+    assert summary_matching._normalize_bleurt_score(-0.73, postprocess="raw") == -0.73

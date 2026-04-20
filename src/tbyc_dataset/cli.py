@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
 import json
 import logging
+from pathlib import Path
 from typing import Optional, Sequence
 
 from tbyc_dataset.config import github_settings_from_env, pipeline_settings
@@ -22,6 +24,7 @@ from tbyc_dataset.metrics import (
     compute_type_matching_metrics,
 )
 from tbyc_dataset.models import RepositoryRef
+from tbyc_dataset.storage import read_json
 from tbyc_dataset.viewer import build_processed_viewer
 
 
@@ -47,9 +50,19 @@ def build_parser() -> argparse.ArgumentParser:
         "compute-metadata-metrics",
         "compute-tag-metrics",
         "compute-summary-metrics",
+        "compute-all-metrics",
+        "build-leaderboard",
     ):
         subparser = subparsers.add_parser(command)
-        subparser.add_argument("--repo", required=True, help="Repository in owner/name format.")
+        subparser.add_argument(
+            "--repo",
+            required=command not in {"compute-all-metrics", "build-leaderboard"},
+            default=None,
+            help=(
+                "Repository in owner/name format. For compute-all-metrics, this is optional "
+                "and acts as a filter."
+            ),
+        )
         subparser.add_argument(
             "--output-root",
             default="data",
@@ -314,6 +327,105 @@ def build_parser() -> argparse.ArgumentParser:
                 default="Elron/bleurt-base-512",
                 help="BLEURT model checkpoint for summary quality scoring.",
             )
+            subparser.add_argument(
+                "--bleurt-postprocess",
+                choices=["sigmoid", "clip", "raw"],
+                default="sigmoid",
+                help="BLEURT post-processing mode (default: sigmoid).",
+            )
+            subparser.add_argument(
+                "--bleurt-clip-min",
+                type=float,
+                default=0.0,
+                help="Minimum BLEURT score when --bleurt-postprocess=clip (default: 0.0).",
+            )
+            subparser.add_argument(
+                "--bleurt-sigmoid-temperature",
+                type=float,
+                default=2.0,
+                help="Temperature for --bleurt-postprocess=sigmoid (higher = more relaxed).",
+            )
+            subparser.add_argument(
+                "--bleurt-sigmoid-bias",
+                type=float,
+                default=0.0,
+                help="Bias shift for --bleurt-postprocess=sigmoid.",
+            )
+
+        if command == "compute-all-metrics":
+            subparser.add_argument(
+                "--model-id",
+                default=None,
+                help=(
+                    "Optional model filter. If omitted, run all discovered models "
+                    "under data/derived."
+                ),
+            )
+            subparser.add_argument(
+                "--issue-number",
+                type=int,
+                default=None,
+                help="Optional issue number filter forwarded to all metric computations.",
+            )
+            subparser.add_argument(
+                "--similarity-threshold",
+                type=float,
+                default=0.82,
+                help="Metadata metric similarity threshold.",
+            )
+            subparser.add_argument(
+                "--similarity-metric",
+                choices=[
+                    "all",
+                    "max_all",
+                    "token_f1",
+                    "sequence_ratio",
+                    "token_jaccard",
+                    "char_3gram_jaccard",
+                    "token_containment",
+                ],
+                default="max_all",
+                help="Metadata metric similarity backend.",
+            )
+            subparser.add_argument(
+                "--codebert-model",
+                default="microsoft/codebert-base",
+                help="Encoder model used for the CodeBERT cosine baseline.",
+            )
+            subparser.add_argument(
+                "--bertscore-model",
+                default="microsoft/codebert-base",
+                help="Encoder model used for BERTScore token-level contextual matching.",
+            )
+            subparser.add_argument(
+                "--bleurt-model",
+                default="Elron/bleurt-base-512",
+                help="BLEURT model checkpoint for summary quality scoring.",
+            )
+            subparser.add_argument(
+                "--bleurt-postprocess",
+                choices=["sigmoid", "clip", "raw"],
+                default="sigmoid",
+                help="BLEURT post-processing mode (default: sigmoid).",
+            )
+            subparser.add_argument(
+                "--bleurt-clip-min",
+                type=float,
+                default=0.0,
+                help="Minimum BLEURT score when --bleurt-postprocess=clip (default: 0.0).",
+            )
+            subparser.add_argument(
+                "--bleurt-sigmoid-temperature",
+                type=float,
+                default=2.0,
+                help="Temperature for --bleurt-postprocess=sigmoid (higher = more relaxed).",
+            )
+            subparser.add_argument(
+                "--bleurt-sigmoid-bias",
+                type=float,
+                default=0.0,
+                help="Bias shift for --bleurt-postprocess=sigmoid.",
+            )
 
         if command in {"fetch-repo", "build-dataset"}:
             subparser.add_argument(
@@ -327,6 +439,19 @@ def build_parser() -> argparse.ArgumentParser:
                 nargs="+",
                 default=["OPEN", "CLOSED"],
                 help="GitHub issue states to fetch.",
+            )
+
+        if command == "build-leaderboard":
+            subparser.add_argument(
+                "--model-id",
+                default=None,
+                help="Optional model filter for leaderboard generation.",
+            )
+            subparser.add_argument(
+                "--rrf-k",
+                type=int,
+                default=60,
+                help="Reciprocal rank fusion constant k (default: 60).",
             )
 
     viewer_parser = subparsers.add_parser("build-viewer")
@@ -353,6 +478,52 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         LOGGER.info("building viewer")
         result = build_processed_viewer(output_root=pipeline_settings(args.output_root, 0, None).output_root)
         LOGGER.info("viewer build completed")
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return
+
+    if args.command == "compute-all-metrics":
+        LOGGER.info("stage=compute-all-metrics model_filter=%s repo_filter=%s", args.model_id, args.repo)
+        p_settings = pipeline_settings(args.output_root, args.min_comments, args.max_comments)
+        result = _compute_all_metrics(
+            output_root=p_settings.output_root,
+            model_id_filter=args.model_id,
+            repo_filter=args.repo,
+            issue_number=args.issue_number,
+            similarity_threshold=args.similarity_threshold,
+            similarity_metric=args.similarity_metric,
+            codebert_model=args.codebert_model,
+            bertscore_model=args.bertscore_model,
+            bleurt_model=args.bleurt_model,
+            bleurt_postprocess=args.bleurt_postprocess,
+            bleurt_clip_min=args.bleurt_clip_min,
+            bleurt_sigmoid_temperature=args.bleurt_sigmoid_temperature,
+            bleurt_sigmoid_bias=args.bleurt_sigmoid_bias,
+        )
+        print(
+            json.dumps(
+                {
+                    "model_filter": result.get("model_filter"),
+                    "repo_filter": result.get("repo_filter"),
+                    "target_count": result.get("target_count"),
+                    "metric_run_count": result.get("metric_run_count"),
+                    "succeeded_metric_count": result.get("succeeded_metric_count"),
+                    "failed_metric_count": result.get("failed_metric_count"),
+                    "targets": result.get("targets"),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+
+    if args.command == "build-leaderboard":
+        p_settings = pipeline_settings(args.output_root, args.min_comments, args.max_comments)
+        result = _build_rank_fusion_leaderboard(
+            output_root=p_settings.output_root,
+            repo_filter=args.repo,
+            model_id_filter=args.model_id,
+            rrf_k=args.rrf_k,
+        )
         print(json.dumps(result, indent=2, sort_keys=True))
         return
 
@@ -463,6 +634,10 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             codebert_model=args.codebert_model,
             bertscore_model=args.bertscore_model,
             bleurt_model=args.bleurt_model,
+            bleurt_postprocess=args.bleurt_postprocess,
+            bleurt_clip_min=args.bleurt_clip_min,
+            bleurt_sigmoid_temperature=args.bleurt_sigmoid_temperature,
+            bleurt_sigmoid_bias=args.bleurt_sigmoid_bias,
         )
     elif args.command in {"extract-discussion-artifacts", "extract-discussion-entities"}:
         LOGGER.info("stage=extract model=%s issue_number=%s", args.model_id, args.issue_number)
@@ -600,6 +775,427 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         )
     else:
         print(json.dumps(result, indent=2, sort_keys=True))
+
+
+def _compute_all_metrics(
+    *,
+    output_root: Path,
+    model_id_filter: Optional[str],
+    repo_filter: Optional[str],
+    issue_number: Optional[int],
+    similarity_threshold: float,
+    similarity_metric: str,
+    codebert_model: str,
+    bertscore_model: str,
+    bleurt_model: str,
+    bleurt_postprocess: str,
+    bleurt_clip_min: float,
+    bleurt_sigmoid_temperature: float,
+    bleurt_sigmoid_bias: float,
+) -> dict:
+    targets = _discover_metric_targets(
+        output_root=output_root,
+        model_id_filter=model_id_filter,
+        repo_filter=repo_filter,
+    )
+    if not targets:
+        raise FileNotFoundError(
+            "No derived metric targets found for the provided filters under "
+            f"{output_root / 'derived'}."
+        )
+
+    target_reports = []
+    succeeded_metric_count = 0
+    failed_metric_count = 0
+    metric_run_count = len(targets) * 4
+
+    for model_id, repo_ref in targets:
+        target_report = {
+            "model_id": model_id,
+            "repository": repo_ref.slug,
+            "metrics": {},
+            "errors": [],
+        }
+
+        metric_runners = (
+            (
+                "type",
+                lambda: compute_type_matching_metrics(
+                    owner=repo_ref.owner,
+                    repo=repo_ref.name,
+                    output_root=str(output_root),
+                    model_id=model_id,
+                    issue_number=issue_number,
+                ),
+            ),
+            (
+                "metadata",
+                lambda: compute_metadata_matching_metrics(
+                    owner=repo_ref.owner,
+                    repo=repo_ref.name,
+                    output_root=str(output_root),
+                    model_id=model_id,
+                    issue_number=issue_number,
+                    similarity_threshold=similarity_threshold,
+                    similarity_metric=similarity_metric,
+                ),
+            ),
+            (
+                "tag",
+                lambda: compute_tag_matching_metrics(
+                    owner=repo_ref.owner,
+                    repo=repo_ref.name,
+                    output_root=str(output_root),
+                    model_id=model_id,
+                    issue_number=issue_number,
+                ),
+            ),
+            (
+                "summary",
+                lambda: compute_summary_matching_metrics(
+                    owner=repo_ref.owner,
+                    repo=repo_ref.name,
+                    output_root=str(output_root),
+                    model_id=model_id,
+                    issue_number=issue_number,
+                    codebert_model=codebert_model,
+                    bertscore_model=bertscore_model,
+                    bleurt_model=bleurt_model,
+                    bleurt_postprocess=bleurt_postprocess,
+                    bleurt_clip_min=bleurt_clip_min,
+                    bleurt_sigmoid_temperature=bleurt_sigmoid_temperature,
+                    bleurt_sigmoid_bias=bleurt_sigmoid_bias,
+                ),
+            ),
+        )
+
+        for metric_name, runner in metric_runners:
+            try:
+                result = runner()
+                target_report["metrics"][metric_name] = {
+                    "metric": result.get("metric"),
+                    "issue_count": result.get("issue_count"),
+                }
+                succeeded_metric_count += 1
+            except Exception as exc:  # pragma: no cover - defensive aggregation path.
+                target_report["errors"].append({"metric": metric_name, "error": str(exc)})
+                failed_metric_count += 1
+
+        target_reports.append(target_report)
+
+    return {
+        "model_filter": model_id_filter,
+        "repo_filter": repo_filter,
+        "target_count": len(targets),
+        "metric_run_count": metric_run_count,
+        "succeeded_metric_count": succeeded_metric_count,
+        "failed_metric_count": failed_metric_count,
+        "targets": target_reports,
+    }
+
+
+def _discover_metric_targets(
+    *,
+    output_root: Path,
+    model_id_filter: Optional[str],
+    repo_filter: Optional[str],
+) -> list[tuple[str, RepositoryRef]]:
+    derived_root = output_root / "derived"
+    if not derived_root.exists():
+        return []
+
+    repo_filter_ref = RepositoryRef.parse(repo_filter) if repo_filter else None
+    model_dir_filter = _model_dir_name(model_id_filter) if model_id_filter else None
+
+    targets: list[tuple[str, RepositoryRef]] = []
+    for model_dir in sorted(path for path in derived_root.iterdir() if path.is_dir()):
+        if model_dir_filter and model_dir.name != model_dir_filter:
+            continue
+        model_id = _model_id_from_dir(model_dir.name)
+
+        repo_dirs = sorted(path for path in model_dir.iterdir() if path.is_dir())
+        for repo_dir in repo_dirs:
+            repo_ref = _repo_ref_from_fs_slug(repo_dir.name)
+            if repo_ref is None:
+                continue
+            if repo_filter_ref and repo_ref != repo_filter_ref:
+                continue
+            if not any(repo_dir.glob("issue_*.json")):
+                continue
+            targets.append((model_id, repo_ref))
+
+    return targets
+
+
+def _model_dir_name(model_id: Optional[str]) -> str:
+    if model_id is None:
+        return ""
+    return model_id.strip().replace("/", "__")
+
+
+def _model_id_from_dir(model_dir_name: str) -> str:
+    return model_dir_name.replace("__", "/")
+
+
+def _repo_ref_from_fs_slug(fs_slug: str) -> Optional[RepositoryRef]:
+    if "__" not in fs_slug:
+        return None
+    owner, name = fs_slug.split("__", 1)
+    owner = owner.strip()
+    name = name.strip()
+    if not owner or not name:
+        return None
+    return RepositoryRef(owner=owner, name=name)
+
+
+def _build_rank_fusion_leaderboard(
+    *,
+    output_root: Path,
+    repo_filter: Optional[str],
+    model_id_filter: Optional[str],
+    rrf_k: int,
+) -> dict:
+    metrics_root = output_root / "metrics"
+    if not metrics_root.exists():
+        raise FileNotFoundError(f"No metrics directory found at {metrics_root}")
+
+    repo_filter_ref = RepositoryRef.parse(repo_filter) if repo_filter else None
+    model_dir_filter = _model_dir_name(model_id_filter) if model_id_filter else None
+
+    # repo_slug -> model_id -> component -> value
+    repo_model_components: dict[str, dict[str, dict[str, float]]] = {}
+    all_models: set[str] = set()
+
+    for model_dir in sorted(path for path in metrics_root.iterdir() if path.is_dir()):
+        if model_dir_filter and model_dir.name != model_dir_filter:
+            continue
+        model_id = _model_id_from_dir(model_dir.name)
+
+        for repo_dir in sorted(path for path in model_dir.iterdir() if path.is_dir()):
+            repo_ref = _repo_ref_from_fs_slug(repo_dir.name)
+            if repo_ref is None:
+                continue
+            if repo_filter_ref and repo_ref != repo_filter_ref:
+                continue
+
+            components = _load_leaderboard_components(repo_dir)
+            if not components:
+                continue
+
+            repo_bucket = repo_model_components.setdefault(repo_ref.slug, {})
+            repo_bucket[model_id] = components
+            all_models.add(model_id)
+
+    if not repo_model_components:
+        raise FileNotFoundError("No leaderboard-compatible metrics found for the provided filters.")
+
+    per_repo_reports = []
+    for repo_slug in sorted(repo_model_components.keys()):
+        model_components = repo_model_components[repo_slug]
+        repo_scores = _compute_rrf_scores(model_components, rrf_k=rrf_k)
+        per_repo_reports.append(
+            {
+                "repository": repo_slug,
+                "model_count": len(model_components),
+                "leaderboard": _serialize_leaderboard_rows(repo_scores),
+            }
+        )
+
+    combined_scores, combined_components = _compute_combined_rrf_scores(repo_model_components, rrf_k=rrf_k)
+
+    return {
+        "metric": "rank_fusion_leaderboard",
+        "rrf_k": int(max(1, rrf_k)),
+        "repo_filter": repo_filter,
+        "model_filter": model_id_filter,
+        "components": sorted(_leaderboard_component_names()),
+        "repo_count": len(repo_model_components),
+        "model_count": len(all_models),
+        "per_repo": per_repo_reports,
+        "all_repos_combined": {
+            "leaderboard": _serialize_leaderboard_rows(combined_scores, component_values=combined_components),
+        },
+    }
+
+
+def _load_leaderboard_components(repo_metrics_dir: Path) -> dict[str, float]:
+    components: dict[str, float] = {}
+
+    type_path = repo_metrics_dir / "type_matching.json"
+    if type_path.exists():
+        payload = read_json(type_path)
+        _put_float(components, "type_f1", _get_path(payload, ("macro_average", "f1")))
+
+    metadata_path = repo_metrics_dir / "metadata_matching.json"
+    if metadata_path.exists():
+        payload = read_json(metadata_path)
+        _put_float(components, "metadata_f1", _get_path(payload, ("macro_average", "f1")))
+        _put_float(components, "metadata_soft_f1", _get_path(payload, ("macro_average", "soft_f1")))
+
+    tag_path = repo_metrics_dir / "tag_matching.json"
+    if tag_path.exists():
+        payload = read_json(tag_path)
+        _put_float(components, "tag_f1", _get_path(payload, ("overall", "f1")))
+
+    summary_path = repo_metrics_dir / "summary_matching.json"
+    if summary_path.exists():
+        payload = read_json(summary_path)
+        base = (
+            "overall",
+            "all_issues_macro_with_unmatched_penalty",
+        )
+        _put_float(components, "summary_codebert", _get_path(payload, base + ("codebert", "cosine")))
+        _put_float(components, "summary_bertscore_f1", _get_path(payload, base + ("bertscore", "f1")))
+        _put_float(components, "summary_bleurt", _get_path(payload, base + ("bleurt", "score")))
+
+    return components
+
+
+def _leaderboard_component_names() -> tuple[str, ...]:
+    return (
+        "type_f1",
+        "metadata_f1",
+        "metadata_soft_f1",
+        "tag_f1",
+        "summary_codebert",
+        "summary_bertscore_f1",
+        "summary_bleurt",
+    )
+
+
+def _compute_rrf_scores(
+    model_components: dict[str, dict[str, float]],
+    *,
+    rrf_k: int,
+) -> list[dict]:
+    k = int(max(1, rrf_k))
+    scores: dict[str, float] = defaultdict(float)
+    rank_maps: dict[str, dict[str, int]] = {}
+
+    for component in _leaderboard_component_names():
+        ranked = sorted(
+            ((model_id, values[component]) for model_id, values in model_components.items() if component in values),
+            key=lambda item: (-float(item[1]), item[0]),
+        )
+        if not ranked:
+            continue
+        rank_map: dict[str, int] = {}
+        for rank, (model_id, _value) in enumerate(ranked, start=1):
+            scores[model_id] += 1.0 / float(k + rank)
+            rank_map[model_id] = rank
+        rank_maps[component] = rank_map
+
+    rows = []
+    for model_id in sorted(model_components.keys()):
+        rows.append(
+            {
+                "model_id": model_id,
+                "score": float(scores.get(model_id, 0.0)),
+                "component_values": model_components.get(model_id, {}),
+                "component_ranks": {
+                    component: rank_maps.get(component, {}).get(model_id)
+                    for component in _leaderboard_component_names()
+                    if component in model_components.get(model_id, {})
+                },
+            }
+        )
+
+    rows.sort(key=lambda item: (-float(item["score"]), item["model_id"]))
+    return rows
+
+
+def _compute_combined_rrf_scores(
+    repo_model_components: dict[str, dict[str, dict[str, float]]],
+    *,
+    rrf_k: int,
+) -> tuple[list[dict], dict[str, dict[str, float]]]:
+    k = int(max(1, rrf_k))
+    scores: dict[str, float] = defaultdict(float)
+    component_values_by_model: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+    repo_presence: dict[str, set[str]] = defaultdict(set)
+
+    for repo_slug, model_components in repo_model_components.items():
+        for model_id, comps in model_components.items():
+            repo_presence[model_id].add(repo_slug)
+            for component, value in comps.items():
+                component_values_by_model[model_id][component].append(float(value))
+
+        for component in _leaderboard_component_names():
+            ranked = sorted(
+                ((model_id, values[component]) for model_id, values in model_components.items() if component in values),
+                key=lambda item: (-float(item[1]), item[0]),
+            )
+            for rank, (model_id, _value) in enumerate(ranked, start=1):
+                scores[model_id] += 1.0 / float(k + rank)
+
+    averaged_components: dict[str, dict[str, float]] = {}
+    for model_id, component_values in component_values_by_model.items():
+        averaged_components[model_id] = {
+            component: (sum(values) / float(len(values)))
+            for component, values in component_values.items()
+            if values
+        }
+
+    rows = []
+    for model_id in sorted(averaged_components.keys()):
+        rows.append(
+            {
+                "model_id": model_id,
+                "score": float(scores.get(model_id, 0.0)),
+                "repo_count": len(repo_presence.get(model_id, set())),
+            }
+        )
+    rows.sort(key=lambda item: (-float(item["score"]), item["model_id"]))
+    return rows, averaged_components
+
+
+def _serialize_leaderboard_rows(
+    rows: list[dict],
+    *,
+    component_values: Optional[dict[str, dict[str, float]]] = None,
+) -> list[dict]:
+    if not rows:
+        return []
+
+    top_score = float(rows[0].get("score", 0.0))
+    output_rows = []
+    for index, row in enumerate(rows, start=1):
+        model_id = str(row.get("model_id", ""))
+        score = float(row.get("score", 0.0))
+        normalized = 0.0 if top_score <= 0.0 else (score / top_score) * 100.0
+        payload = {
+            "rank": index,
+            "model_id": model_id,
+            "score": score,
+            "normalized_score": normalized,
+        }
+        if "repo_count" in row:
+            payload["repo_count"] = int(row.get("repo_count", 0))
+        if "component_values" in row:
+            payload["component_values"] = row.get("component_values", {})
+        elif component_values is not None:
+            payload["component_values"] = component_values.get(model_id, {})
+        if "component_ranks" in row:
+            payload["component_ranks"] = row.get("component_ranks", {})
+        output_rows.append(payload)
+    return output_rows
+
+
+def _get_path(payload: dict, path: tuple[str, ...]) -> Optional[float]:
+    current = payload
+    for key in path:
+        if not isinstance(current, dict) or key not in current:
+            return None
+        current = current[key]
+    if isinstance(current, (int, float)):
+        return float(current)
+    return None
+
+
+def _put_float(target: dict[str, float], key: str, value: Optional[float]) -> None:
+    if value is None:
+        return
+    target[key] = float(value)
 
 
 if __name__ == "__main__":
