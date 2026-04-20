@@ -15,6 +15,12 @@ from tbyc_dataset.evaluation import (
     extract_derived_artifacts_from_responses,
 )
 from tbyc_dataset.extraction.pipeline import ExtractionSettings, extract_discussion_artifacts
+from tbyc_dataset.metrics import (
+    compute_metadata_matching_metrics,
+    compute_summary_matching_metrics,
+    compute_tag_matching_metrics,
+    compute_type_matching_metrics,
+)
 from tbyc_dataset.models import RepositoryRef
 from tbyc_dataset.viewer import build_processed_viewer
 
@@ -37,6 +43,10 @@ def build_parser() -> argparse.ArgumentParser:
         "retrieve-code-chunks",
         "generate-issue-thoughts",
         "extract-derived-artifacts",
+        "compute-type-metrics",
+        "compute-metadata-metrics",
+        "compute-tag-metrics",
+        "compute-summary-metrics",
     ):
         subparser = subparsers.add_parser(command)
         subparser.add_argument("--repo", required=True, help="Repository in owner/name format.")
@@ -127,18 +137,22 @@ def build_parser() -> argparse.ArgumentParser:
             subparser.add_argument(
                 "--model-id",
                 default="qwen2.5:14b",
-                help="Ollama model identifier for issue thought generation.",
+                help=(
+                    "Model identifier for issue thought generation. "
+                    "Use 'ollama/<model>' (or an Ollama tag like qwen2.5:14b) for Ollama, "
+                    "or 'api/<model>' for CMU gateway API calls."
+                ),
             )
             subparser.add_argument(
                 "--model-url",
                 default="http://localhost:11434",
-                help="Ollama server URL.",
+                help="Ollama server URL (only used for Ollama models).",
             )
             subparser.add_argument(
                 "--num-ctx",
                 type=int,
                 default=32768,
-                help="Ollama context window size (num_ctx).",
+                help="Ollama context window size (num_ctx, Ollama models only).",
             )
             subparser.add_argument(
                 "--include-context",
@@ -181,7 +195,15 @@ def build_parser() -> argparse.ArgumentParser:
             subparser.add_argument(
                 "--model-id",
                 default="qwen2.5:14b",
-                help="Ollama model identifier for derived artifact extraction.",
+                help="Model identifier used to run derived artifact extraction.",
+            )
+            subparser.add_argument(
+                "--responses-model-id",
+                default=None,
+                help=(
+                    "Model identifier used to locate response files under data/responses. "
+                    "Defaults to --model-id for backward compatibility."
+                ),
             )
             subparser.add_argument(
                 "--model-url",
@@ -204,6 +226,93 @@ def build_parser() -> argparse.ArgumentParser:
                 "--no-skip-existing",
                 action="store_true",
                 help="Regenerate derived files even when they already exist.",
+            )
+
+        if command == "compute-type-metrics":
+            subparser.add_argument(
+                "--model-id",
+                default="qwen2.5:7b-instruct",
+                help="Model identifier used to locate derived artifacts and metric outputs.",
+            )
+            subparser.add_argument(
+                "--issue-number",
+                type=int,
+                default=None,
+                help="Optional issue number filter.",
+            )
+
+        if command == "compute-metadata-metrics":
+            subparser.add_argument(
+                "--model-id",
+                default="qwen2.5:7b-instruct",
+                help="Model identifier used to locate derived artifacts and metric outputs.",
+            )
+            subparser.add_argument(
+                "--issue-number",
+                type=int,
+                default=None,
+                help="Optional issue number filter.",
+            )
+            subparser.add_argument(
+                "--similarity-threshold",
+                type=float,
+                default=0.82,
+                help="Minimum phrase similarity used to count a metadata value as a match.",
+            )
+            subparser.add_argument(
+                "--similarity-metric",
+                choices=[
+                    "all",
+                    "max_all",
+                    "token_f1",
+                    "sequence_ratio",
+                    "token_jaccard",
+                    "char_3gram_jaccard",
+                    "token_containment",
+                ],
+                default="max_all",
+                help="Similarity backend used for metadata phrase matching.",
+            )
+
+        if command == "compute-tag-metrics":
+            subparser.add_argument(
+                "--model-id",
+                default="qwen2.5:7b-instruct",
+                help="Model identifier used to locate derived artifacts and metric outputs.",
+            )
+            subparser.add_argument(
+                "--issue-number",
+                type=int,
+                default=None,
+                help="Optional issue number filter.",
+            )
+
+        if command == "compute-summary-metrics":
+            subparser.add_argument(
+                "--model-id",
+                default="qwen2.5:7b-instruct",
+                help="Model identifier used to locate derived artifacts and metric outputs.",
+            )
+            subparser.add_argument(
+                "--issue-number",
+                type=int,
+                default=None,
+                help="Optional issue number filter.",
+            )
+            subparser.add_argument(
+                "--codebert-model",
+                default="microsoft/codebert-base",
+                help="Encoder model used for the CodeBERT cosine baseline.",
+            )
+            subparser.add_argument(
+                "--bertscore-model",
+                default="microsoft/codebert-base",
+                help="Encoder model used for BERTScore token-level contextual matching.",
+            )
+            subparser.add_argument(
+                "--bleurt-model",
+                default="Elron/bleurt-base-512",
+                help="BLEURT model checkpoint for summary quality scoring.",
             )
 
         if command in {"fetch-repo", "build-dataset"}:
@@ -295,9 +404,14 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         )
         result = pipeline.run(owner=repo.owner, repo=repo.name)
     elif args.command == "extract-derived-artifacts":
-        LOGGER.info("stage=extract-derived-artifacts model=%s", args.model_id)
+        LOGGER.info(
+            "stage=extract-derived-artifacts extraction_model=%s responses_model=%s",
+            args.model_id,
+            args.responses_model_id or args.model_id,
+        )
         derived_settings = DerivedExtractionSettings(
             model_id=args.model_id,
+            responses_model_id=args.responses_model_id,
             model_url=args.model_url,
             num_ctx=args.num_ctx,
             issue_number=args.issue_number,
@@ -308,6 +422,47 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             repo=repo.name,
             output_root=str(p_settings.output_root),
             settings=derived_settings,
+        )
+    elif args.command == "compute-type-metrics":
+        LOGGER.info("stage=compute-type-metrics model=%s", args.model_id)
+        result = compute_type_matching_metrics(
+            owner=repo.owner,
+            repo=repo.name,
+            output_root=str(p_settings.output_root),
+            model_id=args.model_id,
+            issue_number=args.issue_number,
+        )
+    elif args.command == "compute-metadata-metrics":
+        LOGGER.info("stage=compute-metadata-metrics model=%s", args.model_id)
+        result = compute_metadata_matching_metrics(
+            owner=repo.owner,
+            repo=repo.name,
+            output_root=str(p_settings.output_root),
+            model_id=args.model_id,
+            issue_number=args.issue_number,
+            similarity_threshold=args.similarity_threshold,
+            similarity_metric=args.similarity_metric,
+        )
+    elif args.command == "compute-tag-metrics":
+        LOGGER.info("stage=compute-tag-metrics model=%s", args.model_id)
+        result = compute_tag_matching_metrics(
+            owner=repo.owner,
+            repo=repo.name,
+            output_root=str(p_settings.output_root),
+            model_id=args.model_id,
+            issue_number=args.issue_number,
+        )
+    elif args.command == "compute-summary-metrics":
+        LOGGER.info("stage=compute-summary-metrics model=%s", args.model_id)
+        result = compute_summary_matching_metrics(
+            owner=repo.owner,
+            repo=repo.name,
+            output_root=str(p_settings.output_root),
+            model_id=args.model_id,
+            issue_number=args.issue_number,
+            codebert_model=args.codebert_model,
+            bertscore_model=args.bertscore_model,
+            bleurt_model=args.bleurt_model,
         )
     elif args.command in {"extract-discussion-artifacts", "extract-discussion-entities"}:
         LOGGER.info("stage=extract model=%s issue_number=%s", args.model_id, args.issue_number)
@@ -360,6 +515,84 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                     "total_comment_count": result.get("total_comment_count"),
                     "failed_comment_count": result.get("failed_comment_count"),
                     "total_artifact_count": result.get("total_artifact_count"),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    elif args.command == "compute-type-metrics":
+        print(
+            json.dumps(
+                {
+                    "repository": result.get("repository"),
+                    "model_id": result.get("model_id"),
+                    "issue_count": result.get("issue_count"),
+                    "metric": result.get("metric"),
+                    "overall": result.get("overall"),
+                    "macro_average": result.get("macro_average"),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    elif args.command == "compute-metadata-metrics":
+        print(
+            json.dumps(
+                (
+                    {
+                        "repository": result.get("repository"),
+                        "model_id": result.get("model_id"),
+                        "issue_count": result.get("issue_count"),
+                        "metric": result.get("metric"),
+                        "similarity": result.get("similarity"),
+                        "summary_by_metric": {
+                            key: {
+                                "overall": value.get("overall", {}),
+                                "macro_average": value.get("macro_average", {}),
+                            }
+                            for key, value in result.get("summary_by_metric", {}).items()
+                        },
+                    }
+                    if result.get("metric") == "metadata_phrase_matching_all"
+                    else {
+                        "repository": result.get("repository"),
+                        "model_id": result.get("model_id"),
+                        "issue_count": result.get("issue_count"),
+                        "metric": result.get("metric"),
+                        "similarity": result.get("similarity"),
+                        "overall": result.get("overall", {}).get("pooled"),
+                        "macro_average": result.get("macro_average"),
+                    }
+                ),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    elif args.command == "compute-tag-metrics":
+        print(
+            json.dumps(
+                {
+                    "repository": result.get("repository"),
+                    "model_id": result.get("model_id"),
+                    "issue_count": result.get("issue_count"),
+                    "metric": result.get("metric"),
+                    "overall": result.get("overall"),
+                    "macro_average": result.get("macro_average"),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    elif args.command == "compute-summary-metrics":
+        print(
+            json.dumps(
+                {
+                    "repository": result.get("repository"),
+                    "model_id": result.get("model_id"),
+                    "issue_count": result.get("issue_count"),
+                    "metric": result.get("metric"),
+                    "models": result.get("models"),
+                    "overall": result.get("overall"),
                 },
                 indent=2,
                 sort_keys=True,

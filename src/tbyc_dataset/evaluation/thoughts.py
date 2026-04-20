@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import logging
+import os
+import importlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
+from dotenv import load_dotenv
 from ollama import Client
 
 from tbyc_dataset.evaluation.prompt import build_issue_thought_prompt
@@ -14,12 +17,15 @@ from tbyc_dataset.storage import curated_dataset_path, ensure_directory, read_js
 
 LOGGER = logging.getLogger(__name__)
 PROGRESS_LOG_EVERY = 25
+DEFAULT_LLM_API_BASE_URL = "https://ai-gateway.andrew.cmu.edu"
 
 
 @dataclass(frozen=True)
 class IssueThoughtSettings:
     model_id: str = "qwen2.5:14b"
     model_url: str = "http://localhost:11434"
+    llm_api_base_url: str = DEFAULT_LLM_API_BASE_URL
+    llm_api_key_env_var: str = "LLM_KEY"
     include_context: bool = True
     max_context_chars: int = 32768
     max_context_chunks: int = 10
@@ -35,9 +41,10 @@ class IssueThoughtPipeline:
 
     def run(self, owner: str, repo: str) -> Dict[str, Any]:
         repo_ref = RepositoryRef(owner=owner, name=repo)
+        model_dir = _model_dir_name(self.settings.model_id)
         issue_dir = self.output_root / "raw" / repo_ref.fs_slug / "issues"
         retrieval_results_dir = self.output_root / "evaluation" / repo_ref.fs_slug / "results"
-        responses_dir = self.output_root / "responses" / repo_ref.fs_slug
+        responses_dir = self.output_root / "responses" / model_dir / repo_ref.fs_slug
         ensure_directory(responses_dir)
         processed_issues = self._load_processed_issue_lookup(repo_ref)
 
@@ -51,7 +58,8 @@ class IssueThoughtPipeline:
         LOGGER.info("loaded %s issues from %s", len(issue_paths), issue_dir)
         LOGGER.info("responses will be written to %s", responses_dir)
 
-        client = Client(host=self.settings.model_url)
+        provider, resolved_model_id, run_completion = _build_issue_thought_completion_runner(self.settings)
+        LOGGER.info("issue thought provider=%s model=%s", provider, resolved_model_id)
         outputs: List[Dict[str, Any]] = []
         issue_iterator = self._progress_iter(
             issue_paths,
@@ -81,18 +89,16 @@ class IssueThoughtPipeline:
                 max_prompt_chars=self.settings.max_context_chars,
                 max_context_chunks=self.settings.max_context_chunks,
             )
-            response = client.chat(
-                model=self.settings.model_id,
-                messages=[{"role": "user", "content": prompt}],
-                options={"num_ctx": max(512, int(self.settings.num_ctx))},
-            )
-            content = str(response.get("message", {}).get("content", "")).strip()
+            content = run_completion(prompt)
 
             payload = {
                 "repository": repo_ref.slug,
                 "issue_number": issue_number,
                 "model_id": self.settings.model_id,
+                "resolved_model_id": resolved_model_id,
+                "provider": provider,
                 "model_url": self.settings.model_url,
+                "llm_api_base_url": self.settings.llm_api_base_url if provider == "api" else None,
                 "prompt_flags": {
                     "include_context": self.settings.include_context,
                 },
@@ -120,6 +126,7 @@ class IssueThoughtPipeline:
 
         return {
             "repository": repo_ref.slug,
+            "model_id": self.settings.model_id,
             "response_dir": str(responses_dir),
             "issue_count": len(outputs),
             "responses": outputs,
@@ -166,6 +173,74 @@ class IssueThoughtPipeline:
         except ImportError:
             return _log_progress_iter(iterable, desc=desc, unit=unit, total=total)
         return tqdm(iterable, desc=desc, unit=unit, total=total)
+
+
+def _model_dir_name(model_id: str) -> str:
+    return model_id.strip().replace("/", "__") or "unknown-model"
+
+
+def _build_issue_thought_completion_runner(
+    settings: IssueThoughtSettings,
+) -> Tuple[str, str, Callable[[str], str]]:
+    provider, resolved_model_id = _resolve_issue_thought_provider(settings.model_id)
+    if provider == "api":
+        load_dotenv()
+        api_key = os.environ.get(settings.llm_api_key_env_var, "").strip()
+        if not api_key:
+            raise ValueError(
+                f"{settings.llm_api_key_env_var} is required for API models. "
+                "Set it in your shell or place it in a .env file."
+            )
+
+        try:
+            openai_module = importlib.import_module("openai")
+            OpenAI = getattr(openai_module, "OpenAI")
+        except Exception as exc:
+            raise ImportError("openai is required for API model calls. Install project dependencies.") from exc
+
+        client = OpenAI(api_key=api_key, base_url=settings.llm_api_base_url)
+
+        def _run_api_completion(prompt: str) -> str:
+            response = client.chat.completions.create(
+                model=resolved_model_id,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            message = response.choices[0].message if response.choices else None
+            return str(getattr(message, "content", "") or "").strip()
+
+        return provider, resolved_model_id, _run_api_completion
+
+    client = Client(host=settings.model_url)
+
+    def _run_ollama_completion(prompt: str) -> str:
+        response = client.chat(
+            model=resolved_model_id,
+            messages=[{"role": "user", "content": prompt}],
+            options={"num_ctx": max(512, int(settings.num_ctx))},
+        )
+        return str(response.get("message", {}).get("content", "")).strip()
+
+    return provider, resolved_model_id, _run_ollama_completion
+
+
+def _resolve_issue_thought_provider(model_id: str) -> Tuple[str, str]:
+    normalized = model_id.strip()
+    lowered = normalized.lower()
+
+    # Explicit prefixes are the safest way to route requests.
+    if lowered.startswith("api/"):
+        return "api", normalized[4:]
+    if lowered.startswith("openai/"):
+        return "api", normalized[7:]
+    if lowered.startswith("ollama/"):
+        return "ollama", normalized[7:]
+
+    # Ollama tags commonly include a colon (for example qwen2.5:14b).
+    if ":" in normalized:
+        return "ollama", normalized
+
+    # Default to API for untagged model IDs.
+    return "api", normalized
 
 
 def select_shortest_context_chunks(
