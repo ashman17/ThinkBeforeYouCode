@@ -22,6 +22,7 @@ from tbyc_dataset.metrics import (
     compute_summary_matching_metrics,
     compute_tag_matching_metrics,
     compute_type_matching_metrics,
+    generate_metrics_visualizations,
 )
 from tbyc_dataset.models import RepositoryRef
 from tbyc_dataset.storage import read_json
@@ -52,11 +53,12 @@ def build_parser() -> argparse.ArgumentParser:
         "compute-summary-metrics",
         "compute-all-metrics",
         "build-leaderboard",
+        "visualize-metrics",
     ):
         subparser = subparsers.add_parser(command)
         subparser.add_argument(
             "--repo",
-            required=command not in {"compute-all-metrics", "build-leaderboard"},
+            required=command not in {"compute-all-metrics", "build-leaderboard", "visualize-metrics"},
             default=None,
             help=(
                 "Repository in owner/name format. For compute-all-metrics, this is optional "
@@ -453,6 +455,42 @@ def build_parser() -> argparse.ArgumentParser:
                 default=60,
                 help="Reciprocal rank fusion constant k (default: 60).",
             )
+            subparser.add_argument(
+                "--points-max",
+                type=int,
+                default=100,
+                help="Maximum points assigned to the theoretical max-possible score (default: 100).",
+            )
+            subparser.add_argument(
+                "--points-step",
+                type=int,
+                default=1,
+                help="Quantization step for leaderboard points (default: 1).",
+            )
+
+        if command == "visualize-metrics":
+            subparser.add_argument(
+                "--model-id",
+                default=None,
+                help="Optional model filter for graph generation.",
+            )
+            subparser.add_argument(
+                "--graphs-root",
+                default=None,
+                help="Optional output directory for graphs (default: <output-root>/graphs).",
+            )
+            subparser.add_argument(
+                "--points-max",
+                type=int,
+                default=100,
+                help="Maximum points for the points graph (default: 100).",
+            )
+            subparser.add_argument(
+                "--points-step",
+                type=int,
+                default=1,
+                help="Quantization step for points graph (default: 1).",
+            )
 
     viewer_parser = subparsers.add_parser("build-viewer")
     viewer_parser.add_argument(
@@ -523,6 +561,30 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             repo_filter=args.repo,
             model_id_filter=args.model_id,
             rrf_k=args.rrf_k,
+            points_max=args.points_max,
+            points_step=args.points_step,
+        )
+        metrics_dir = p_settings.output_root / "metrics"
+        metrics_dir.mkdir(parents=True, exist_ok=True)
+        if args.repo:
+            repo_slug = args.repo.strip().replace("/", "__")
+            leaderboard_path = metrics_dir / f"leaderboard_rank_fusion_{repo_slug}.json"
+        else:
+            leaderboard_path = metrics_dir / "leaderboard_rank_fusion.json"
+        leaderboard_path.write_text(json.dumps(result, indent=2, sort_keys=True), encoding="utf-8")
+        result["saved_to"] = str(leaderboard_path)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return
+
+    if args.command == "visualize-metrics":
+        p_settings = pipeline_settings(args.output_root, args.min_comments, args.max_comments)
+        result = generate_metrics_visualizations(
+            output_root=str(p_settings.output_root),
+            graphs_root=args.graphs_root,
+            repo=args.repo,
+            model_id=args.model_id,
+            points_max=args.points_max,
+            points_step=args.points_step,
         )
         print(json.dumps(result, indent=2, sort_keys=True))
         return
@@ -954,6 +1016,8 @@ def _build_rank_fusion_leaderboard(
     repo_filter: Optional[str],
     model_id_filter: Optional[str],
     rrf_k: int,
+    points_max: int,
+    points_step: int,
 ) -> dict:
     metrics_root = output_root / "metrics"
     if not metrics_root.exists():
@@ -992,20 +1056,34 @@ def _build_rank_fusion_leaderboard(
     per_repo_reports = []
     for repo_slug in sorted(repo_model_components.keys()):
         model_components = repo_model_components[repo_slug]
-        repo_scores = _compute_rrf_scores(model_components, rrf_k=rrf_k)
+        repo_scores, repo_max_possible = _compute_rrf_scores(model_components, rrf_k=rrf_k)
         per_repo_reports.append(
             {
                 "repository": repo_slug,
                 "model_count": len(model_components),
-                "leaderboard": _serialize_leaderboard_rows(repo_scores),
+                "max_possible_score": repo_max_possible,
+                "leaderboard": _serialize_leaderboard_rows(
+                    repo_scores,
+                    max_possible_score=repo_max_possible,
+                    points_max=points_max,
+                    points_step=points_step,
+                ),
             }
         )
 
-    combined_scores, combined_components = _compute_combined_rrf_scores(repo_model_components, rrf_k=rrf_k)
+    combined_scores, combined_components, combined_max_possible = _compute_combined_rrf_scores(
+        repo_model_components,
+        rrf_k=rrf_k,
+    )
 
     return {
         "metric": "rank_fusion_leaderboard",
         "rrf_k": int(max(1, rrf_k)),
+        "points": {
+            "max": int(max(1, points_max)),
+            "step": int(max(1, points_step)),
+            "formula": "points = round_to_step((score / max_possible_score) * points_max)",
+        },
         "repo_filter": repo_filter,
         "model_filter": model_id_filter,
         "components": sorted(_leaderboard_component_names()),
@@ -1013,7 +1091,14 @@ def _build_rank_fusion_leaderboard(
         "model_count": len(all_models),
         "per_repo": per_repo_reports,
         "all_repos_combined": {
-            "leaderboard": _serialize_leaderboard_rows(combined_scores, component_values=combined_components),
+            "max_possible_score": combined_max_possible,
+            "leaderboard": _serialize_leaderboard_rows(
+                combined_scores,
+                component_values=combined_components,
+                max_possible_score=combined_max_possible,
+                points_max=points_max,
+                points_step=points_step,
+            ),
         },
     }
 
@@ -1067,10 +1152,11 @@ def _compute_rrf_scores(
     model_components: dict[str, dict[str, float]],
     *,
     rrf_k: int,
-) -> list[dict]:
+) -> tuple[list[dict], float]:
     k = int(max(1, rrf_k))
     scores: dict[str, float] = defaultdict(float)
     rank_maps: dict[str, dict[str, int]] = {}
+    contributing_rank_lists = 0
 
     for component in _leaderboard_component_names():
         ranked = sorted(
@@ -1079,6 +1165,7 @@ def _compute_rrf_scores(
         )
         if not ranked:
             continue
+        contributing_rank_lists += 1
         rank_map: dict[str, int] = {}
         for rank, (model_id, _value) in enumerate(ranked, start=1):
             scores[model_id] += 1.0 / float(k + rank)
@@ -1101,18 +1188,20 @@ def _compute_rrf_scores(
         )
 
     rows.sort(key=lambda item: (-float(item["score"]), item["model_id"]))
-    return rows
+    max_possible_score = float(contributing_rank_lists) * (1.0 / float(k + 1))
+    return rows, max_possible_score
 
 
 def _compute_combined_rrf_scores(
     repo_model_components: dict[str, dict[str, dict[str, float]]],
     *,
     rrf_k: int,
-) -> tuple[list[dict], dict[str, dict[str, float]]]:
+) -> tuple[list[dict], dict[str, dict[str, float]], float]:
     k = int(max(1, rrf_k))
     scores: dict[str, float] = defaultdict(float)
     component_values_by_model: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
     repo_presence: dict[str, set[str]] = defaultdict(set)
+    contributing_rank_lists = 0
 
     for repo_slug, model_components in repo_model_components.items():
         for model_id, comps in model_components.items():
@@ -1125,6 +1214,8 @@ def _compute_combined_rrf_scores(
                 ((model_id, values[component]) for model_id, values in model_components.items() if component in values),
                 key=lambda item: (-float(item[1]), item[0]),
             )
+            if ranked:
+                contributing_rank_lists += 1
             for rank, (model_id, _value) in enumerate(ranked, start=1):
                 scores[model_id] += 1.0 / float(k + rank)
 
@@ -1146,28 +1237,43 @@ def _compute_combined_rrf_scores(
             }
         )
     rows.sort(key=lambda item: (-float(item["score"]), item["model_id"]))
-    return rows, averaged_components
+    max_possible_score = float(contributing_rank_lists) * (1.0 / float(k + 1))
+    return rows, averaged_components, max_possible_score
 
 
 def _serialize_leaderboard_rows(
     rows: list[dict],
     *,
     component_values: Optional[dict[str, dict[str, float]]] = None,
+    max_possible_score: Optional[float] = None,
+    points_max: int = 1000,
+    points_step: int = 10,
 ) -> list[dict]:
     if not rows:
         return []
 
     top_score = float(rows[0].get("score", 0.0))
+    max_score = float(max_possible_score) if max_possible_score is not None else top_score
     output_rows = []
+    max_points = int(max(1, points_max))
+    step = int(max(1, points_step))
+    leader_points = 0
     for index, row in enumerate(rows, start=1):
         model_id = str(row.get("model_id", ""))
         score = float(row.get("score", 0.0))
-        normalized = 0.0 if top_score <= 0.0 else (score / top_score) * 100.0
+        normalized = 0.0 if max_score <= 0.0 else (score / max_score) * 100.0
+        raw_points = 0.0 if max_score <= 0.0 else (score / max_score) * float(max_points)
+        quantized_points = int(round(raw_points / float(step)) * step)
+        quantized_points = max(0, min(max_points, quantized_points))
+        if index == 1:
+            leader_points = quantized_points
         payload = {
             "rank": index,
             "model_id": model_id,
             "score": score,
             "normalized_score": normalized,
+            "points": quantized_points,
+            "points_to_leader": leader_points - quantized_points,
         }
         if "repo_count" in row:
             payload["repo_count"] = int(row.get("repo_count", 0))

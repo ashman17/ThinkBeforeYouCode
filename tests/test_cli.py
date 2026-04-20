@@ -393,3 +393,33 @@ def test_build_leaderboard_repo_filter(capsys, tmp_path: Path) -> None:
     payload = json.loads(capsys.readouterr().out)
     assert payload["repo_count"] == 1
     assert payload["per_repo"][0]["repository"] == "octo/repo"
+
+
+def test_visualize_metrics_prints_manifest(monkeypatch, capsys, tmp_path: Path) -> None:
+    monkeypatch.setattr(
+        cli,
+        "generate_metrics_visualizations",
+        lambda output_root, graphs_root=None, repo=None, model_id=None, points_max=100, points_step=1: {
+            "output_root": output_root,
+            "graphs_root": str(tmp_path / "graphs"),
+            "repo_filter": repo,
+            "model_filter": model_id,
+            "graph_count": 3,
+            "files": ["a.png", "b.png", "c.png"],
+        },
+    )
+
+    cli.main([
+        "visualize-metrics",
+        "--output-root",
+        str(tmp_path),
+        "--repo",
+        "octo/repo",
+        "--model-id",
+        "modelA",
+    ])
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["graph_count"] == 3
+    assert payload["repo_filter"] == "octo/repo"
+    assert payload["model_filter"] == "modelA"
