@@ -1,0 +1,80 @@
+{
+  "issue": {
+    "artifact_count": 3,
+    "comments": [
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "svanstaa",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34827"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "documentation",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "confusion"
+            },
+            "summary": "section 6 expected results are incorrect; current version strings do not match those specified.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "carloantinarella",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34827#issuecomment-4069556368"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "coverage_target": "unknown",
+              "expected_outcome": "Correct references and expected behavior.",
+              "test_level": "unknown"
+            },
+            "summary": "Update test case for checking document references and expected behavior.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "test_case"
+          }
+        ],
+        "comment_author": "svanstaa",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34827#issuecomment-4069892479"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "justification": "praises the work",
+              "strength": "positive",
+              "target": "version output quality"
+            },
+            "summary": "carloantinarella agrees with the quality of the version output and praises the work done.",
+            "tags": [
+              "performance_issue",
+              "runtime"
+            ],
+            "type": "agreement"
+          }
+        ],
+        "comment_author": "carloantinarella",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34827#issuecomment-4070233491"
+      }
+    ],
+    "issue_number": 34827,
+    "issue_title": "31.0 RC Testing Guide Feedback",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34827"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34827.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

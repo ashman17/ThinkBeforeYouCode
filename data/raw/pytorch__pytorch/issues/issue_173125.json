@@ -1,0 +1,213 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "richardlayman"
+  },
+  "authorAssociation": "NONE",
+  "body": "### \ud83d\udc1b Describe the bug\n\nAbout two weeks ago I updated pytorch with the nightly build that I usually do every week or two. My system was working fine, not a single issue besides the one-off quirks you usually see. But after the update, I found that ComfyUI was failing to load any models. At first I thought it was the ComfyUI update that broke it, so I started there, but couldn't find any issue. The only message it was giving me was a seg fault when trying to load the model. I then turned to PyTorch and found that it would seg fault during a basic torch command.\n\n```\nimport torch\ntorch.rand(50000,30000).cuda() @ torch.rand(30000,20000).cuda()\nSegmentation fault         (core dumped) python\n```\n\n\nI've provided the valgrind, rocminfo, and boot entries.\n\nAnother odd thing is that rewinding the version, doesn't seem to fix the issue. I went back as far as a month and I got the exact same seg fault.\n\nAnother thing I should mention is that I did do a system update just before updating pytorch, so it could be possible that this could have happened from an AMD driver update and looking in the wrong spot. If I was smart, I would have tested torch after doing the system update before updating torch, but I have done this so many times, that I got used to it just working.\n\n### Versions\n\n[collected_env.txt](https://github.com/user-attachments/files/24810701/collected_env.txt)\n\n[rocminfo.txt](https://github.com/user-attachments/files/24810749/rocminfo.txt)\n\n[valgrind_results.txt](https://github.com/user-attachments/files/24810769/valgrind_results.txt)\n\n[boot_options.txt](https://github.com/user-attachments/files/24810784/boot_options.txt)\n\ncc @jeffdaily @sunway513 @jithunnair-amd @pruthvistony @ROCmSupport @jataylo @hongxiayang @naromero77amd @pragupta @jerrymannil @xinyazhang",
+  "closedAt": "2026-03-11T19:45:04Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "malfet"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm not a rocm expert, but looks like you have 3 versions of triton installed side by side, which is not a good sign...",
+      "createdAt": "2026-01-23T03:50:44Z",
+      "id": "IC_kwDOA-j9z87hyNVT",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3788035411"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "authorAssociation": "NONE",
+      "body": "I removed all triton packages and reinstalled the triton-rocm package from the nightly build.\n\n```\npip list | grep triton\ntriton-rocm                            3.6.0+git9844da95\n```\n\nBut I'm still getting the same issue.\n\n```\n>>> import torch\n>>> torch.rand(50000,30000).cuda() @ torch.rand(30000,20000).cuda()\nSegmentation fault         (core dumped) python\n```\n",
+      "createdAt": "2026-01-23T21:47:46Z",
+      "id": "IC_kwDOA-j9z87iDt_g",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3792625632"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "radeksm"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Hi @richardlayman \n   You are doing this massive matrix multiplication and roughly counting your GPU memory consumption looks like below: \n\n- Matrix A: 50,000 * 30,000 * 4 bytes ~6.0 GB\n- Matrix B: 30,000 * 20,000 * 4 bytes ~2.4 GB\n- Result Matrix C: 50,000 * 20,000 * 4 bytes ~ 4.0 GB\n\nTotal Required: ~12.4 GB of free VRAM.\nI would recommend to check in **dmesg** if you don't hit kernel OutOfMemoryError  or \"OutOfMemoryError: CUDA out of memory.\" despite fact that you should have plenty of free memory.\n\nThe second thing which doesn't look right to me are these boot kernel  options:  _**amd_iommu=off amd_pstate=0 amdgpu.cwsr_enable=0**_\nYou disabled AMD IOMMU and in the same time below error may suggest problem with (disabled) GPU memory mapping:\n`Address 0x34 is not stack'd, malloc'd or (recently) free'd`.\n\nBTW, you can easily reproduce it, right ?",
+      "createdAt": "2026-01-25T07:04:58Z",
+      "id": "IC_kwDOA-j9z87iRBu8",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3796114364"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, the seq fault is constant; it fails 100% of the time. But, the AMD drivers seem to work fine when I'm working with apps outside of the conda environment. Blender will work fine with the card when rendering scenes. So this makes my lean more towards pytorch rather then a system driver. \n\nWhen I was having issues getting the system to work before, I kept getting 'memory out of bounds' or 'invalid permission for memory block' errors when I first got the machine. This seems to be normal for this processor. These were happening both in Blender and the in the conda environment where I was using PyTorch for ComfyUI. Driver updates made this lessen, but it was still there. It wasn't until I put those kernel parameters into the boot entry when all the issues seem to disappear and started working fine. I read that those parameters were causing issues with the particular AMD processor on my machine and needed to be disabled. \n\nI removed the kernel parameters in question but the issue still persists.\n\nBefore this current issue, I was loading 32G models without any issue. ",
+      "createdAt": "2026-01-28T00:27:17Z",
+      "id": "IC_kwDOA-j9z87i_W4N",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3808259597"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "authorAssociation": "NONE",
+      "body": "I found the below message at the bottom of my dmesg which appears to be from the seq fault.\n\n```\n[ 7227.911060] amdxdna 0000:c3:00.1: [drm] *ERROR* amdxdna_drm_open: SVA bind device failed, ret -19\n[ 7228.264638] python[2739]: segfault at 34 ip 00007ff74c445a70 sp 00007fffbc277ee0 error 4 in libhsa-runtime64.so[45a70,7ff74c41d000+117000] likely on CPU 7 (core 7, socket 0)\n[ 7228.264651] Code: 8b 43 20 85 c0 0f 95 c0 5b c3 41 55 4c 8d af e8 04 00 00 41 54 55 48 89 f5 53 48 89 fb 48 83 ec 28 4c 8b 66 68 4d 39 e5 74 30 <41> 83 7c 24 34 03 49 8b 44 24 20 74 43 41 c7 44 24 34 00 00 00 00\n```\n",
+      "createdAt": "2026-01-29T14:53:14Z",
+      "id": "IC_kwDOA-j9z87jlPtd",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3818191709"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "authorAssociation": "NONE",
+      "body": "The below bug appears to be similar to mine and was just reported couple of days ago in another project that was using pytorch.\n\n[TheRock issue #3081](https://github.com/ROCm/TheRock/issues/3081)",
+      "createdAt": "2026-01-29T17:31:18Z",
+      "id": "IC_kwDOA-j9z87jpBYS",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3819181586"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "authorAssociation": "NONE",
+      "body": "I was hoping the hsa-rocr 7.2.0 update would fix this issue, but it's still doing the exact same thing. I created a new conda environment from scratch and just install pytorch and the exact same thing is happening. I have no clue what's going on and have just about given up on fixing it. Everything on the system is working but pytorch and I can use rocm to render scenes in blender without any issue. ",
+      "createdAt": "2026-02-08T17:45:58Z",
+      "id": "IC_kwDOA-j9z87miN-M",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3867729804"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "naromero77amd"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@richardlayman  Can you try deactivating your test and deactivating the caching allocator?\n```\nexport PYTORCH_NO_HIP_MEMORY_CACHING=1\n```",
+      "createdAt": "2026-02-12T17:16:37Z",
+      "id": "IC_kwDOA-j9z87n_vEW",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3892244758"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks for the suggestion @naromero77amd I set the environment parameter, but it's still seq faulting.\n\n ```\n$ echo $PYTORCH_NO_HIP_MEMORY_CACHING\n1\n```\nIt appears that the seq fault is consistent and never changes. Below is what dmesg shows after I tried to run my torch tester code twice in a row. It's pretty much the exact same message. I'm currently running hsa-rocr 7.2 with torch 7.1 nightly builds, but this was going on even when I was running hsa-rocr 7.1.\n```\n\n[  853.986260] amdxdna 0000:c3:00.1: [drm] *ERROR* amdxdna_drm_open: SVA bind device failed, ret -19\n[  854.328443] python[2610]: segfault at 34 ip 00007fb7dcc45a70 sp 00007ffc7056bf90 error 4 in libhsa-runtime64.so[45a70,7fb7dcc1d000+117000] likely on CPU 0 (core 0, socket 0)\n[  854.328455] Code: 8b 43 20 85 c0 0f 95 c0 5b c3 41 55 4c 8d af e8 04 00 00 41 54 55 48 89 f5 53 48 89 fb 48 83 ec 28 4c 8b 66 68 4d 39 e5 74 30 <41> 83 7c 24 34 03 49 8b 44 24 20 74 43 41 c7 44 24 34 00 00 00 00\n[  897.426497] amdxdna 0000:c3:00.1: [drm] *ERROR* amdxdna_drm_open: SVA bind device failed, ret -19\n[  897.773657] python[2679]: segfault at 34 ip 00007f3261245a70 sp 00007fffe98c45f0 error 4 in libhsa-runtime64.so[45a70,7f326121d000+117000] likely on CPU 7 (core 7, socket 0)\n[  897.773670] Code: 8b 43 20 85 c0 0f 95 c0 5b c3 41 55 4c 8d af e8 04 00 00 41 54 55 48 89 f5 53 48 89 fb 48 83 ec 28 4c 8b 66 68 4d 39 e5 74 30 <41> 83 7c 24 34 03 49 8b 44 24 20 74 43 41 c7 44 24 34 00 00 00 00\n\n```",
+      "createdAt": "2026-02-13T00:14:04Z",
+      "id": "IC_kwDOA-j9z87oGyEM",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3894092044"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "authorAssociation": "NONE",
+      "body": "I found [this issue](https://github.com/ROCm/TheRock/issues/3081) that appears to be giving the exact same seq fault as what I'm seeing. It appears that they were having an issue with kernel versions after 6.18.3, which was around the same time that I updated my PC. It looked like people were hoping that it would be fixed with rocm 7.2, but I'm currently running 7.2.0-1 and it still's not working. If this is the issue, the only fix is to roll it back to 6.18.3 or wait until they eventually fix it. I'm waiting for 6.19.1 to be released. If that doesn't fix it, I'll try to roll it back and see if that helps. I'm still confused as to why this only seems to affect torch and not blender.",
+      "createdAt": "2026-02-24T23:49:42Z",
+      "id": "IC_kwDOA-j9z87rwnlV",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3955390805"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "authorAssociation": "NONE",
+      "body": "There was an update to linux, not to 6.19.1, but still an update. So I installed the update and there was no change; I was still getting seq faults. I then rolled back the linux package to 6.18.3, which is the version that I heard worked for another person, and **everything started working perfectly again!** Everything on the system has the latest version except the kernel, so the issue is one of two things. The linux kernel broke something after 6.18.3 for gfx1151. Or, torch needs to be updated for the change in the kernel after 6.18.3.\n\nI'm highly leaning on this being just a kernel issue but I'll leave it up to the torch devs to determine if this is the case and whether this should be closed or stay open. I don't know the internal workings of torch enough to know if this is something that could have been caused by torch, so I don't feel comfortable closing the issue if there's still a possibility of torch causing this.",
+      "createdAt": "2026-02-28T17:20:36Z",
+      "id": "IC_kwDOA-j9z87tExxH",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3977452615"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "naromero77amd"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@richardlayman  Thanks again for all the details and for keeping us posted.\n\nHave you tried theRock-based PyTorch wheels to see if that solves your issue (similar to theRock issue) that you referenced?\n\nHere are some instructions for install theRock-based PyTorch wheels:\nhttps://github.com/ROCm/TheRock/blob/main/RELEASES.md\n\nIt looks like latest PyTorch with nightly theRock can be installed as follows:\n```\npip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ torch torchaudio torchvision\n# Optional additional packages on Linux:\n#   apex\n```\n\nIt looks like some stable versions are available as well.\n",
+      "createdAt": "2026-03-04T18:50:17Z",
+      "id": "IC_kwDOA-j9z87uY0tA",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-3999484736"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "naromero77amd"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@richardlayman Following up my message from last week.",
+      "createdAt": "2026-03-11T19:06:32Z",
+      "id": "IC_kwDOA-j9z87w5HqY",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-4041505432"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "authorAssociation": "NONE",
+      "body": "Sorry about the late response. This morning I updated to 7.2 pytorch for the nightly build and then updated my PC with the latest linux kernel 6.19.6. Everything worked fines now, so I'm going to close this issue. Thanks for all the help to everyone that helped on this.",
+      "createdAt": "2026-03-11T19:45:04Z",
+      "id": "IC_kwDOA-j9z87w6CND",
+      "url": "https://github.com/pytorch/pytorch/issues/173125#issuecomment-4041745219"
+    }
+  ],
+  "createdAt": "2026-01-23T00:48:04Z",
+  "id": "I_kwDOA-j9z87lM10L",
+  "labels": [
+    {
+      "name": "module: rocm"
+    },
+    {
+      "name": "triaged"
+    }
+  ],
+  "number": 173125,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "malfet"
+      },
+      "createdAt": "2026-01-23T03:50:16Z",
+      "label": {
+        "name": "module: rocm"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "malfet"
+      },
+      "createdAt": "2026-01-23T03:50:16Z",
+      "label": {
+        "name": "triaged"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "richardlayman"
+      },
+      "createdAt": "2026-03-11T19:45:04Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Seq Faults after update [gfx1151]",
+  "url": "https://github.com/pytorch/pytorch/issues/173125"
+}

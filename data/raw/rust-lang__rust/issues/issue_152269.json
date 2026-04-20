@@ -1,0 +1,252 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "oech3"
+  },
+  "authorAssociation": "NONE",
+  "body": "current_exe() uses `/proc/self/exe` which means it does not support masked `proc`as noted at https://git.launchpad.net/ubuntu/+source/rust-coreutils/tree/debian/patches/require-utility-to-be-invoked-at-matching-path.patch?h=applied/ubuntu/devel .\n\nBut it should support container, initramfs, etc...\n\nIt should be able to support it by getauxval (and maybe, faster than `/proc/self/exe`?).",
+  "closedAt": "2026-03-05T00:12:17Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "eggyal"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "For clarification, because it isn't a function I've ever used or was familiar with, this is referring to [`std::env::current_exe`](https://doc.rust-lang.org/std/env/fn.current_exe.html), and in particular the Linux implementation thereof:\n\nhttps://github.com/rust-lang/rust/blob/56aaf58ec02b6ac974e8364269fbb33a8a806e28/library/std/src/sys/pal/unix/os.rs#L265-L273",
+      "createdAt": "2026-02-07T08:28:29Z",
+      "id": "IC_kwDOAAsO6M7mTzWX",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3863950743"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Noratrieb"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=002bef5b0ef8a232777289f057d7b860\n\nThey do not return the same value, `AT_EXECFN` is the literal path used to start the executable, while `/proc/self/exe` will be a symbolic link that can be resolved to an absolute path.\n\nIt looks like that when using a relative path to start the executable, `AT_EXECFN` will preserve this relative path. This means that while it will be readable at startup, it will no longer be accessible after the process changes its working directory.\n\nExample:\n```rust\nfn main() {\n    std::env::set_current_dir(\"/nix\");\n    dbg!(std::env::current_exe());\n    dbg!(unsafe { std::ffi::CStr::from_ptr(libc::getauxval(libc::AT_EXECFN) as _) });\n}\n```\n```\n./path/main\n[src/main.rs:3:5] std::env::current_exe() = Ok(\n    \"/tmp/scratchYbUWvz9ol/path/main\",\n)\n[src/main.rs:4:5] unsafe { std::ffi::CStr::from_ptr(libc::getauxval(libc::AT_EXECFN) as _) } = \"./path/main\"\n```\n\nAs such I don't think this is a good *replacement* for `/proc/self/exe`. At most it could be a fallback. But even then this behavior won't work very well, `current_exe()` is documented as\n> Returns the full filesystem\n\nBut I guess it might be better than nothing?",
+      "createdAt": "2026-02-07T12:55:22Z",
+      "id": "IC_kwDOAAsO6M7mVyUz",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3864470835"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "oech3"
+      },
+      "authorAssociation": "NONE",
+      "body": "How about recursing readlink for AT_EXECFN?",
+      "createdAt": "2026-02-07T13:01:18Z",
+      "id": "IC_kwDOAAsO6M7mV0TE",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3864478916"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bjorn3"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "By the time the user runs `std::env::current_exe()` it is already too late to resolve `AT_EXECFN` to an absolute path. The working directory might have changed since starting the process. It is only usable by the dynamic linker or libc before any user code ran.\n\n> But it should support container\n\nAfaik pretty much every container implementation will mount `/proc`.\n\n> initramfs\n\nIf you use systemd inside the initramfs, /proc will be mounted by systemd afaik. Alpine's initramfs generator mounts /proc too: https://gitlab.alpinelinux.org/alpine/mkinitfs/-/blob/master/initramfs-init.in?ref_type=heads#L505 Same for Debian's version: https://salsa.debian.org/kernel-team/initramfs-tools/-/blob/debian/latest/init?ref_type=heads#L14 I guess for those you do have an issue if `mount` and `mkdir` are implemented by uutils though.\n\nNote that this is not the only place where the rust standard library expects the standard mounts like `/proc` and `/dev` to be present. For example `/dev/null` must exist when any of the stdio fds are closed at startup: https://github.com/rust-lang/rust/blob/06cafcbe08b1b0d4235685abd5f817ae1979cefa/library/std/src/sys/pal/unix/mod.rs#L69 And on systems without `getrandom`, we need `/dev/urandom` when creating a hashmap. And the `Debug` impl for `File` uses `/proc/self/fd`. And on systems without `getauxval` we fallback to `/proc/self/auxv`. And `std::process::available_concurrency()` needs `/proc` and `/sys`.",
+      "createdAt": "2026-02-07T13:57:34Z",
+      "id": "IC_kwDOAAsO6M7mWFG4",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3864547768"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "ryanavella"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Note that this is not the only place where the rust standard library expects the standard mounts like `/proc` and `/dev` to be present.\n\nAt least with `/dev`, POSIX mandates its existence, and it specifically promises the existence of a special file `/dev/null`. Linux additionally promises that `/dev` contains some devices and special files (e.g. `/dev/zero` and `/dev/urandom`) that are not required by POSIX.",
+      "createdAt": "2026-02-09T17:44:07Z",
+      "id": "IC_kwDOAAsO6M7m2gRi",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3873047650"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "the8472"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> as noted at https://git.launchpad.net/ubuntu/+source/rust-coreutils/tree/debian/patches/require-utility-to-be-invoked-at-matching-path.patch?h=applied/ubuntu/devel .\n\nI'm getting a 404",
+      "createdAt": "2026-02-09T20:56:19Z",
+      "id": "IC_kwDOAAsO6M7m5aBD",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3873808451"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "oech3"
+      },
+      "authorAssociation": "NONE",
+      "body": "In my memory, the linked patch compares `argv[0]` and `/proc/self/exe` for security. Panics if `/proc/self/exe` is unavaiable.",
+      "createdAt": "2026-02-09T20:59:42Z",
+      "id": "IC_kwDOAAsO6M7m5eUa",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3873826074"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "solsticedhiver"
+      },
+      "authorAssociation": "NONE",
+      "body": "On a SaaS VM, kind of a limited VPS at *pythonanywhere.com*, I am trying to upgrade the private binary **uv** that I am using to setup my python venv:\n\n```\n$ uv self upgrade\nerror: no /proc/self/exe available. Is /proc mounted?\n```",
+      "createdAt": "2026-02-26T22:57:27Z",
+      "id": "IC_kwDOAAsO6M7snS40",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3969723956"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "oech3"
+      },
+      "authorAssociation": "NONE",
+      "body": "I think adding `std::env::start_exe` is making a sence. Current path is not needed in some case.",
+      "createdAt": "2026-02-27T07:27:41Z",
+      "id": "IC_kwDOAAsO6M7stSjk",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3971295460"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Voultapher"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> By the time the user runs `std::env::current_exe()` it is already too late to resolve AT_EXECFN to an absolute path. The working directory might have changed since starting the process. It is only usable by the dynamic linker or libc before any user code ran.\n\nIn theory we could generate code before main runs that resolves `AT_EXECFN`. AFAICT this should be compatible with the current documentation of `std::env::current_exe()`.",
+      "createdAt": "2026-03-03T10:06:01Z",
+      "id": "IC_kwDOAAsO6M7t0gvp",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-3989965801"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "oech3"
+      },
+      "authorAssociation": "NONE",
+      "body": "duplcated",
+      "createdAt": "2026-03-05T00:12:17Z",
+      "id": "IC_kwDOAAsO6M7ufE-F",
+      "url": "https://github.com/rust-lang/rust/issues/152269#issuecomment-4001124229"
+    }
+  ],
+  "createdAt": "2026-02-07T06:52:18Z",
+  "id": "I_kwDOAAsO6M7pB_No",
+  "labels": [
+    {
+      "name": "O-linux"
+    },
+    {
+      "name": "C-enhancement"
+    },
+    {
+      "name": "T-libs"
+    },
+    {
+      "name": "A-process"
+    }
+  ],
+  "number": 152269,
+  "state": "CLOSED",
+  "stateReason": "DUPLICATE",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "oech3"
+      },
+      "createdAt": "2026-02-07T06:52:19Z",
+      "label": {
+        "name": "C-bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-02-07T06:52:21Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Noratrieb"
+      },
+      "createdAt": "2026-02-07T12:40:20Z",
+      "label": {
+        "name": "O-linux"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Noratrieb"
+      },
+      "createdAt": "2026-02-07T12:40:20Z",
+      "label": {
+        "name": "T-libs"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Noratrieb"
+      },
+      "createdAt": "2026-02-07T12:40:41Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Noratrieb"
+      },
+      "createdAt": "2026-02-07T12:40:54Z",
+      "label": {
+        "name": "A-process"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Noratrieb"
+      },
+      "createdAt": "2026-02-07T12:53:51Z",
+      "label": {
+        "name": "C-bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Noratrieb"
+      },
+      "createdAt": "2026-02-07T12:53:51Z",
+      "label": {
+        "name": "C-enhancement"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "oech3"
+      },
+      "createdAt": "2026-03-05T00:12:17Z",
+      "stateReason": "DUPLICATE"
+    }
+  ],
+  "title": "std::env::current_exe should work under masked /proc at Linux",
+  "url": "https://github.com/rust-lang/rust/issues/152269"
+}

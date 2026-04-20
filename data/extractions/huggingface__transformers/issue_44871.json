@@ -1,0 +1,80 @@
+{
+  "issue": {
+    "artifact_count": 4,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "model/tokenizer compatibility",
+              "problem_kind": "config",
+              "user_or_system_impact": "generation loop failure"
+            },
+            "summary": "Inconsistent eos_token_id configuration between tokenizer and model config.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "IvanFan-Van",
+        "comment_link": "https://github.com/huggingface/transformers/issues/44871"
+      },
+      {
+        "artifact_count": 3,
+        "artifacts": [
+          {
+            "metadata": {
+              "impact_scope": "unknown",
+              "reasoning_kind": "unknown",
+              "supports_artifact_type": "unknown"
+            },
+            "summary": "explains the presence of two EOS tokens in instruction-tuned models and why checking only tokenizer.eos_token_id can miss <end_of_turn> tokens.",
+            "tags": [
+              "incorrect_behavior",
+              "runtime_error",
+              "logic_bug"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "addresses incorrect behavior and ensures all stop tokens are handled.",
+              "solution_kind": "code modification",
+              "target_area": "manual generation loops"
+            },
+            "summary": "suggests checking against model.config.eos_token_id for all stop tokens in generation loops.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "alternative_to": "manual generation loop",
+              "comparison_focus": "effort and correctness",
+              "differentiator": "automatically handles all stop tokens"
+            },
+            "summary": "proposes using model.generate() as an alternative to manually handling token IDs.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "alternative_solution"
+          }
+        ],
+        "comment_author": "ashwin3005",
+        "comment_link": "https://github.com/huggingface/transformers/issues/44871#issuecomment-4096937810"
+      }
+    ],
+    "issue_number": 44871,
+    "issue_title": "[Gemma-3] Inconsistent eos_token_id configuration: tokenizer has single value (1) but model.config has list [1, 106]",
+    "issue_url": "https://github.com/huggingface/transformers/issues/44871"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/huggingface__transformers/issue_44871.json",
+  "repository": "huggingface/transformers",
+  "status": "completed"
+}

@@ -1,0 +1,274 @@
+{
+  "issue": {
+    "artifact_count": 14,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Build process",
+              "problem_kind": "Compile error",
+              "user_or_system_impact": "Developer unable to build and deploy the application"
+            },
+            "summary": "macOS bundle verification fails due to unrecognized or invalid format.",
+            "tags": [
+              "build_failure",
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "version_information_request",
+              "target_area": "version_specific_behavior",
+              "urgency": "low"
+            },
+            "summary": "The comment asks for the version of Bitcoin which is relevant to a potential issue or discussion.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "pinheadmz",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4005522871"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "bug_reproduction",
+              "target_area": "unknown",
+              "urgency": "unknown"
+            },
+            "summary": "Requesting information to reproduce a bug.",
+            "tags": [
+              "bug"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4005523880"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4005642297"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "technical",
+              "target_area": "cmake",
+              "urgency": "unknown"
+            },
+            "summary": "Checking if cmake macOS deploy target performs code signing.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "pinheadmz",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4005701279"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification",
+              "target_area": "macOS deployment",
+              "urgency": "unknown"
+            },
+            "summary": "Asking if the cmake macOS deploy target does code signing.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4005749840"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "macdeployqtplus script",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "Potential data corruption"
+            },
+            "summary": "The problem is that symlinks are not being preserved in the macdeployqtplus script.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4006024582"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification",
+              "target_area": "macdeployqtplus",
+              "urgency": "unknown"
+            },
+            "summary": "Should symlinks be preserved by macdeployqtplus? The tool is meant to create a standalone tarball, copying libraries into the bundle. If not, why copy dylibs at all?",
+            "tags": [
+              "api_misuse",
+              "config_issue",
+              "runtime_error"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4006090085"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification",
+              "target_area": "macOS deployment",
+              "urgency": "unknown"
+            },
+            "summary": "macdeployqtplus usage and bundle structure in macOS",
+            "tags": [
+              "api_misuse",
+              "config_issue"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "hebasto",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4006168202"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "v31 milestone",
+              "problem_kind": "potential silent breakage and long-term impact on project timeline",
+              "user_or_system_impact": "unspecified"
+            },
+            "summary": "Problem kind: bug; Affected area: v31 milestone; User or system impact: potential silent breakage and long-term impact on project timeline.",
+            "tags": [
+              "bug",
+              "fix_proposed"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4030934297"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "proposed fix",
+              "target_area": "untested bug",
+              "urgency": "unknown"
+            },
+            "summary": "Suggests a fix in #34787 for an untested issue.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4033228244"
+      },
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "macOS build artifacts",
+              "problem_kind": "application failure",
+              "user_or_system_impact": "user experience impact, development workflow issues"
+            },
+            "summary": "Bitcoin-Qt.app works but bitcoin-macos-app.zip and terminal start fail on macOS due to missing Qt platform plugin 'cocoa'.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "determinism": "reproducible",
+              "environment": "macOS 26.3.1 (M4)",
+              "prerequisites": "unknown"
+            },
+            "summary": "Steps to reproduce: open `Bitcoin-Qt.app` via Finder, or start it from the terminal.",
+            "tags": [
+              "incorrect_behavior",
+              "runtime_error"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "constraint_type": "dependency",
+              "scope": "application startup",
+              "severity": "blocker"
+            },
+            "summary": "The Qt platform plugin 'cocoa' is required but not found.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "coverage_target": "Qt platform plugin loading",
+              "expected_outcome": "application starts without errors, both `.app` and `zip` files are functional.",
+              "test_level": "functional"
+            },
+            "summary": "Test the application after applying a fix.",
+            "tags": [
+              "unit_test",
+              "integration_test"
+            ],
+            "type": "test_case"
+          }
+        ],
+        "comment_author": "Sjors",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34744#issuecomment-4039986665"
+      }
+    ],
+    "issue_number": 34744,
+    "issue_title": "macOS: Bundle format unrecognized, invalid, or unsuitable",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34744"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34744.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

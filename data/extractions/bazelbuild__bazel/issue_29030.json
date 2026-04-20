@@ -1,0 +1,47 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "rdesgroppes",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29030"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "unknown",
+              "language": "unknown",
+              "snippet_kind": "download_link"
+            },
+            "summary": "bharadwaj08-one provided a link to download a specific version of bazel-skylib.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "bharadwaj08-one",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29030#issuecomment-4095751125"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "rdesgroppes",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29030#issuecomment-4101935556"
+      }
+    ],
+    "issue_number": 29030,
+    "issue_title": "[Mirror] bazel-skylib 1.9.0",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/29030"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_29030.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

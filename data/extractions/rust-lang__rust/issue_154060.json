@@ -1,0 +1,162 @@
+{
+  "issue": {
+    "artifact_count": 10,
+    "comments": [
+      {
+        "artifact_count": 8,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "penplot crate",
+              "problem_kind": "bug",
+              "user_or_system_impact": "compilation failure"
+            },
+            "summary": "regression on nightly causing query depth limit overflow in penplot crate",
+            "tags": [
+              "regression",
+              "runtime_error",
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "alternative_to": "unknown",
+              "comparison_focus": "unknown",
+              "differentiator": "unknown"
+            },
+            "summary": "suggestion to increase recursion limit by adding `#![recursion_limit = \"256\"]` attribute",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "determinism": "reproducible",
+              "environment": "x86_64-unknown-linux-gnu",
+              "prerequisites": "nightly 2026-03-17 or later"
+            },
+            "summary": "commands to reproduce the bug",
+            "tags": [
+              "regression",
+              "compile_error"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "claim_direction": "increase",
+              "metric_focus": "query depth",
+              "workload": "penplot crate"
+            },
+            "summary": "regression in nightly version causing increased query depth and overflow limit issue",
+            "tags": [
+              "performance_degradation",
+              "runtime_error"
+            ],
+            "type": "performance_claim"
+          },
+          {
+            "metadata": {
+              "constraint_type": "query_depth_limit",
+              "scope": "parallel frontend usage",
+              "severity": "compile_time"
+            },
+            "summary": "queries overflow the depth limit due to parallel frontend",
+            "tags": [
+              "regression",
+              "runtime_error"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "blocking": "no blockers identified",
+              "progress_state": "reported",
+              "status_kind": "bug_report"
+            },
+            "summary": "reporting the regression issue in nightly versions for penplot crate",
+            "tags": [
+              "regression"
+            ],
+            "type": "status_update"
+          },
+          {
+            "metadata": {
+              "assignee": "unknown",
+              "deliverable": "fix or workaround proposal",
+              "due_context": "not specified"
+            },
+            "summary": "assigning the issue for further investigation and fix",
+            "tags": [
+              "regression"
+            ],
+            "type": "task_assignment"
+          },
+          {
+            "metadata": {
+              "dependency_target": "nightly 2026-03-17 and later",
+              "dependency_type": "rustc_version",
+              "relationship": "causal"
+            },
+            "summary": "dependency issue in nightly versions of rustc causing regression",
+            "tags": [
+              "regression"
+            ],
+            "type": "dependency"
+          }
+        ],
+        "comment_author": "kleinesfilmroellchen",
+        "comment_link": "https://github.com/rust-lang/rust/issues/154060"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification",
+              "target_area": "issue_relationship",
+              "urgency": "unknown"
+            },
+            "summary": "Is this issue the same as another one?",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "RalfJung",
+        "comment_link": "https://github.com/rust-lang/rust/issues/154060#issuecomment-4085675234"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "resolved",
+              "status_kind": "interim"
+            },
+            "summary": "The issue can be closed as a duplicate for now, and the commenter will subscribe to the original issue if necessary.",
+            "tags": [
+              "refactor"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "kleinesfilmroellchen",
+        "comment_link": "https://github.com/rust-lang/rust/issues/154060#issuecomment-4086091582"
+      }
+    ],
+    "issue_number": 154060,
+    "issue_title": "regression on nightly: queries overflow the depth limit",
+    "issue_url": "https://github.com/rust-lang/rust/issues/154060"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/rust-lang__rust/issue_154060.json",
+  "repository": "rust-lang/rust",
+  "status": "completed"
+}

@@ -1,0 +1,76 @@
+{
+  "issue": {
+    "artifact_count": 4,
+    "comments": [
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "functional testing, test infrastructure",
+              "problem_kind": "test failure",
+              "user_or_system_impact": "Test execution was unsuccessful; build failure."
+            },
+            "summary": "Test failure in wallet_multiwallet.py --usecli due to RPC connection issue and wallet directory specification errors.",
+            "tags": [
+              "ci_failure",
+              "runtime_error",
+              "test_infra_issue"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "determinism": "Intermittent issue; might require multiple attempts to reproduce.",
+              "environment": "CI environment",
+              "prerequisites": "Run wallet_multiwallet.py with '--usecli' flag"
+            },
+            "summary": "Reproduce the CI failure by running wallet_multiwallet.py --usecli.",
+            "tags": [
+              "ci_failure",
+              "test_infra_issue"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "constraint_type": "configuration error",
+              "scope": "test runner configuration",
+              "severity": "intermittent failure"
+            },
+            "summary": "The specified -walletdir parameters in the test environment are invalid, causing errors.",
+            "tags": [
+              "config_issue"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "coverage_target": "Wallet multi-wallet functionality with CLI usage",
+              "expected_outcome": "Successful execution of wallet initialization and test framework operations.",
+              "test_level": "integration test"
+            },
+            "summary": "Test case wallet_multiwallet.py --usecli is failing due to RPC connection errors and invalid wallet directory paths.",
+            "tags": [
+              "functional_test",
+              "ci_failure",
+              "test_infra_issue"
+            ],
+            "type": "test_case"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34854"
+      }
+    ],
+    "issue_number": 34854,
+    "issue_title": "ci: failure in wallet_multiwallet.py --usecli",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34854"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34854.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

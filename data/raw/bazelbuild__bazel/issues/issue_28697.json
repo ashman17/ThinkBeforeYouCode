@@ -1,0 +1,205 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "gergo-b"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Description of the bug:\n\n\nI am trying to setup a custom coverage calculation and accessing the coverage.dat output of a failed TestRunner leads to runtime exception.\n\n### Which category does this issue belong to?\n\nCore\n\n### What's the simplest, easiest way to reproduce this bug? Please provide a minimal example if possible.\n\n\n`bazel build --aspects //:a.bzl%A   --output_groups=tracefiles  --collect_code_coverage //:test`\n[example.zip](https://github.com/user-attachments/files/25373690/example.zip)\n\n### Which operating system are you running Bazel on?\n\n\nUbuntu 22.04.5 LTS\n\n### What is the output of `bazel info release`?\n\n\nrelease 8.5.1\n\n### If `bazel info release` returns `development version` or `(@non-git)`, tell us how you built Bazel.\n\n\n_No response_\n\n### What's the output of `git remote get-url origin; git rev-parse HEAD` ?\n\n\n```text\n\n```\n\n### If this is a regression, please try to identify the Bazel commit where the bug was introduced with bazelisk --bisect.\n\n\n_No response_\n\n### Have you found anything relevant by searching the web?\n\n[Thread on Bazel Slack](https://bazelbuild.slack.com/archives/C07HTMQFTBN/p1771336790154559?thread_ts=1763062314.055249&cid=C07HTMQFTBN)\nFYI @gregestren \n\n### Any other information, logs, or outputs that you want to share?\n```\nFATAL: bazel crashed due to an internal error. Printing stack trace:\njava.lang.RuntimeException: Unrecoverable error while evaluating node 'UnshareableActionLookupData{actionLookupKey=ConfiguredTargetKey{label=//:test, config=BuildConfigurationKey[5ffc57dd0b8c8a9cc799b909eafd8d025c0b2bfffb0258bac41acb98dcdd2e70]}, actionIndex=10}' (requested by nodes 'AspectCompletionKey{topLevelArtifactContext=com.google.devtools.build.lib.analysis.TopLevelArtifactContext@7bdc8a56, actionLookupKey=//:test#//:a.bzl%A ConfiguredTargetKey{label=//:test, config=BuildConfigurationKey[5ffc57dd0b8c8a9cc799b909eafd8d025c0b2bfffb0258bac41acb98dcdd2e70]} {}}')\n\tat com.google.devtools.build.skyframe.AbstractParallelEvaluator$Evaluate.run(AbstractParallelEvaluator.java:547)\n\tat com.google.devtools.build.lib.concurrent.AbstractQueueVisitor$WrappedRunnable.run(AbstractQueueVisitor.java:435)\n\tat java.base/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(Unknown Source)\n\tat java.base/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.compute(Unknown Source)\n\tat java.base/java.util.concurrent.ForkJoinTask$InterruptibleTask.exec(Unknown Source)\n\tat java.base/java.util.concurrent.ForkJoinTask.doExec(Unknown Source)\n\tat java.base/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(Unknown Source)\n\tat java.base/java.util.concurrent.ForkJoinPool.runWorker(Unknown Source)\n\tat java.base/java.util.concurrent.ForkJoinWorkerThread.run(Unknown Source)\nCaused by: java.lang.NullPointerException: Cannot read field \"printRelativeTestLogPaths\" because \"this.testSummaryOptions\" is null\n\tat com.google.devtools.build.lib.analysis.test.TestStrategy.processTestOutput(TestStrategy.java:407)\n\tat com.google.devtools.build.lib.exec.StandaloneTestStrategy.processTestAttempt(StandaloneTestStrategy.java:288)\n\tat com.google.devtools.build.lib.exec.StandaloneTestStrategy.finalizeTest(StandaloneTestStrategy.java:213)\n\tat com.google.devtools.build.lib.exec.StandaloneTestStrategy$StandaloneTestRunnerSpawn.finalizeTest(StandaloneTestStrategy.java:607)\n\tat com.google.devtools.build.lib.analysis.test.TestRunnerAction.executeAllAttempts(TestRunnerAction.java:1235)\n\tat com.google.devtools.build.lib.analysis.test.TestRunnerAction.execute(TestRunnerAction.java:1012)\n\tat com.google.devtools.build.lib.analysis.test.TestRunnerAction.execute(TestRunnerAction.java:983)\n\tat com.google.devtools.build.lib.skyframe.SkyframeActionExecutor$ActionRunner.executeAction(SkyframeActionExecutor.java:1177)\n\tat com.google.devtools.build.lib.skyframe.SkyframeActionExecutor$ActionRunner.run(SkyframeActionExecutor.java:1082)\n\tat com.google.devtools.build.lib.skyframe.ActionExecutionState.runStateMachine(ActionExecutionState.java:166)\n\tat com.google.devtools.build.lib.skyframe.ActionExecutionState.getResultOrDependOnFuture(ActionExecutionState.java:95)\n\tat com.google.devtools.build.lib.skyframe.SkyframeActionExecutor.executeAction(SkyframeActionExecutor.java:566)\n\tat com.google.devtools.build.lib.skyframe.ActionExecutionFunction.checkCacheAndExecuteIfNeeded(ActionExecutionFunction.java:946)\n\tat com.google.devtools.build.lib.skyframe.ActionExecutionFunction.computeInternal(ActionExecutionFunction.java:377)\n\tat com.google.devtools.build.lib.skyframe.ActionExecutionFunction.compute(ActionExecutionFunction.java:218)\n\tat com.google.devtools.build.skyframe.AbstractParallelEvaluator$Evaluate.run(AbstractParallelEvaluator.java:467)\n\t... 8 more\n```",
+  "closedAt": "2026-02-20T10:12:00Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "meisterT"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "cc @c-mita ",
+      "createdAt": "2026-02-19T13:28:49Z",
+      "id": "IC_kwDOATz7jc7qFjAz",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3927322675"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "c-mita"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Ok, there are several layers of weirdness here.\n\n1. I have no idea why you're getting this crash.\n2. In your reproduction, I can make this crash go away by changing `return 1` to `return 0` in `main.cpp`, which is weird.\n3. I don't understand what you're actually trying to accomplish.\n\nI feel like 3. is worth focusing on. What's the actual goal here?\n\n1\\. and 2. I suspect are related to the fact that you're operating with `bazel build`, so the test runner may not be properly configured. In fact, swapping to `bazel test` makes the crash go away, although now the aspect output is no longer displayed.",
+      "createdAt": "2026-02-19T14:19:13Z",
+      "id": "IC_kwDOATz7jc7qGk-Y",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3927592856"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "c-mita"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "So it is possible to act on the `coverage.dat` file from within Bazel if you really want to. \n\nThe issue is that you need the `TestRunnerAction` to execute, but this is only gets correctly configured when running with `bazel test` ([test summary options ](https://cs.opensource.google/bazel/bazel/+/master:src/main/java/com/google/devtools/build/lib/runtime/TestSummaryOptions.java)are only setup with the [test command](https://cs.opensource.google/bazel/bazel/+/master:src/main/java/com/google/devtools/build/lib/runtime/commands/TestCommand.java;l=70)).\n\nSo you're going to need to run with the `bazel test` (or `bazel coverage`) commands.\n\nThe good news is that you can still apply an aspect onto the test target with this command. And you can even have this aspect perform an action using the output files.\n\n```starlark\n# //:aspect.bzl\ndef _coverage_proc_aspect_impl(target, ctx):\n  coverage_files = [\n    f\n    for a in target.actions if a.mnemonic == \"TestRunner\",\n    for f in a.outputs.to_list() if f.basename == \"coverage.dat\"\n  ]\n  processed = []\n  for file in coverage_files:\n    proc = ctx.actions.declare_file(\"%s_%s.proc\" % (target.label.name, file.basename))\n    args = ctx.actions.args()\n    # setup args\n    ctx.actions.run(\n      outputs = [proc],\n      inputs = [file],\n      executable = ctx.executable._processor,\n      arguments = [args],\n    )\n    processed.append(proc)\n  \n  return [(OutputGroupInfo(\n    processed_coverage = depset(processed),\n  )]\n\ncoverage_proc_aspect = aspect(\n  implementation = _coverage_proc_aspect_impl,\n  attrs = {\n    \"_processor\": attr.label(\n      default = \"//:tool\",\n      cfg = \"exec\",\n      executable = True\n    )\n  }\n)\n```\n\nThen this \"should\" work.\n```\n$ bazel coverage \\\n--aspects //:aspect.bzl%coverage_proc_aspect \\\n--output_group=processed_coverage \\\n//pkg:test1 //pkg:test2\n...\n\n$ find bazel-bin/pkg | grep proc$\nbazel-bin/pkg/test1_coverage.dat.proc\nbazel-bin/pkg/test2_coverage.dat.proc\n```\n\nAll that said, I don't quite know what problem this would solve that an \"outside of Bazel\" solution wouldn't. But we probably shouldn't crash when you set this sort of thing up incorrectly.",
+      "createdAt": "2026-02-19T15:17:53Z",
+      "id": "IC_kwDOATz7jc7qH3hi",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3927930978"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "gergo-b"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I feel like 3. is worth focusing on. What's the actual goal here?\n\n>All that said, I don't quite know what problem this would solve that an \"outside of Bazel\" solution wouldn't.\n\nI would like to have a custom aggregation of coverage results from selected test targets, instead of a global single result provided by `bazel coverage`.  We have an \"outside of Bazel\" solution already, but having it as a Bazel rule provides several advantages.\nAs it would be used a test rule, using `bazel test` instead of `bazel build` is an acceptable \"limitation\".",
+      "createdAt": "2026-02-19T18:45:45Z",
+      "id": "IC_kwDOATz7jc7qMt8v",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3929202479"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "gregestren"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": ">  But we probably shouldn't crash when you set this sort of thing up incorrectly.\n\n+1 ",
+      "createdAt": "2026-02-19T19:20:16Z",
+      "id": "IC_kwDOATz7jc7qNiYQ",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3929417232"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "c-mita"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> As it would be used a test rule, using bazel test instead of bazel build is an acceptable \"limitation\".\n\nThere are caveats with this. It moves the test action to the \"build\" step, so things like the \"exclusive\" tag are unlikely to be honored. Regular test reporting might also get a little confused, but if you're using something else to process results that might not matter much.",
+      "createdAt": "2026-02-19T19:36:56Z",
+      "id": "IC_kwDOATz7jc7qN0i0",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3929491636"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "gergo-b"
+      },
+      "authorAssociation": "NONE",
+      "body": "Could this be cherry-picked onto 8.5 or 8.6?",
+      "createdAt": "2026-02-20T12:33:44Z",
+      "id": "IC_kwDOATz7jc7qfELJ",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3934012105"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@bazel-io fork 8.6.0",
+      "createdAt": "2026-02-20T19:02:37Z",
+      "id": "IC_kwDOATz7jc7qo3jC",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3936581826"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@bazel-io fork 9.0.1",
+      "createdAt": "2026-02-23T14:19:12Z",
+      "id": "IC_kwDOATz7jc7rJI0m",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3945041190"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmeum"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@bazel-io fork 9.1.0",
+      "createdAt": "2026-02-23T14:19:16Z",
+      "id": "IC_kwDOATz7jc7rJI6V",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3945041557"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A fix for this issue has been included in\u00a0[Bazel 8.6.0 RC3](https://github.com/bazelbuild/bazel/releases/tag/8.6.0rc3). Please test out the release candidate and report any issues as soon as possible.\nIf you're using Bazelisk, you can point to the latest RC by setting USE_BAZEL_VERSION=8.6.0rc3. Thanks!\n",
+      "createdAt": "2026-02-24T22:29:05Z",
+      "id": "IC_kwDOATz7jc7rvgXk",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-3955099108"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A fix for this issue has been included in\u00a0[Bazel 9.0.1 RC1](https://github.com/bazelbuild/bazel/releases/tag/9.0.1rc1). Please test out the release candidate and report any issues as soon as possible.\nIf you're using Bazelisk, you can point to the latest RC by setting USE_BAZEL_VERSION=9.0.1rc1. Thanks!",
+      "createdAt": "2026-03-06T05:41:35Z",
+      "id": "IC_kwDOATz7jc7u_3l8",
+      "url": "https://github.com/bazelbuild/bazel/issues/28697#issuecomment-4009720188"
+    }
+  ],
+  "createdAt": "2026-02-17T20:26:56Z",
+  "id": "I_kwDOATz7jc7rtVKy",
+  "labels": [
+    {
+      "name": "type: bug"
+    },
+    {
+      "name": "untriaged"
+    },
+    {
+      "name": "team-Core"
+    }
+  ],
+  "number": 28697,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "gergo-b"
+      },
+      "createdAt": "2026-02-17T20:26:57Z",
+      "label": {
+        "name": "type: bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "gergo-b"
+      },
+      "createdAt": "2026-02-17T20:26:58Z",
+      "label": {
+        "name": "untriaged"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bharadwaj08-one"
+      },
+      "createdAt": "2026-02-18T05:01:08Z",
+      "label": {
+        "name": "team-Core"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "copybara-service"
+      },
+      "createdAt": "2026-02-20T10:12:01Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Crash when accessing coverage.dat output of a failed TestRunner action",
+  "url": "https://github.com/bazelbuild/bazel/issues/28697"
+}

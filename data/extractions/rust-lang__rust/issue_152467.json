@@ -1,0 +1,335 @@
+{
+  "issue": {
+    "artifact_count": 19,
+    "comments": [
+      {
+        "artifact_count": 7,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "type checking and higher-ranked binders",
+              "problem_kind": "compilation error",
+              "user_or_system_impact": "user confusion, unexpected errors"
+            },
+            "summary": "Types inside higher-ranked binders are sometimes not checked for well-formedness (wf), leading to unexpected compilation errors or incorrect behavior when adding certain bounds.",
+            "tags": [
+              "bug",
+              "compile_error",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "determinism": "Yes",
+              "environment": "Rust version 1.95.0-nightly (2026-02-09)",
+              "prerequisites": "Rust playground"
+            },
+            "summary": "A bug can be reproduced by providing specific code examples where the addition of a `Send` bound changes the compilation result.",
+            "tags": [
+              "bug",
+              "compile_error"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "type checking and higher-ranked binders",
+              "urgency": "unknown"
+            },
+            "summary": "Clarification needed on the behavior and correctness of type checking for higher-ranked binders.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "determinism": "Yes",
+              "environment": "Rust version 1.95.0-nightly (2026-02-09)",
+              "prerequisites": "Rust playground"
+            },
+            "summary": "Specific code examples are provided to reproduce the issue with `Send` bounds.",
+            "tags": [
+              "bug",
+              "compile_error"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "constraint_type": "technical limitation",
+              "scope": "type checking",
+              "severity": "intermittent compilation errors"
+            },
+            "summary": "Constraints exist on type checking for higher-ranked binders, specifically related to well-formedness and the presence of certain bounds.",
+            "tags": [
+              "compile_error"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "alternative_to": "correctly handling higher-ranked bounds without additional `Send` bounds",
+              "comparison_focus": "behavior and correctness",
+              "differentiator": "workaround vs. fix"
+            },
+            "summary": "Adding a `Send` bound to the type constraints resolves the compilation error, but may not be the correct solution.",
+            "tags": [
+              "bug",
+              "compile_error"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "impact_scope": "type system and higher-ranked binders",
+              "reasoning_kind": "technical limitation analysis",
+              "supports_artifact_type": "bug"
+            },
+            "summary": "The rationale behind the bug is to understand why certain types inside higher-ranked binders are not checked for well-formedness, even when a `Send` bound appears to resolve the issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "generic type system",
+              "problem_kind": "compilation failure",
+              "user_or_system_impact": "compiler behavior"
+            },
+            "summary": "The issue is that a generic function with a higher-ranked lifetime bound fails to compile even without dynamic dispatch.",
+            "tags": [
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3882027831"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "generic_function_lifetime",
+              "problem_kind": "compilation_error",
+              "user_or_system_impact": "user_code_compilation"
+            },
+            "summary": "A lifetime error occurs in a generic function due to the reference having a longer lifetime than the data it references.",
+            "tags": [
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3882031957"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "functionality",
+              "problem_kind": "compile_error",
+              "user_or_system_impact": "compilation failure"
+            },
+            "summary": "Error with non-lifetime requirements causes issues in Rust function.",
+            "tags": [
+              "compile_error",
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3882043430"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "generic types and slices",
+              "problem_kind": "compilation error",
+              "user_or_system_impact": "User code is unable to compile due to size ambiguity"
+            },
+            "summary": "Error related to size unknown at compile time for slice type.",
+            "tags": [
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3882051187"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "unknown",
+              "language": "unknown",
+              "snippet_kind": "unknown"
+            },
+            "summary": "snippet demonstrates a confusing type system behavior",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3882151050"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "demonstrate feature usage",
+              "language": "rust",
+              "snippet_kind": "example"
+            },
+            "summary": "Rust code demonstrating the use of unboxed closures and type inference",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3882158132"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "demonstrate erroneous behavior",
+              "language": "rust",
+              "snippet_kind": "bug_reproduction"
+            },
+            "summary": "Rust code demonstrating a bug in trait implementation and method dispatch",
+            "tags": [
+              "bug",
+              "runtime_error"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3882205618"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "Reproduces ICE in nightly Rust compiler with a specific trait implementation and associated type.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3883126465"
+      },
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "generic type resolution, trait implementation, dynamic dispatch",
+              "problem_kind": "internal compiler error (ICE)",
+              "user_or_system_impact": "system impact (compiler crash)"
+            },
+            "summary": "ICE encountered with a complex generic type instantiation involving trait bounds and dyn types.",
+            "tags": [
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "determinism": "always reproduces the error",
+              "environment": "rustc 1.95.0-nightly (9e79395f9 2026-02-10) running on x86_64-unknown-linux-gnu",
+              "prerequisites": "nightly toolchain and nightly Rust code"
+            },
+            "summary": "Reproduce the ICE by attempting to instantiate a generic type with a complex bound and calling a method.",
+            "tags": [
+              "compile_error"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3884623230"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "traits and type systems",
+              "problem_kind": "compile_error",
+              "user_or_system_impact": "errors due to missing implied bounds"
+            },
+            "summary": "Issue with handling of higher-ranked lifetimes in well-formed goals and trait object checks",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "lcnr",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3884757455"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rust_core_library",
+              "problem_kind": "logical_bug",
+              "user_or_system_impact": "potentially incorrect behavior"
+            },
+            "summary": "The issue is partly intended and partly an unsoundness tracked elsewhere.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "lcnr",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152467#issuecomment-3885091880"
+      }
+    ],
+    "issue_number": 152467,
+    "issue_title": "Types inside higher-ranked binders sometimes aren't checked for WF.",
+    "issue_url": "https://github.com/rust-lang/rust/issues/152467"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/rust-lang__rust/issue_152467.json",
+  "repository": "rust-lang/rust",
+  "status": "completed"
+}

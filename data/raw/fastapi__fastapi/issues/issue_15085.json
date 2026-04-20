@@ -1,0 +1,19 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "anix-lynch"
+  },
+  "authorAssociation": "NONE",
+  "body": "## Summary\n\nThe `encoder.md` tutorial covers `jsonable_encoder` for Pydantic models and Python `datetime` objects, but does not mention **Pandas DataFrames** \u2014 a very common data source in FastAPI apps (ML pipelines, analytics APIs, data science backends).\n\n## The Problem\n\nWhen returning data from a Pandas DataFrame using `.to_dict(orient=\"records\")`, columns retain **NumPy types** (`numpy.int64`, `numpy.float64`, `numpy.nan`, `pandas.NaT`). These are **not natively JSON serializable**, causing runtime errors:\n\n```\nTypeError: Object of type int64 is not JSON serializable\n```\n\nOr silently producing invalid JSON with `NaN` values (not valid JSON spec).\n\n## Minimal Reproduction\n\n```python\nfrom fastapi import FastAPI\nimport pandas as pd\n\napp = FastAPI()\n\n@app.get(\"/data\")\ndef get_data():\n    df = pd.DataFrame({\n        \"count\": [1, 2, 3],        # numpy.int64\n        \"score\": [1.5, float(\"nan\"), 3.0],  # numpy.float64 + NaN\n    })\n    return df.to_dict(orient=\"records\")  # \ud83d\udca5 NaN breaks JSON, int64 may fail\n```\n\n## Expected\n\nDocs should show the safe pattern for returning Pandas DataFrames:\n\n```python\nfrom fastapi.encoders import jsonable_encoder\n\n@app.get(\"/data\")\ndef get_data():\n    df = pd.DataFrame({...})\n    # \u2705 Converts numpy types + handles NaT/NaN -> null\n    return jsonable_encoder(df.to_dict(orient=\"records\"))\n```\n\nOr alternatively using pandas native JSON serialization:\n\n```python\nimport json\n\n@app.get(\"/data\")\ndef get_data():\n    df = pd.DataFrame({...})\n    # \u2705 pandas handles numpy types natively\n    return json.loads(df.to_json(orient=\"records\", date_format=\"iso\"))\n```\n\n## Why This Matters\n\nPandas is extremely common in FastAPI backends (ML inference APIs, analytics dashboards, data pipelines). This silent failure is a frequent gotcha for developers and is not covered anywhere in the current docs.\n\nProposing a small addition to `docs/en/docs/tutorial/encoder.md` under a new **\"Working with Pandas DataFrames\"** section.\n\n## Environment\n\n- FastAPI: latest\n- Python: 3.11\n- pandas: 2.x\n- Hit this while building a healthcare analytics REST API backed by a pandas DataFrame\n\n",
+  "closedAt": "2026-03-10T09:10:37Z",
+  "comments": [],
+  "createdAt": "2026-03-10T09:01:47Z",
+  "id": "I_kwDOCZduT87xbBAn",
+  "labels": [],
+  "number": 15085,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [],
+  "title": "Docs: No guidance on Pandas DataFrame serialization \u2014 numpy types cause JSON errors",
+  "url": "https://github.com/fastapi/fastapi/issues/15085"
+}

@@ -1,0 +1,86 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "bazel-io"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "- Expected release date: 2026-03-19\n\nTask list:\n\n- [x] Pick release baseline: [f3ab794](https://github.com/bazelbuild/bazel/commit/f3ab7948c2dff519f8228890b3878a5586d2b723)\n- [ ] Create release candidate: https://releases.bazel.build/10.0.0/rolling/10.0.0-pre.20260312.1rc1/index.html\n- [ ] Post-submit: https://buildkite.com/bazel/bazel-bazel/builds?branch=release-10.0.0-pre.20260312.1rc1\n- [x] Push the release: https://releases.bazel.build/10.0.0/rolling/10.0.0-pre.20260312.1/index.html\n- [x] Check the [release page](https://bazel.build/release/rolling)",
+  "closedAt": "2026-03-20T13:45:24Z",
+  "comments": [],
+  "createdAt": "2026-03-19T18:22:21Z",
+  "id": "I_kwDOATz7jc70lUE0",
+  "labels": [
+    {
+      "name": "P1"
+    },
+    {
+      "name": "type: process"
+    },
+    {
+      "name": "release"
+    },
+    {
+      "name": "team-OSS"
+    }
+  ],
+  "number": 29033,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bazel-io"
+      },
+      "createdAt": "2026-03-19T18:22:22Z",
+      "label": {
+        "name": "P1"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bazel-io"
+      },
+      "createdAt": "2026-03-19T18:22:22Z",
+      "label": {
+        "name": "type: process"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bazel-io"
+      },
+      "createdAt": "2026-03-19T18:22:23Z",
+      "label": {
+        "name": "release"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bazel-io"
+      },
+      "createdAt": "2026-03-19T18:22:23Z",
+      "label": {
+        "name": "team-OSS"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "secondsun"
+      },
+      "createdAt": "2026-03-20T13:45:24Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Status of Bazel 10.0.0-pre.20260312.1",
+  "url": "https://github.com/bazelbuild/bazel/issues/29033"
+}

@@ -1,0 +1,238 @@
+{
+  "issue": {
+    "artifact_count": 12,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rust_test_rule_action_generation",
+              "problem_kind": "conflict",
+              "user_or_system_impact": "system"
+            },
+            "summary": "Action conflicts detected for 'foo.repo_mapping' generation in rust_test rule under `coverage`",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "dzbarsky",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification_request",
+              "target_area": "bazel_configuration",
+              "urgency": "unknown"
+            },
+            "summary": "Could you diff the two configs (using `bazel config`) and see what's different?",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "Wyverald",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3672159384"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "testing",
+              "problem_kind": "behavior_change",
+              "user_or_system_impact": "potential impact on testing"
+            },
+            "summary": "The issue may be related to the test trimming transition affecting loaded packages through config fields like `lcov_merger`.",
+            "tags": [
+              "config_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3672386153"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "configuration comparison",
+              "language": "plaintext",
+              "snippet_kind": "diff"
+            },
+            "summary": "A diff of two configuration values with differing keys and options.",
+            "tags": [
+              "config_issue"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "dzbarsky",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3674813512"
+      },
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "prevents removal of coverage_support reference",
+              "solution_kind": "code change",
+              "target_area": "coverage support in tests"
+            },
+            "summary": "move coverage_support to CoverageOptions and don't trim it as a fix for test trimming issue affecting loaded transitive packages",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "affected_area": "coverage support in tests",
+              "problem_kind": "behavioral issue",
+              "user_or_system_impact": "affects test results and package loading"
+            },
+            "summary": "test trimming removes the reference to coverage_support, affecting loaded transitive packages",
+            "tags": [
+              "incorrect_behavior",
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3674965273"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "reduced_test_configuration_forking",
+              "target_area": "bazel_tests",
+              "urgency": "unknown"
+            },
+            "summary": "Suggest enabling an experimental flag to avoid configuration forking.",
+            "tags": [
+              "workaround"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3675500631"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "compared_against": "unknown",
+              "priority_level": "unknown",
+              "scope": "unknown"
+            },
+            "summary": "Prioritizing the release of a specific feature in 8.5.1",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "priority_discussion"
+          }
+        ],
+        "comment_author": "UebelAndre",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3696802599"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "@bazel-io",
+              "deliverable": "fork 8.5.1",
+              "due_context": "implied"
+            },
+            "summary": "Assigning task to @bazel-io for the fork 8.5.1.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3696994266"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": "false",
+              "progress_state": "informative",
+              "status_kind": "mention"
+            },
+            "summary": "user @bazel-io mentions fork 8.6.0 of the project",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3696994591"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "candidate",
+              "status_kind": "released"
+            },
+            "summary": "Bazel 8.5.1 RC2 has been released; request for testing.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3720810087"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "complete",
+              "status_kind": "released"
+            },
+            "summary": "Bazel 9.0.0 RC5 has been released with a fix for the issue; users are encouraged to test it.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28056#issuecomment-3747115101"
+      }
+    ],
+    "issue_number": 28056,
+    "issue_title": "Action conflicts: 'foo.repo_mapping' is generated by these conflicting actions",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/28056"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_28056.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

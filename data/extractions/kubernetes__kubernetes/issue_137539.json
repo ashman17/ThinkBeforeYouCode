@@ -1,0 +1,248 @@
+{
+  "issue": {
+    "artifact_count": 12,
+    "comments": [
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "node_drivers",
+              "problem_kind": "functional_test",
+              "user_or_system_impact": "system"
+            },
+            "summary": "E2E suite test failures related to DRAExtendedResource feature gate on specific nodes.",
+            "tags": [
+              "test_infra_issue",
+              "e2e_test",
+              "test_flakiness"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "determinism": "non-deterministic (occurred once, but test was failing)",
+              "environment": "GCE COS Serial Master",
+              "prerequisites": "DRAExtendedResource feature gate enabled"
+            },
+            "summary": "Test failure due to timeout in pod allocation on specific node.",
+            "tags": [
+              "test_flakiness",
+              "timeout",
+              "runtime_error"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "coverage_target": "extended_resources_allocation",
+              "expected_outcome": "successful pod allocation on nodes with specific feature gate enabled",
+              "test_level": "integration"
+            },
+            "summary": "Specific E2E tests related to extended resource allocation and device plugin uninstallation.",
+            "tags": [
+              "e2e_test",
+              "unit_test"
+            ],
+            "type": "test_case"
+          },
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "failure",
+              "status_kind": "issue_tracking"
+            },
+            "summary": "Issue has been failing since 6th March 2026.",
+            "tags": [
+              "ci_failure",
+              "test_flakiness"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "dhanishaphadate",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4017853862"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "pohly",
+              "deliverable": "further investigation and action on the issue",
+              "due_context": "unknown"
+            },
+            "summary": "Assigning the issue to @pohly for further investigation and action.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4018671821"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "device_plugin",
+              "problem_kind": "test_failure",
+              "user_or_system_impact": "unresolved"
+            },
+            "summary": "a failure occurred during device plugin deployment at test/e2e/dra/deploy_device_plugin.go:77; not related to DRA; requires investigation by @bart0sh",
+            "tags": [
+              "test_infra_issue",
+              "e2e_test",
+              "unit_test"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "yliaog",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4019539791"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "Prevent incorrect job execution",
+              "target_area": "job scheduling and execution",
+              "urgency": "Medium"
+            },
+            "summary": "Suggest DRA label for jobs in a specific lane to prevent their execution.",
+            "tags": [
+              "api_misuse",
+              "config_issue"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "kannon92",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4019727532"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "bart0sh",
+              "deliverable": "deeper look at the issue",
+              "due_context": "not explicitly stated"
+            },
+            "summary": "bart0sh is assigned to review the issue related to device plugin deployment.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "bart0sh",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4022063720"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "continuous_integration",
+              "problem_kind": "infrastructure_failure",
+              "user_or_system_impact": "system"
+            },
+            "summary": "issue with ci-kubernetes-e2e-gci-gce-serial failing due to same error",
+            "tags": [
+              "test_infra_issue",
+              "test_flakiness"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Prajyot-Parab",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4022904054"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "pacoxu",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4029387405"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "resolved",
+              "status_kind": "closure"
+            },
+            "summary": "Closing issue due to PR merge and skipped test.",
+            "tags": [
+              "fix_merged"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4029387841"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "device_plugin",
+              "problem_kind": "test_failure",
+              "user_or_system_impact": "system"
+            },
+            "summary": "the failure during device plugin deployment is unrelated to DRA; potential tracking issue needed",
+            "tags": [
+              "test_infra_issue",
+              "e2e_test",
+              "incorrect_output"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "pohly",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4029423971"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "device plugin deployment",
+              "problem_kind": "failure",
+              "user_or_system_impact": "test failure"
+            },
+            "summary": "Failure during device plugin deployment in E2E test; not directly related to DRA",
+            "tags": [
+              "test_infra_issue",
+              "e2e_test"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "pacoxu",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4029512774"
+      }
+    ],
+    "issue_number": 137539,
+    "issue_title": "[Failing Test] [sig-node]Kubernetes e2e suite.[It] [sig-node] [DRA] [FeatureGate:DRAExtendedResource] [Beta] ",
+    "issue_url": "https://github.com/kubernetes/kubernetes/issues/137539"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/kubernetes__kubernetes/issue_137539.json",
+  "repository": "kubernetes/kubernetes",
+  "status": "completed"
+}

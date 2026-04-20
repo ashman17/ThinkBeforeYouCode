@@ -1,0 +1,523 @@
+{
+  "issue": {
+    "artifact_count": 31,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "query parameter handling",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "conflicting output"
+            },
+            "summary": "In version 0.115.0 of FastAPI, the pydantic model with declared alias does not correctly receive query parameters.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "insistence",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "demonstrate correct usage of Annotated in FastAPI queries.",
+              "language": "Python",
+              "snippet_kind": "solution_example"
+            },
+            "summary": "Provided a code snippet using Annotated for Query parameters to demonstrate the solution.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "aless10",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2400852854"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "FastAPI framework",
+              "problem_kind": "query parameter interaction",
+              "user_or_system_impact": "potential confusion"
+            },
+            "summary": "It is unclear if it's possible to include other query parameters along with a Pydantic model in FastAPI.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Usernamelesss",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2401678887"
+      },
+      {
+        "artifact_count": 3,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Query handling in FastAPI",
+              "problem_kind": "API misuse",
+              "user_or_system_impact": "User confusion and potential API misuse"
+            },
+            "summary": "Cannot use both Pydantic models and regular query parameters in FastAPI.",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "question_kind": "Query clarification",
+              "target_area": "Query handling in FastAPI",
+              "urgency": "Informal request for confirmation"
+            },
+            "summary": "Confirm whether it is possible to use Pydantic models alongside regular query parameters.",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "certainty": "Confident response based on framework limitations",
+              "resolution_status": "Resolved with confirmation",
+              "target_question_topic": "Query handling in FastAPI"
+            },
+            "summary": "Clarify that using both Pydantic models and regular query parameters is not allowed.",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "answer_clarification"
+          }
+        ],
+        "comment_author": "mjurenka",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2414411163"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "jd-solanki",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2416720739"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "API usage and behavior",
+              "problem_kind": "behavioral issue",
+              "user_or_system_impact": "System misbehaves"
+            },
+            "summary": "User reports that using the `Annotated` version as recommended in the documentation does not resolve a bug.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "KristofMerey",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2418890722"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "header parameter handling",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "confusion and incorrect implementation"
+            },
+            "summary": "issue with header parameter models in fastapi 0.115.2; different behavior based on model count",
+            "tags": [
+              "incorrect_behavior",
+              "api_misuse",
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Kyle-sandeman-mrdfood",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2419182406"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "query parameter models",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "conflicting issue reports"
+            },
+            "summary": "There are two distinct problems in query parameter models: alias handling and combining multiple models.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "KristofMerey",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2419304334"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "validation errors handling",
+              "solution_kind": "workaround",
+              "target_area": "query parameter handling"
+            },
+            "summary": "Aggregate several query parameters using `Depends` + some callable in Pydantic model.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "JoseKilo",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2520205504"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "query parameters and validation",
+              "problem_kind": "behavior",
+              "user_or_system_impact": "invalid API responses"
+            },
+            "summary": "Query parameter alias handling issue in FastAPI leading to extra field forbidden error.",
+            "tags": [
+              "incorrect_behavior",
+              "runtime_error",
+              "api"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Viicos",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2559403511"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "unknown",
+              "problem_kind": "status inquiry",
+              "user_or_system_impact": "unknown"
+            },
+            "summary": "The user is inquiring about the status of committed changes.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "RicarTang",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2603802087"
+      },
+      {
+        "artifact_count": 11,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "query parameters and dependency injection in FastAPI",
+              "problem_kind": "misconfiguration",
+              "user_or_system_impact": "incorrect behavior"
+            },
+            "summary": "Problem with using Query() to inject a Pydantic model in FastAPI.",
+            "tags": [
+              "api_misuse",
+              "bug"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "correct and clean parsing of query parameters",
+              "solution_kind": "dependency injection",
+              "target_area": "query parameters handling in FastAPI"
+            },
+            "summary": "Using Depends() to inject a Pydantic model as a dependency.",
+            "tags": [
+              "api"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "alternative_to": "Query() with Pydantic models",
+              "comparison_focus": "declarations and dependency injection",
+              "differentiator": "field-level vs. function-level"
+            },
+            "summary": "Using Query() for field-level declarations versus Depends() for function-level dependency injection.",
+            "tags": [
+              "api"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "chosen_option": "Depends() for dependency injection",
+              "decision_status": "implemented",
+              "rejected_options": "Query() with Pydantic models"
+            },
+            "summary": "Decision on how to handle multiple query parameters as a model in FastAPI.",
+            "tags": [
+              "api"
+            ],
+            "type": "design_decision"
+          },
+          {
+            "metadata": {
+              "impact_scope": "query parameters and dependency injection",
+              "reasoning_kind": "technical limitation",
+              "supports_artifact_type": "code explanation"
+            },
+            "summary": "Explanation of why Query() is not suitable for injecting a Pydantic model.",
+            "tags": [
+              "api"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "component": "FastAPI route handler",
+              "implementation_action": "parameter declaration",
+              "lifecycle_stage": "definition phase"
+            },
+            "summary": "Example of using Query() for individual query parameter declarations.",
+            "tags": [
+              "api"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "intended_use": "query parameter declaration",
+              "language": "Python",
+              "snippet_kind": "route handler definition"
+            },
+            "summary": "Example of a FastAPI route with Query() for individual query parameters.",
+            "tags": [
+              "api"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "intended_use": "dependency injection",
+              "language": "Python",
+              "snippet_kind": "route handler definition"
+            },
+            "summary": "Example of a FastAPI route using Depends() for dependency injection.",
+            "tags": [
+              "api"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "approach_name": "FastAPI dependency injection mechanism",
+              "scale_or_complexity_notes": "dynamic parameter handling",
+              "target_problem": "query parameter parsing and model construction"
+            },
+            "summary": "Algorithm approach for handling query parameters in FastAPI.",
+            "tags": [
+              "api"
+            ],
+            "type": "algorithm_approach"
+          },
+          {
+            "metadata": {
+              "api_surface": "route handler parameter declarations",
+              "compatibility_impact": "backward compatibility",
+              "interface_kind": "dependency injection API"
+            },
+            "summary": "Design of FastAPI's approach to query parameters and model dependency injection.",
+            "tags": [
+              "api"
+            ],
+            "type": "api_design"
+          },
+          {
+            "metadata": {
+              "evidence_type": "visual explanation",
+              "reliability": "based on FastAPI's design philosophy",
+              "sample_source": "FastAPI documentation"
+            },
+            "summary": "Visual analogy of using models for multiple query parameters.",
+            "tags": [
+              "api"
+            ],
+            "type": "empirical_evidence"
+          }
+        ],
+        "comment_author": "JobyGeJo",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2826895393"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "dependency_injection",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "code functionality"
+            },
+            "summary": "The `Depends()` syntax does not fully support field_validators and list-parameters in Pydantic models.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "jannis701",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2829901757"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "impact_scope": "query_parameter_handling",
+              "reasoning_kind": "technical_detail",
+              "supports_artifact_type": "explains_behavior"
+            },
+            "summary": "Explains why FastAPI treats `Depends()` differently for query parameters and body models.",
+            "tags": [
+              "api"
+            ],
+            "type": "rationale"
+          }
+        ],
+        "comment_author": "JobyGeJo",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2833577734"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "query_param_models",
+              "problem_kind": "syntax_bug",
+              "user_or_system_impact": "workaround_required"
+            },
+            "summary": "The `Annotated[FilterParams, Query()]` syntax in FastAPI is expected to work according to the documentation but does not, leading to a bug where Pydantic field aliases are broken.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "jannis701",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2834642130"
+      },
+      {
+        "artifact_count": 3,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "FastAPI Query parameters with Annotated types",
+              "problem_kind": "alias inconsistency in Pydantic model handling",
+              "user_or_system_impact": "Inconsistent behavior may mislead developers and affect application logic"
+            },
+            "summary": "When using Annotated[FilterParams, Query()], the alias defined via Field(...) is not respected while it works as expected when using Depends(). This highlights inconsistent behavior between Pydantic models and `Query()` vs. `Depends()`.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "impact_scope": "query parameter parsing behavior",
+              "reasoning_kind": "user feedback and clarification",
+              "supports_artifact_type": "clarification"
+            },
+            "summary": "Clarification that `list_test_parameter` is parsed from the query parameters on GET requests regardless of whether `Depends()` or `Query()` are used.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "Consistent behavior between Pydantic models and `Query()` vs. `Depends()`",
+              "target_area": "Pydantic model handling with Annotated types",
+              "urgency": "Developer experience improvement"
+            },
+            "summary": "Agrees that the issue feels like inconsistent behavior and considers it a bug. Suggests using `Depends()` for cleaner alias mapping and intuitive query parsing.",
+            "tags": [
+              "bug",
+              "fix_proposed"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "JobyGeJo",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2837600251"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "FastAPI query dependencies",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "Unexpected function behavior"
+            },
+            "summary": "The bug is re-introduced after a previous fix and causes incorrect behavior with the `Annotated[FilterParams, Query()]` syntax.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "jannis701",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-2837809162"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "complete",
+              "status_kind": "resolved"
+            },
+            "summary": "The issue was solved in pull request #14360 and is available in version 0.123.3 of FastAPI.",
+            "tags": [
+              "fix_merged"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "tiangolo",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/12402#issuecomment-3601086881"
+      }
+    ],
+    "issue_number": 12402,
+    "issue_title": "[BUG] In version 0.115.0 of FastAPI, the pydantic model that has declared an alias cannot correctly receive query parameters",
+    "issue_url": "https://github.com/fastapi/fastapi/issues/12402"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/fastapi__fastapi/issue_12402.json",
+  "repository": "fastapi/fastapi",
+  "status": "completed"
+}

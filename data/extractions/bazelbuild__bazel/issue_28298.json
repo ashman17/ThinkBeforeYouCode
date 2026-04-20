@@ -1,0 +1,383 @@
+{
+  "issue": {
+    "artifact_count": 21,
+    "comments": [
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Java Rules and Bazel version 8.5.1",
+              "problem_kind": "Version incompatibility",
+              "user_or_system_impact": "System impact: crash during coverage"
+            },
+            "summary": "8.5.1 version of Bazel has a compatibility issue with JaCoCo and rules_java 9.3.0, leading to `ExceptionInInitializerError` during `bazel coverage` on Kotlin targets.",
+            "tags": [
+              "compatibility_issue",
+              "version_mismatch",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "determinism": "Reproducibly crashes",
+              "environment": "Bazel version 8.5.1",
+              "prerequisites": "Kotlin target and rules_java 9.3.0"
+            },
+            "summary": "Crash occurs with `bazel coverage` on Kotlin targets using rules_java 9.3.0 when running Bazel 8.5.1, but not in 8.5.0.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "dmivankov",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298"
+      },
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "unknown",
+              "problem_kind": "unknown",
+              "user_or_system_impact": "unknown"
+            },
+            "summary": "Same with 9.0.0rc5; affected_area=version, problem_kind=bug, user_or_system_impact=user_reported",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "constraint_type": "unknown",
+              "scope": "unknown",
+              "severity": "unknown"
+            },
+            "summary": "Same with 9.0.0rc5; constraint_type=same_behavior, scope=all_versions, severity=critical",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          }
+        ],
+        "comment_author": "dmivankov",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3749171694"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "unknown",
+              "urgency": "unknown"
+            },
+            "summary": "Can you check if the jacoco dependency is included in the target's dependencies?",
+            "tags": [
+              "test_infra_issue"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "hvadehra",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3752720636"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "non-deterministic due to command differences",
+              "environment": "bazel 9.2.0",
+              "prerequisites": "running Bazel commands"
+            },
+            "summary": "Reproducing the issue involves running `bazel query` versus `bazel cquery --collect_code_coverage`, with different outputs.",
+            "tags": [
+              "unit_test"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "dmivankov",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3753171653"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "certainty": "high",
+              "resolution_status": "resolved",
+              "target_question_topic": "coverage with rules_java 9.2.0"
+            },
+            "summary": "clarified that coverage with rules_java 9.2.0 works",
+            "tags": [
+              "performance_issue"
+            ],
+            "type": "answer_clarification"
+          }
+        ],
+        "comment_author": "hvadehra",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3753479951"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "hvadehra",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3753484819"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rules_kotlin",
+              "problem_kind": "bug",
+              "user_or_system_impact": "unknown"
+            },
+            "summary": "The `rules_kotlin` file imports jacoco but the source of import and used version are unclear when it fails.",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "dmivankov",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3754373773"
+      },
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rules_kotlin",
+              "problem_kind": "version_conflict",
+              "user_or_system_impact": "compilation_failure"
+            },
+            "summary": "The version of the Jacoco agent differs between the compile-time and runtime environments when consuming rules_kotlin.",
+            "tags": [
+              "compile_error",
+              "version_mismatch",
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "question_kind": "how_to_solve",
+              "target_area": "rules_kotlin",
+              "urgency": "high"
+            },
+            "summary": "How to make the version bump in rules_kotlin without breaking consumption and how to properly handle compile-time vs runtime instrumentation.",
+            "tags": [
+              "config_issue",
+              "api_misuse",
+              "compatibility_issue"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "component": "rules_kotlin",
+              "implementation_action": "registry_override",
+              "lifecycle_stage": "development"
+            },
+            "summary": "Attempts to override the registry to change the version of MODULE.bazel rules_java in rules_kotlin.",
+            "tags": [
+              "config_issue",
+              "api_misuse"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "evidence_type": "class_file_comparison",
+              "reliability": "determined_by_inspection",
+              "sample_source": "bazel_build_output"
+            },
+            "summary": "Evidence of version differences through the presence of different class file versions in the compiled output.",
+            "tags": [
+              "version_mismatch"
+            ],
+            "type": "empirical_evidence"
+          }
+        ],
+        "comment_author": "dmivankov",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3754408967"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "Silic0nS0ldier",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3755036365"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "debugging",
+              "language": "bash",
+              "snippet_kind": "command_output"
+            },
+            "summary": "Output of jar command and pom.properties content for rules_kotlin",
+            "tags": [
+              "unit_test"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "dmivankov",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3755149484"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "configuration inquiry",
+              "target_area": "rules_kotlin and Jacoco setup",
+              "urgency": "unknown"
+            },
+            "summary": "AFAICT things should work fine the way rules_kotlin setups up it's dependencies on Jacoco. Is there something special in the way your target(s) are set up?",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "hvadehra",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3760109572"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "Reproducible bug in kotlin_worker compilation using newer jacoco.",
+            "tags": [
+              "bug"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "dmivankov",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3767299915"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rules_kotlin and Bazel build system",
+              "problem_kind": "inconsistency",
+              "user_or_system_impact": "Build output inconsistency"
+            },
+            "summary": "Inconsistent behavior when using bzlmod with rules_kotlin and bazel binary dependencies.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "dmivankov",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3767581118"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rules_kotlin",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "incorrect_behavior"
+            },
+            "summary": "The kotlin builder for KotlinCompile contains jacoco classes which depend on the rules_java version at release time.",
+            "tags": [
+              "api_misuse",
+              "config_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "hvadehra",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3767648710"
+      },
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rules_kotlin",
+              "problem_kind": "configuration_error",
+              "user_or_system_impact": "development_experience"
+            },
+            "summary": "The issue relates to pre-built workers in rules_kotlin and potential complexity in managing multiple jacoco versions.",
+            "tags": [
+              "api_misuse",
+              "config_issue",
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "improved_stability_and_adaptability",
+              "solution_kind": "code_change",
+              "target_area": "rules_kotlin"
+            },
+            "summary": "Proposing to move away from pre-built workers or pre-building for multiple jacoco versions.",
+            "tags": [
+              "refactor",
+              "fix_proposed"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "alternative_to": "pre-built_workers",
+              "comparison_focus": "development_effort_and_stability",
+              "differentiator": "flexibility_in_version_matching"
+            },
+            "summary": "Considering the non-prebuilt approach as an alternative to pre-built workers.",
+            "tags": [
+              "refactor",
+              "fix_proposed"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "assignee": "dmivankov",
+              "deliverable": "working_solution_or_ticket",
+              "due_context": "issue_resolution"
+            },
+            "summary": "Assigning the task of exploring non-prebuilt approach to resolve compatibility issues.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "dmivankov",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28298#issuecomment-3767802186"
+      }
+    ],
+    "issue_number": 28298,
+    "issue_title": "8.5.1: broken jacoco compatibility with rules_java:9.3.0/java_tools:18.1",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/28298"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_28298.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

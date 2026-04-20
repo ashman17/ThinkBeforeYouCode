@@ -1,0 +1,125 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "josephgal007"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Is there an existing issue for this?\n\n- [x] I have searched the existing issues\n\n### Current behaviour\n\n[error] A fatal internal error occurred, see debug.log for details: System error while flushing: Fatal LevelDB error: Corruption: block checksum mismatch: C:\\Bitcoin Core\\chainstate/1131523.ldb\n\n[debug.log](https://github.com/user-attachments/files/26090007/debug.log)\n\nThis error is occurring frequently now.\n\n### Expected behaviour\n\nno errors like this.\n\n### Steps to reproduce\n\nerror occurs again after restarting bitcoin core\n\n### Relevant log output\n\n_No response_\n\n### How did you obtain Bitcoin Core\n\nPre-built binaries\n\n### What version of Bitcoin Core are you using?\n\nBitcoin Core version v30.2.0\n\n### Operating system and version\n\nWindows 11\n\n### Machine specifications\n\n<img width=\"1138\" height=\"483\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/baacb1de-b0c0-4c12-9696-1d0977b8c94c\" />",
+  "closedAt": "2026-03-19T05:21:27Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Bitcoin Core makes heavy use of CPU, RAM and storage IO. Hardware defects might only become visible when running Bitcoin Core. You might want to check your hardware for defects.\n\n* Use software such as memtest86 to check your RAM.\n* Use software such as linpack, or Prime95 to check the CPU behaviour under load.\n* Use software such as smartctl, fsck, badblocks, or CrystalDiskInfo to test your storage device use.\n\nSource: https://bitcoin.stackexchange.com/a/12206",
+      "createdAt": "2026-03-18T14:49:50Z",
+      "id": "IC_kwDOABII587zX9bD",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4083144387"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "josephgal007"
+      },
+      "authorAssociation": "NONE",
+      "body": "I did a power down and restart which resolved the issue. Thanks for your\r\nreply.\r\n\r\nThanks,\r\n\r\nJoseph Gal\r\n\r\n\r\n\r\nOn Wed, Mar 18, 2026 at 10:51\u202fAM maflcko ***@***.***> wrote:\r\n\r\n> *maflcko* left a comment (bitcoin/bitcoin#34851)\r\n> <https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4083144387>\r\n>\r\n> Bitcoin Core makes heavy use of CPU, RAM and storage IO. Hardware defects\r\n> might only become visible when running Bitcoin Core. You might want to\r\n> check your hardware for defects.\r\n>\r\n>    - Use software such as memtest86 to check your RAM.\r\n>    - Use software such as linpack, or Prime95 to check the CPU behaviour\r\n>    under load.\r\n>    - Use software such as smartctl, fsck, badblocks, or CrystalDiskInfo\r\n>    to test your storage device use.\r\n>\r\n> Source: https://bitcoin.stackexchange.com/a/12206\r\n>\r\n> \u2014\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4083144387>,\r\n> or unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/CAGA3WBWFBPKBSNUBG5SHLT4RKZXNAVCNFSM6AAAAACWWRPZF6VHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHM2DAOBTGE2DIMZYG4>\r\n> .\r\n> You are receiving this because you authored the thread.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+      "createdAt": "2026-03-18T20:14:57Z",
+      "id": "IC_kwDOABII587zgPTx",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4085314801"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "l0rinc"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I don't think a restart can fix the failure - you had a local chainstate LevelDB corruption during flushing https://github.com/bitcoin/bitcoin/blob/20a6babfa9a66f5432ef19c6c433b4357560f853/src/leveldb/table/format.cc#L92\n\nThis will likely happen again if the source of the problem is indeed faulty hardware - which we assume is the case here.",
+      "createdAt": "2026-03-18T20:28:21Z",
+      "id": "IC_kwDOABII587zggJT",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4085383763"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "josephgal007"
+      },
+      "authorAssociation": "NONE",
+      "body": "Ok, I'll run those hardware checks you suggested.\r\n\r\n\r\nThanks,\r\n\r\nJoseph Gal\r\n\r\n\r\nOn Wed, Mar 18, 2026 at 4:28\u202fPM l0rinc ***@***.***> wrote:\r\n\r\n> *l0rinc* left a comment (bitcoin/bitcoin#34851)\r\n> <https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4085383763>\r\n>\r\n> I don't think a restart can fix the failure - you had a local chainstate\r\n> LevelDB corruption during flushing\r\n> https://github.com/bitcoin/bitcoin/blob/20a6babfa9a66f5432ef19c6c433b4357560f853/src/leveldb/table/format.cc#L92\r\n>\r\n> This will likely happen again if the source of the problem is indeed\r\n> faulty hardware - which we assume is the case here.\r\n>\r\n> \u2014\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4085383763>,\r\n> or unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/CAGA3WCFSUYA2KK2RSRGXTT4RMBHZAVCNFSM6AAAAACWWRPZF6VHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHM2DAOBVGM4DGNZWGM>\r\n> .\r\n> You are receiving this because you authored the thread.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+      "createdAt": "2026-03-18T20:42:25Z",
+      "id": "IC_kwDOABII587zgxU3",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4085454135"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Ok, I'll run those hardware checks you suggested.\n\nSounds good. A few other things to check:\n\n* Is the machine self-built? What is the power supply?\n* Are any components external? External storage device?\n\nIn any case, I'll close this issue for now. Discussion can still continue normally, but there is no need to keep it open.",
+      "createdAt": "2026-03-19T05:21:27Z",
+      "id": "IC_kwDOABII587zqDrq",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4087888618"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "josephgal007"
+      },
+      "authorAssociation": "NONE",
+      "body": "   1. Purchased on a amazon.com. Its a Beelink Mini S13 Mini PC,13th Intel\r\n   Twin Lake-N150 (up to 3.6GHz, Upgraded N100), 16GB DDR4 500GB M.2 SSD, Mini\r\n   Desktop Computer Support 4K Dual Display/USB 3.2/WiFi 6/BT 5.2.\r\n   2. No external devices are connected, and it is currently running only\r\n   as a pruned node.\r\n\r\n\r\nThanks,\r\n\r\nJoseph Gal\r\n\r\n\r\n\r\nOn Thu, Mar 19, 2026 at 1:21\u202fAM maflcko ***@***.***> wrote:\r\n\r\n> *maflcko* left a comment (bitcoin/bitcoin#34851)\r\n> <https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4087888618>\r\n>\r\n> Ok, I'll run those hardware checks you suggested.\r\n>\r\n> Sounds good. A few other things to check:\r\n>\r\n>    - Is the machine self-built? What is the power supply?\r\n>    - Are any components external? External storage device?\r\n>\r\n> In any case, I'll close this issue for now. Discussion can still continue\r\n> normally, but there is no need to keep it open.\r\n>\r\n> \u2014\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4087888618>,\r\n> or unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/CAGA3WFOZHI4HSKAFLRUCFD4RN7W5AVCNFSM6AAAAACWWRPZF6VHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHM2DAOBXHA4DQNRRHA>\r\n> .\r\n> You are receiving this because you authored the thread.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+      "createdAt": "2026-03-19T15:28:56Z",
+      "id": "IC_kwDOABII587z10so",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34851#issuecomment-4090972968"
+    }
+  ],
+  "createdAt": "2026-03-18T14:44:13Z",
+  "id": "I_kwDOABII5870HjPG",
+  "labels": [
+    {
+      "name": "Data corruption"
+    },
+    {
+      "name": "Questions and Help"
+    }
+  ],
+  "number": 34851,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "createdAt": "2026-03-18T14:50:01Z",
+      "label": {
+        "name": "Data corruption"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "createdAt": "2026-03-18T14:50:01Z",
+      "label": {
+        "name": "Questions and Help"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "createdAt": "2026-03-19T05:21:27Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "[error] A fatal internal error occurred, see debug.log for details: System error while flushing: Fatal LevelDB error: Corruption: block checksum mismatch: C:\\Bitcoin Core\\chainstate/1131523.ldb",
+  "url": "https://github.com/bitcoin/bitcoin/issues/34851"
+}

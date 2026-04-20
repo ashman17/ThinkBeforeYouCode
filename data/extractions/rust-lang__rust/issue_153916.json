@@ -1,0 +1,28 @@
+{
+  "issue": {
+    "artifact_count": 0,
+    "comments": [
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "jieyouxu",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153916"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "jieyouxu",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153916#issuecomment-4062913147"
+      }
+    ],
+    "issue_number": 153916,
+    "issue_title": "[IGNORE] Triagebot example (modified title)",
+    "issue_url": "https://github.com/rust-lang/rust/issues/153916"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/rust-lang__rust/issue_153916.json",
+  "repository": "rust-lang/rust",
+  "status": "completed"
+}

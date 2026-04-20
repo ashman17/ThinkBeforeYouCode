@@ -1,0 +1,72 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "alsa765"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Page link:\n\n\nhttps://bazel.build/instal\n\n### Problem description (include actual vs expected text, if applicable):\n\n\n_No response_\n\n### Where do you see this issue? (include link to specific section of the page, if applicable)\n\n\n_No response_\n\n### Any other information you'd like to share?\n\n_No response_",
+  "closedAt": "2026-03-18T17:44:27Z",
+  "comments": [],
+  "createdAt": "2026-03-18T10:47:42Z",
+  "id": "I_kwDOATz7jc70CdH-",
+  "labels": [
+    {
+      "name": "type: documentation (cleanup)"
+    },
+    {
+      "name": "untriaged"
+    },
+    {
+      "name": "team-Documentation"
+    }
+  ],
+  "number": 29022,
+  "state": "CLOSED",
+  "stateReason": "NOT_PLANNED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "alsa765"
+      },
+      "createdAt": "2026-03-18T10:47:44Z",
+      "label": {
+        "name": "type: documentation (cleanup)"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "alsa765"
+      },
+      "createdAt": "2026-03-18T10:47:44Z",
+      "label": {
+        "name": "untriaged"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "alsa765"
+      },
+      "createdAt": "2026-03-18T10:47:44Z",
+      "label": {
+        "name": "team-Documentation"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "createdAt": "2026-03-18T17:44:27Z",
+      "stateReason": "NOT_PLANNED"
+    }
+  ],
+  "title": "[bazel.build] Problem with /install",
+  "url": "https://github.com/bazelbuild/bazel/issues/29022"
+}

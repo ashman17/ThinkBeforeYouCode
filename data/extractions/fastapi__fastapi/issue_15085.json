@@ -1,0 +1,218 @@
+{
+  "issue": {
+    "artifact_count": 16,
+    "comments": [
+      {
+        "artifact_count": 16,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "api_backends",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "developers"
+            },
+            "summary": "Pandas DataFrame serialization issues with NumPy types causing JSON errors in FastAPI apps.",
+            "tags": [
+              "incorrect_behavior",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "reduce developer errors",
+              "solution_kind": "guidance",
+              "target_area": "docs"
+            },
+            "summary": "Proposal to add documentation on safe patterns for returning Pandas DataFrames in FastAPI.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "intended_use": "returning data from a DataFrame",
+              "language": "python",
+              "snippet_kind": "bug_example"
+            },
+            "summary": "Example of problematic code using Pandas DataFrame with NumPy types.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "intended_use": "returning data from a DataFrame",
+              "language": "python",
+              "snippet_kind": "solution_example"
+            },
+            "summary": "Example of safe code using `jsonable_encoder` for Pandas DataFrame serialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "intended_use": "returning data from a DataFrame",
+              "language": "python",
+              "snippet_kind": "solution_example"
+            },
+            "summary": "Example of using pandas native JSON serialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "affected_area": "api_backends",
+              "problem_kind": "silent_failure",
+              "user_or_system_impact": "developers"
+            },
+            "summary": "Silent failure of returning Pandas DataFrames with NaN values in JSON response.",
+            "tags": [
+              "incorrect_behavior",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "impact_scope": "backend_developers",
+              "reasoning_kind": "coverage_gap",
+              "supports_artifact_type": "docs"
+            },
+            "summary": "Importance of covering Pandas DataFrame serialization in FastAPI documentation.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "alternative_to": "using `jsonable_encoder`",
+              "comparison_focus": "simplicity",
+              "differentiator": "no manual conversion needed"
+            },
+            "summary": "Alternative approach using pandas native JSON serialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "impact": "JSON serialization failure",
+              "rarity": "frequent in ML pipelines",
+              "trigger": "returning data with NaN or NumPy types"
+            },
+            "summary": "Handling of NaN values and NumPy types in JSON serialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "edge_case"
+          },
+          {
+            "metadata": {
+              "coverage_target": "JSON serialization with Pandas DataFrames",
+              "expected_outcome": "TypeError or invalid JSON",
+              "test_level": "integration"
+            },
+            "summary": "Example of reproducing the JSON error when returning a Pandas DataFrame.",
+            "tags": [
+              "unit_test",
+              "integration_test"
+            ],
+            "type": "test_case"
+          },
+          {
+            "metadata": {
+              "determinism": "Yes",
+              "environment": "FastAPI 0.97, Python 3.11, pandas 2.x",
+              "prerequisites": "Numpy and Pandas installed"
+            },
+            "summary": "Steps to reproduce the issue when returning data from a Pandas DataFrame.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "constraint_type": "technical_requirement",
+              "scope": "FastAPI backend development",
+              "severity": "medium"
+            },
+            "summary": "Requirement to handle NumPy types in JSON serialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "component": "FastAPI encoder utilities",
+              "implementation_action": "use `jsonable_encoder`",
+              "lifecycle_stage": "development"
+            },
+            "summary": "Explanation of using `jsonable_encoder` for JSON serialization.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "chosen_option": "add new section on working with Pandas DataFrames",
+              "decision_status": "accepted",
+              "rejected_options": "none mentioned"
+            },
+            "summary": "Decision to cover Pandas DataFrame serialization in FastAPI documentation.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "design_decision"
+          },
+          {
+            "metadata": {
+              "blocking": "None mentioned",
+              "progress_state": "drafted proposal",
+              "status_kind": "new_feature_proposal"
+            },
+            "summary": "Proposal for adding documentation to FastAPI docs.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          },
+          {
+            "metadata": {
+              "compared_against": "other documentation topics",
+              "priority_level": "high",
+              "scope": "unknown"
+            },
+            "summary": "Discussion on the priority of covering Pandas DataFrame serialization in FastAPI docs.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "priority_discussion"
+          }
+        ],
+        "comment_author": "anix-lynch",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/15085"
+      }
+    ],
+    "issue_number": 15085,
+    "issue_title": "Docs: No guidance on Pandas DataFrame serialization \u2014 numpy types cause JSON errors",
+    "issue_url": "https://github.com/fastapi/fastapi/issues/15085"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/fastapi__fastapi/issue_15085.json",
+  "repository": "fastapi/fastapi",
+  "status": "completed"
+}

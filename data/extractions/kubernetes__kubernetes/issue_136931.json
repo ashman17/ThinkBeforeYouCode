@@ -1,0 +1,528 @@
+{
+  "issue": {
+    "artifact_count": 34,
+    "comments": [
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kubelet",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "incorrect_output"
+            },
+            "summary": "kubelet fails to restart containers for static pod manifest changes that do not involve image changes.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "correctly handle static pod spec changes",
+              "solution_kind": "fix_proposed",
+              "target_area": "kubelet"
+            },
+            "summary": "Expand `pickFieldsToHash()` for static pods or ensure UID-based recreation works.",
+            "tags": [
+              "bug"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "coverage_target": "static pod update handling",
+              "expected_outcome": "manifest change results in container restart",
+              "test_level": "integration_test"
+            },
+            "summary": "Steps to reproduce the bug in a Kubernetes cluster with specific configuration and environment.",
+            "tags": [
+              "bug"
+            ],
+            "type": "test_case"
+          },
+          {
+            "metadata": {
+              "evidence_type": "observational",
+              "reliability": "high",
+              "sample_source": "field testing"
+            },
+            "summary": "Tested across 2 independent clusters with 6 control plane nodes, all running Kubernetes v1.33.3.",
+            "tags": [
+              "bug"
+            ],
+            "type": "empirical_evidence"
+          }
+        ],
+        "comment_author": "yg-codes",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kube-apiserver_process_management",
+              "problem_kind": "configuration_change_behavior",
+              "user_or_system_impact": "observational"
+            },
+            "summary": "The kube-apiserver manifest flag change does not immediately reflect in the running process.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3886254829"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "baseline": "unknown",
+              "candidate": "emulated-version-upgrade.sh script",
+              "environment": "test-infra",
+              "metric": "CI job success"
+            },
+            "summary": "The CI jobs are passing for the experiment/compatibility-versions/emulated-version-upgrade.sh script.",
+            "tags": [
+              "ci_failure"
+            ],
+            "type": "benchmark_result"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3886262499"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kubelet/file watcher mechanism",
+              "problem_kind": "behavioral bug",
+              "user_or_system_impact": "silent data loss or incorrect pod updates"
+            },
+            "summary": "manifest changes were not detected on v1.33.3 due to containerChanged() path issues.",
+            "tags": [
+              "incorrect_behavior",
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "yg-codes",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3887697511"
+      },
+      {
+        "artifact_count": 5,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "backup management",
+              "problem_kind": "configuration_issue",
+              "user_or_system_impact": "manifests are not being read correctly"
+            },
+            "summary": "The issue is with the backup file placed in the manifests directory.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "correct reading of manifests",
+              "solution_kind": "configuration change",
+              "target_area": "backup management"
+            },
+            "summary": "Move the backup file to a different directory to avoid conflicts with kubelet.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "constraint_type": "system behavior constraint",
+              "scope": "kubelet operation",
+              "severity": "critical"
+            },
+            "summary": "The backup file cannot be placed in the same directory as the manifests due to kubelet reading it.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "avoiding conflicts and misinterpretations",
+              "target_area": "backup management",
+              "urgency": "high"
+            },
+            "summary": "Move the backup file to a different directory for better separation of concerns.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          },
+          {
+            "metadata": {
+              "critique_dimension": "clarity and separation of concerns",
+              "severity": "high",
+              "target": "backup management design"
+            },
+            "summary": "The current backup file placement is a design flaw that causes confusion.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "critique"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3887709508"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "research",
+              "target_area": "backup file issue",
+              "urgency": "low"
+            },
+            "summary": "Check for changes between v1.33 and master to rule out recent fixes.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3887716906"
+      },
+      {
+        "artifact_count": 5,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kubelet",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "restarts, incorrect state persistence"
+            },
+            "summary": "Identified two separate bugs in the kubelet's container management logic.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "affected_area": "kubelet backup and restore",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "manifest override, incorrect state persistence"
+            },
+            "summary": "Backup files are overriding manifests unexpectedly.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "confirmation of issue presence in specific version",
+              "solution_kind": "verification",
+              "target_area": "kubelet container management and backup logic"
+            },
+            "summary": "Proposes verification of the bug on v1.33.3.",
+            "tags": [
+              "bug"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "coverage_target": "container management and backup logic",
+              "expected_outcome": "correct hash update on image digest change",
+              "test_level": "unit"
+            },
+            "summary": "Describes steps to reproduce the bug with image changes.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "test_case"
+          },
+          {
+            "metadata": {
+              "question_kind": "verification",
+              "target_area": "kubelet container management and backup logic",
+              "urgency": "medium"
+            },
+            "summary": "Asks for verification of the bug in v1.33.3 to determine if a fix was missed between releases.",
+            "tags": [
+              "bug",
+              "version_mismatch"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "yg-codes",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3894075408"
+      },
+      {
+        "artifact_count": 5,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "planning",
+              "status_kind": "discussion"
+            },
+            "summary": "Discusses the approach to test different Kubernetes versions and verifies static pod behavior.",
+            "tags": [
+              "test_infra_issue",
+              "test_adjustment",
+              "runtime"
+            ],
+            "type": "status_update"
+          },
+          {
+            "metadata": {
+              "impact_scope": "testing",
+              "reasoning_kind": "cost_benefit",
+              "supports_artifact_type": "test_infra_issue"
+            },
+            "summary": "Explains the rationale behind using a more current release for testing.",
+            "tags": [
+              "performance_issue"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "component": "kind_cluster",
+              "implementation_action": "cluster_setup",
+              "lifecycle_stage": "setup"
+            },
+            "summary": "Provides details on setting up a kind cluster and manipulating static pods.",
+            "tags": [
+              "cli",
+              "runtime"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "alternative_to": "v1.33.3",
+              "comparison_focus": "testing",
+              "differentiator": "more_current_release"
+            },
+            "summary": "Compares the use of a more current release against an older patch release.",
+            "tags": [
+              "compatibility_issue",
+              "runtime"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "versioning",
+              "urgency": "high"
+            },
+            "summary": "Queries the need to verify behavior on a more current release.",
+            "tags": [
+              "runtime"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3894993650"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "component": "kube-apiserver",
+              "implementation_action": "configuration",
+              "lifecycle_stage": "runtime"
+            },
+            "summary": "Configuration for kube-apiserver using `kind build node-image` and `kind create cluster`, no changes other than adding -v=4; no impact noted.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "implementation_detail"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3895009321"
+      },
+      {
+        "artifact_count": 5,
+        "artifacts": [
+          {
+            "metadata": {
+              "impact_scope": "pod management",
+              "reasoning_kind": "root cause analysis",
+              "supports_artifact_type": "issue resolution"
+            },
+            "summary": "The rationale is that `pickFieldsToHash()` handles mutable field changes for running containers but not static pod manifest changes. The root cause of the issue might be related to a backup file confounding factor.",
+            "tags": [
+              "performance_issue",
+              "bug"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "affected_area": "pod management",
+              "problem_kind": "unknown",
+              "user_or_system_impact": "misconfiguration"
+            },
+            "summary": "The issue involves static pod manifest changes not being handled correctly, leading to potential misconfigurations.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "alternative_to": "backup file handling",
+              "comparison_focus": "issue resolution",
+              "differentiator": "v1.33.3 vs kubeadm clusters"
+            },
+            "summary": "The alternative solution is that the issue might be due to a backup file confounding factor, as both v1.33.3 in kind and kubeadm clusters are being tested.",
+            "tags": [
+              "bug"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "chosen_option": "corrected code path",
+              "decision_status": "final",
+              "rejected_options": "incorrect code paths"
+            },
+            "summary": "The design decision is that `pickFieldsToHash()` is the wrong code path for handling static pod manifest changes, which should be managed through a different code path.",
+            "tags": [
+              "bug"
+            ],
+            "type": "design_decision"
+          },
+          {
+            "metadata": {
+              "blocking": "none",
+              "progress_state": "verification pending",
+              "status_kind": "resolution attempt"
+            },
+            "summary": "The status update is that the issue will be reproduced in kind to verify, and if it works as expected, this issue will be closed.",
+            "tags": [
+              "bug"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "yg-codes",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3896343011"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "chosen_option": "needs more information",
+              "decision_status": "not accepted",
+              "rejected_options": []
+            },
+            "summary": "Design decision to not accept a feature for now due to missing information.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "design_decision"
+          }
+        ],
+        "comment_author": "SergeyKanzhelev",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3961230716"
+      },
+      {
+        "artifact_count": 3,
+        "artifacts": [
+          {
+            "metadata": {
+              "justification": "Further discussion with @BenTheElder identified the root cause.",
+              "strength": "strong",
+              "target": "the working as intended of the system"
+            },
+            "summary": "Agreed this issue is not a bug due to a backup file in the manifests directory.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "agreement"
+          },
+          {
+            "metadata": {
+              "impact_scope": "static pod manifests",
+              "reasoning_kind": "technical explanation",
+              "supports_artifact_type": "agreement"
+            },
+            "summary": "Explains why static pod manifest changes lead to pod recreation.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "blocking": "none",
+              "progress_state": "resolved",
+              "status_kind": "resolution"
+            },
+            "summary": "Closing the issue and acknowledging the time spent by other contributors.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "yg-codes",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3963165892"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "justification": "consensus among team members",
+              "strength": "high",
+              "target": "issue resolution"
+            },
+            "summary": "Closing the issue as not a bug due to documentation PR addressing actual issue.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "agreement"
+          }
+        ],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/136931#issuecomment-3963166180"
+      }
+    ],
+    "issue_number": 136931,
+    "issue_title": "kubelet: static pod manifest changes to command/args/volumes silently ignored \u2014 containerChanged() hash limited to name+image since PR #124220",
+    "issue_url": "https://github.com/kubernetes/kubernetes/issues/136931"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/kubernetes__kubernetes/issue_136931.json",
+  "repository": "kubernetes/kubernetes",
+  "status": "completed"
+}

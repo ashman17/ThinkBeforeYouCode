@@ -1,0 +1,100 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "rebroad"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "### Please describe the feature you'd like to see added.\n\n<img width=\"967\" height=\"466\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/c7053cfa-3320-4378-8863-8cd2b7c69eec\" />\n\nFor some time now, my node is seeing significantly more Knots nodes than Core nodes. Could this be considered an issue if relevance is important?\n\nNote, my node favors nodes that provide transactions that make it into the mempool, so it's possible that other people are not seeing this unless their node also has this preference.\n",
+  "closedAt": "2026-03-22T21:15:22Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "pinheadmz"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Can you explain the \"my node favors...\" a bit more? What's the version and actual configuration?",
+      "createdAt": "2026-03-22T14:49:21Z",
+      "id": "IC_kwDOABII5870wpf9",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34894#issuecomment-4106393597"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "rebroad"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Can you explain the \"my node favors...\" a bit more? What's the version and actual configuration?\n\nit's custom code that I've been using since 2022 - it rates a node based on how much of the data received ends up in the mempool and evicts the node with the lowest score.",
+      "createdAt": "2026-03-22T14:54:59Z",
+      "id": "IC_kwDOABII5870wrmT",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34894#issuecomment-4106402195"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "pinheadmz"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'm curious what your mempool policy is. \n\nBut I also think you should close this issue until you can reproduce it with bitcoin core. ",
+      "createdAt": "2026-03-22T14:58:37Z",
+      "id": "IC_kwDOABII5870ws8I",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34894#issuecomment-4106407688"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "willcl-ark"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think without the custom code we cannot reason very insightfully much about the prescribed \"relevance\" metric or the measurements it led to. I'd be surprised if one could say that \"Bitcoin Core nodes are less relevant when I score them against matching my local mempool policy\" and apply that logic to the whole network.\n\n> I'm curious what your mempool policy is.\n\nIndeed, without this and the source we can't do anything but speculate. Is this the branch? https://github.com/rebroad/bitcoin/blob/moorlane-core-master.wip\n\n> But I also think you should close this issue until you can reproduce it with bitcoin core.\n\nYes, I'm not sure what we can action or even discuss here particularly.",
+      "createdAt": "2026-03-22T16:33:49Z",
+      "id": "IC_kwDOABII5870xRRa",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34894#issuecomment-4106556506"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "jlopp"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> it's custom code that I've been using since 2022 - it rates a node based on how much of the data received ends up in the mempool and evicts the node with the lowest score.\n\nSo you created a custom policy that sounds like it favors peers running relay policies like those implemented in Knots and now you claim that somehow this translates into \"Core being less relevant than Knots.\"\n\nYour statement is, at most, applicable to your own node, and has no relevance to Bitcoin Core users.",
+      "createdAt": "2026-03-22T17:03:18Z",
+      "id": "IC_kwDOABII5870xcDy",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34894#issuecomment-4106600690"
+    }
+  ],
+  "createdAt": "2026-03-22T14:45:03Z",
+  "id": "I_kwDOABII5871WL-B",
+  "labels": [
+    {
+      "name": "Feature"
+    }
+  ],
+  "number": 34894,
+  "state": "CLOSED",
+  "stateReason": "NOT_PLANNED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rebroad"
+      },
+      "createdAt": "2026-03-22T14:45:04Z",
+      "label": {
+        "name": "Feature"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "pinheadmz"
+      },
+      "createdAt": "2026-03-22T21:15:22Z",
+      "stateReason": "NOT_PLANNED"
+    }
+  ],
+  "title": "Usage suggests Core has become less relevant than Knots",
+  "url": "https://github.com/bitcoin/bitcoin/issues/34894"
+}

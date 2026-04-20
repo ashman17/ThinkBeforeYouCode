@@ -1,0 +1,53 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "svanstaa"
+  },
+  "authorAssociation": "NONE",
+  "body": "This issue is to discuss the [31.0 Release Candidate Testing Guide](https://github.com/bitcoin-core/bitcoin-devwiki/wiki/31.0-Release-Candidate-Testing-Guide). If you have any feedback on the document, please leave a comment here.\n\nNote: This is for feedback on the document, not on Bitcoin Core or on the `31.0` changes. Create a new issue or give feedback in #34840.\n\nThank you for taking a look at the guide and leaving your feedback.\n\nv31.0rc1 binaries are available here: https://bitcoincore.org/bin/bitcoin-core-31.0/test.rc1/.",
+  "closedAt": null,
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "carloantinarella"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think in section 6 expected results should be:\n```\nBitcoin Core RPC client version v31.0.0rc1\nBitcoin Core daemon version v31.0.0rc1 bitcoind\nBitcoin Core RPC client version v30.2.0\nBitcoin Core daemon version v30.2.0 bitcoind\n```",
+      "createdAt": "2026-03-16T17:55:24Z",
+      "id": "IC_kwDOABII587ykICQ",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34827#issuecomment-4069556368"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "svanstaa"
+      },
+      "authorAssociation": "NONE",
+      "body": "This is mainly for checking that the references work, point to the correct dir, and the correct version. As a good tester however, you should have an eagle eye for even the smallest deviations from expected behavior - since they might be indicative of hidden bigger problems.\nSo I'll check it the next time working on that document, and fix it :) \n\nUpdate: fixed to actual output.",
+      "createdAt": "2026-03-16T18:55:52Z",
+      "id": "IC_kwDOABII587ylaF_",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34827#issuecomment-4069892479"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "carloantinarella"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I ran the complete routine and the version output is the only deviation I found (not relevant actually, but someone completely new to the project might feel puzzled). All the rest is matching perfectly, that means you did a great job.",
+      "createdAt": "2026-03-16T19:55:46Z",
+      "id": "IC_kwDOABII587ymtWT",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34827#issuecomment-4070233491"
+    }
+  ],
+  "createdAt": "2026-03-15T20:18:41Z",
+  "id": "I_kwDOABII587zImF5",
+  "labels": [],
+  "number": 34827,
+  "state": "OPEN",
+  "stateReason": null,
+  "timelineItems": [],
+  "title": "31.0 RC Testing Guide Feedback",
+  "url": "https://github.com/bitcoin/bitcoin/issues/34827"
+}

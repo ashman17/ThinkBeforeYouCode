@@ -1,0 +1,338 @@
+{
+  "issue": {
+    "artifact_count": 19,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "torch.compile, distributed operations",
+              "problem_kind": "Behavioral Issue",
+              "user_or_system_impact": "Misleading behavior"
+            },
+            "summary": "torch.compile misinterprets the output of dist.all_reduce with async_op=False as a Tensor instead of None.",
+            "tags": [
+              "incorrect_behavior",
+              "api_misuse"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "KareemMusleh",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "thisisatharva-rh",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3847996599"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "feature_request",
+              "target_area": "asynchronous operations and compilation in PyTorch",
+              "urgency": "unknown"
+            },
+            "summary": "Is there a way to do all_reduce asynchronously while supporting torch.compile(fullgraph=True)?",
+            "tags": [
+              "api"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "KareemMusleh",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3851222938"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "torch.jit.trace",
+              "problem_kind": "functionality limitation",
+              "user_or_system_impact": "users cannot trace async operations"
+            },
+            "summary": "not_supported_async_op",
+            "tags": [
+              "api_misuse",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "thisisatharva-rh",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3855751795"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "Correct handling of type changes",
+              "solution_kind": "branching_logic",
+              "target_area": "Dynamo rewrites and eager compilation"
+            },
+            "summary": "Branching logic should be done using is_compiling() for Dynamo rewrites and functional collective APIs.",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "xmfan",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3861954615"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "unknown",
+              "solution_kind": "desugaring",
+              "target_area": "torchcomms integration"
+            },
+            "summary": "when compiling with async_op=False, it desugars to an asynchronous-like pattern using wait_tensor",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "dolpm",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3862062293"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "distributed_collectives",
+              "problem_kind": "coding error",
+              "user_or_system_impact": "potential correctness issue"
+            },
+            "summary": "The comment identifies a potential issue with the handling of `wait_tensor` in the `_maybe_wrap_tensor` function.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "KareemMusleh",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3863682882"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "optimized_wait_tensor_placement",
+              "solution_kind": "pass_insertion",
+              "target_area": "tracing_backend"
+            },
+            "summary": "In the context of tracing in PyTorch, a solution to move wait_tensor closer to its consumer is proposed for dynamo and AOT graphs when using inductor. For other backends, a pass can be written to achieve this.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "xmfan",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3866019477"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "inductor backend",
+              "problem_kind": "ordering issue",
+              "user_or_system_impact": "output sequence mismatch"
+            },
+            "summary": "The user reports a problem with the order of operations after compilation using inductor. The expected order is all_reduce -> GEMM -> wait_tensor, but the actual order post-compile is GEMM -> all_reduce -> wait_tensor.",
+            "tags": [
+              "incorrect_behavior",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "KareemMusleh",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3870931219"
+      },
+      {
+        "artifact_count": 8,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "inductor backend compilation",
+              "problem_kind": "scheduling issue",
+              "user_or_system_impact": "compilation of specific patterns results in incorrect execution order."
+            },
+            "summary": "user reports incorrect scheduling of wait_tensor after GEMM in the compiled code with torchinductor; eager mode works as expected.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "correct scheduling of wait_tensor after GEMM.",
+              "solution_kind": "configuration adjustment",
+              "target_area": "torchinductor backend optimizations"
+            },
+            "summary": "enabled certain configuration options for torchinductor to correct the scheduling issue.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "alternative_to": "runtime fix",
+              "comparison_focus": "user experience vs. runtime behavior.",
+              "differentiator": "error reporting improvement"
+            },
+            "summary": "user suggests looking into typing issues and possibly improving error messages.",
+            "tags": [
+              "bug"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "component": "torchinductor backend",
+              "implementation_action": "configure options for correct scheduling.",
+              "lifecycle_stage": "development"
+            },
+            "summary": "details of the workaround configuration settings and code examples.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "intended_use": "debugging and validation.",
+              "language": "Python",
+              "snippet_kind": "reproduction script"
+            },
+            "summary": "example code to reproduce the issue and the workaround.",
+            "tags": [
+              "bug"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "impact_scope": "inductor backend compilation.",
+              "reasoning_kind": "empirical evidence from logs and code",
+              "supports_artifact_type": "configuration options"
+            },
+            "summary": "explains why the configuration settings were chosen to address the issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "constraint_type": "technical limitation",
+              "scope": "current implementation of c10d collectives",
+              "severity": "inconvenience to developers."
+            },
+            "summary": "mentions limitations in the current tracing mechanism for collective operations.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "question_kind": "clarification request",
+              "target_area": "inductor backend configuration",
+              "urgency": "immediate."
+            },
+            "summary": "asks about the sufficiency of the current workaround.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "dolpm",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3873262386"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "unknown",
+              "urgency": "unknown"
+            },
+            "summary": "user asks about nightly options and observed behavior with torch==2.10.0",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "xmfan",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3873557900"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "risk_assessment",
+              "target_area": "additional_overlap_configs",
+              "urgency": "low"
+            },
+            "summary": "user is asking about potential risks of using additional overlap configs in the context of experimental settings.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "KareemMusleh",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3896819689"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "performance and output correctness",
+              "problem_kind": "potential negative impact of code change",
+              "user_or_system_impact": "user concern about system behavior"
+            },
+            "summary": "user asks about potential negative impacts of a change on performance and correctness",
+            "tags": [
+              "incorrect_behavior",
+              "performance_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "xmfan",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/174280#issuecomment-3931771031"
+      }
+    ],
+    "issue_number": 174280,
+    "issue_title": "torch.compile doesn't trace `dist.all_reduce` output correctly",
+    "issue_url": "https://github.com/pytorch/pytorch/issues/174280"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/pytorch__pytorch/issue_174280.json",
+  "repository": "pytorch/pytorch",
+  "status": "completed"
+}

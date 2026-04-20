@@ -1,0 +1,197 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "dhanishaphadate"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Which jobs are failing?\n\n[sig-release-master-informing#gce-cos-serial-master](https://testgrid.k8s.io/sig-release-master-informing#gce-cos-serial-master&sort-by-failures=&exclude-non-failed-tests=)\n\n### Which tests are failing?\n\nKubernetes e2e suite.[It] [sig-node] [DRA] [FeatureGate:DRAExtendedResource] [Beta] must run pods with extended resource on dra nodes and device plugin nodes [Serial] [prow](https://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-gce-cos-serial-master/2030360484472950784) , [triage](https://storage.googleapis.com/k8s-triage/index.html?job=e2e-gce-cos-serial&test=FeatureGate%3ADRAExtendedResource)\n\nKubernetes e2e suite.[It] [sig-node] [DRA] [FeatureGate:DRAExtendedResource] [Beta] process extended resources after device plugin uninstall [Serial] , [prow](https://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-gce-cos-serial-master/2030360484472950784) , [triage](https://storage.googleapis.com/k8s-triage/index.html?job=e2e-gce-cos-serial&test=process%20extended%20resources#88af07e4c2db56e74fca)\n\n\n### Since when has it been failing?\n\n[3/6/2026, 6:03:01 PM](https://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-gce-cos-serial-master/2030056478613704704)\n\n### Testgrid link\n\nhttps://testgrid.k8s.io/sig-release-master-informing#gce-cos-serial-master&exclude-non-failed-tests=\n\n### Reason for failure (if possible)\n\n```\n[FAILED] Timed out after 300.000s.\n  expected 2 \"example.com/resource\" to be allocatable on node \"bootstrap-e2e-minion-group-8jjm\"\n  Expected\n      <int64>: 0\n  to be ==\n      <int64>: 2\n```\n\n### Anything else we need to know?\n\n_No response_\n\n### Relevant SIG(s)\n\n/sig node",
+  "closedAt": "2026-03-10T07:52:05Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This issue is currently awaiting triage.\n\nIf a SIG or subproject determines this is a relevant issue, they will accept it by applying the `triage/accepted` label and provide further guidance.\n\nThe `triage/accepted` label can be added by org members by writing `/triage accepted` in a comment.\n\n\n<details>\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-03-08T01:16:51Z",
+      "id": "IC_kwDOAToIks7ve5Wm",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4017853862"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "pohly"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "/assign @yliaog \n/cc @bart0sh \n/wg device-management",
+      "createdAt": "2026-03-08T08:54:30Z",
+      "id": "IC_kwDOAToIks7viBDN",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4018671821"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "yliaog"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "the failure happened at\nk8s.io/kubernetes/test/e2e/dra/deploy_device_plugin.go:77\n\nwhen deployoing device plugin, it is not related to DRA. @bart0sh do you mind to take a deeper look at this?",
+      "createdAt": "2026-03-08T16:52:41Z",
+      "id": "IC_kwDOAToIks7vlU9P",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4019539791"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kannon92"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I opened up https://github.com/kubernetes/kubernetes/pull/137552.\n\nI was thinking the issue may be that these jobs should not be running in this general lane.\n\nLooking at the job I don't see any other DRA tests running in it so I figured it just needs a DRA label. Please feel free to close if this is wrong.",
+      "createdAt": "2026-03-08T18:24:31Z",
+      "id": "IC_kwDOAToIks7vmCys",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4019727532"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bart0sh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> when deployoing device plugin, it is not related to DRA. [@bart0sh](https://github.com/bart0sh) do you mind to take a deeper look at this?\n\nSure, looking.\n\n/assign",
+      "createdAt": "2026-03-09T08:36:37Z",
+      "id": "IC_kwDOAToIks7vu9Jo",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4022063720"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Prajyot-Parab"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Also failing with same error [gce-cos-master-serial - Triage](https://storage.googleapis.com/k8s-triage/index.html?job=ci-kubernetes-e2e-gci-gce-serial%24)",
+      "createdAt": "2026-03-09T10:57:52Z",
+      "id": "IC_kwDOAToIks7vyKT2",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4022904054"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "pacoxu"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "https://github.com/kubernetes/kubernetes/pull/137552 was merged.\n\nLast run in https://testgrid.k8s.io/sig-release-master-informing#gce-cos-master-serial passed. The failing test is skipped now with a DRA label.\n\n/close \n",
+      "createdAt": "2026-03-10T07:52:00Z",
+      "id": "IC_kwDOAToIks7wK5KN",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4029387405"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@pacoxu: Closing this issue.\n\n<details>\n\nIn response to [this](https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4029387405):\n\n>https://github.com/kubernetes/kubernetes/pull/137552 was merged.\n>\n>Last run in https://testgrid.k8s.io/sig-release-master-informing#gce-cos-master-serial skipped the failing test. \n>\n>/close \n>\n\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-03-10T07:52:06Z",
+      "id": "IC_kwDOAToIks7wK5RB",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4029387841"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "pohly"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> the failure happened at\n> k8s.io/kubernetes/test/e2e/dra/deploy_device_plugin.go:77\n> \n> when deployoing device plugin, it is not related to DRA\n\nDoes anyone care about this one? Should we have a tracking issue for it?\n\n",
+      "createdAt": "2026-03-10T08:00:26Z",
+      "id": "IC_kwDOAToIks7wLCFj",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4029423971"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "pacoxu"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > the failure happened at\n> > k8s.io/kubernetes/test/e2e/dra/deploy_device_plugin.go:77\n> > when deployoing device plugin, it is not related to DRA\n> \n> Does anyone care about this one? Should we have a tracking issue for it?\n\nLet me open a new issue later(I suppose it will fail in dra related testgrid later.), as this issue is for [sig-release-master-informing#gce-cos-serial-master](https://testgrid.k8s.io/sig-release-master-informing#gce-cos-serial-master&sort-by-failures=&exclude-non-failed-tests=) which is being watched by release signal team.",
+      "createdAt": "2026-03-10T08:17:16Z",
+      "id": "IC_kwDOAToIks7wLXxG",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137539#issuecomment-4029512774"
+    }
+  ],
+  "createdAt": "2026-03-08T01:16:43Z",
+  "id": "I_kwDOAToIks7wzwk8",
+  "labels": [
+    {
+      "name": "sig/node"
+    },
+    {
+      "name": "kind/failing-test"
+    },
+    {
+      "name": "needs-triage"
+    },
+    {
+      "name": "wg/device-management"
+    }
+  ],
+  "number": 137539,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "dhanishaphadate"
+      },
+      "createdAt": "2026-03-08T01:16:44Z",
+      "label": {
+        "name": "kind/failing-test"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-08T01:16:46Z",
+      "label": {
+        "name": "sig/node"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-08T01:16:50Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-08T08:54:33Z",
+      "label": {
+        "name": "wg/device-management"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-10T07:52:05Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "[Failing Test] [sig-node]Kubernetes e2e suite.[It] [sig-node] [DRA] [FeatureGate:DRAExtendedResource] [Beta] ",
+  "url": "https://github.com/kubernetes/kubernetes/issues/137539"
+}

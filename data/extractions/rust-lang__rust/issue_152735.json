@@ -1,0 +1,490 @@
+{
+  "issue": {
+    "artifact_count": 30,
+    "comments": [
+      {
+        "artifact_count": 5,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "generic programming, futures",
+              "problem_kind": "bug",
+              "user_or_system_impact": "application crash, incorrect behavior"
+            },
+            "summary": "Miscompilation causing segfault with `dyn Future` on recent nightly versions",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "coverage_target": "miscompilation edge case",
+              "expected_outcome": "exit code zero",
+              "test_level": "unit"
+            },
+            "summary": "Smallest possible reproduction of the miscompilation bug with `dyn Future`",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "test_case"
+          },
+          {
+            "metadata": {
+              "determinism": "reproducible",
+              "environment": "aarch64-unknown-linux-gnu, rust 1.95.0-nightly (18d13b533, 2026-02-09)",
+              "prerequisites": "rust-toolchain.toml with nightly version equal to or newer than specified"
+            },
+            "summary": "Steps to reproduce the miscompilation bug with `tokio` and `futures` crate on recent nightly versions",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "constraint_type": "version",
+              "scope": "nightly toolchain",
+              "severity": "blocking"
+            },
+            "summary": "Miscompilation bug present on recent nightly versions and not older releases",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "affected_area": "distributed systems, futures",
+              "problem_kind": "bug",
+              "user_or_system_impact": "application crash, incorrect behavior"
+            },
+            "summary": "Miscompilation causing segfault with `dyn Future` on recent nightly versions in distributed systems and generic programming",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "bgw",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rust compiler",
+              "problem_kind": "bug",
+              "user_or_system_impact": "unknown"
+            },
+            "summary": "A regression issue has been identified and needs to be triaged.",
+            "tags": [
+              "regression"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "eggyal",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911013286"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "unknown",
+              "language": "Rust",
+              "snippet_kind": "example"
+            },
+            "summary": "Provided a code snippet demonstrating the usage of coroutines in Rust with specific trait implementations and function calls.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "fmease",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911454676"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "demonstration of generic functions and traits",
+              "language": "Rust",
+              "snippet_kind": "example"
+            },
+            "summary": "A Rust code snippet demonstrating a generic function and trait implementation with async block.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911558078"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "compiler",
+              "problem_kind": "programming_error",
+              "user_or_system_impact": "development_hindrance"
+            },
+            "summary": "Internal compiler error during MIR validation with coroutines and trait bounds.",
+            "tags": [
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fmease",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911642929"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "compiler",
+              "problem_kind": "potential incorrect behavior",
+              "user_or_system_impact": "async code may have unexpected runtime issues"
+            },
+            "summary": "rust is confused on whether the async block implements Send or not; affected_area: compiler, user_or_system_impact: potential incorrect behavior in async code",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911678160"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "justification": "Implies agreement but no explicit level stated",
+              "strength": "weak",
+              "target": "related issues"
+            },
+            "summary": "Theemathas agrees that the issue is related to another one.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "agreement"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911689958"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "contextual understanding",
+              "target_area": "trait_system_refactor_initiative",
+              "urgency": "unknown"
+            },
+            "summary": "suggesting to look at another issue for context",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911704139"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "async blocks and coroutine Send trait implementation",
+              "problem_kind": "behavioral",
+              "user_or_system_impact": "incorrect code generation"
+            },
+            "summary": "compiler behavior changed for async block Send impl check causing different answers in similar cases",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fmease",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911876312"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "Bug diagnosis",
+              "language": "unknown",
+              "snippet_kind": "IR analysis"
+            },
+            "summary": "LLVM IR of the optimized form's function is analyzed and found to be consistent with reaching SIGILL.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "workingjubilee",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911886341"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "generic_associated_types",
+              "problem_kind": "compilation_error",
+              "user_or_system_impact": "user"
+            },
+            "summary": "Code does not compile due to implementation of `Visit` being too specific.",
+            "tags": [
+              "compile_error",
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911937654"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "async_send_check",
+              "problem_kind": "behavior",
+              "user_or_system_impact": "compiler bug"
+            },
+            "summary": "The issue lies in the incorrect Send implementation check for async blocks. The vtable generation didn't recognize the `impl Send` returned by `make_none`, leading to an incorrect conclusion.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3912030224"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "coroutine_and_vtable_code_gen",
+              "problem_kind": "code_generation_bug",
+              "user_or_system_impact": "compiler_crash"
+            },
+            "summary": "Rust compiler fails to generate necessary parts of coroutine and vtable leading to a potentially bogus program.",
+            "tags": [
+              "bug",
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "workingjubilee",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3912583063"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "compared_against": "previous_critical_level",
+              "priority_level": "non-critical",
+              "scope": "individual_issue"
+            },
+            "summary": "Revised the criticality of an issue based on recent changes and discussion.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "priority_discussion"
+          }
+        ],
+        "comment_author": "workingjubilee",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3917246247"
+      },
+      {
+        "artifact_count": 11,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "generic_tys_opaque_types",
+              "problem_kind": "unsoundness",
+              "user_or_system_impact": "system_unsound"
+            },
+            "summary": "The interaction between opaque types and coroutine sendability leads to an unsoundness that varies based on the solver used.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_benefit": "preserves_sendability_proofs",
+              "solution_kind": "code_modification",
+              "target_area": "coroutine_sendability"
+            },
+            "summary": "Introducing an opaque type to hide the region type for coroutines helps in preserving sendability proofs.",
+            "tags": [
+              "workaround"
+            ],
+            "type": "proposed_solution"
+          },
+          {
+            "metadata": {
+              "alternative_to": "use_of_impossible_predicates",
+              "comparison_focus": "unsoundness_trigger",
+              "differentiator": "self_type_modification"
+            },
+            "summary": "Avoiding the use of `impossible_predicates` by modifying the self type with `'static` constraints can sidestep the issue.",
+            "tags": [
+              "workaround"
+            ],
+            "type": "alternative_solution"
+          },
+          {
+            "metadata": {
+              "chosen_option": "new_solver_behavior",
+              "decision_status": "decided",
+              "rejected_options": "old_solver_behavior"
+            },
+            "summary": "The new solver's behavior of propagating region constraints and using the leak check at every candidate leads to an unsoundness.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "design_decision"
+          },
+          {
+            "metadata": {
+              "comparison_axes": "region_constraint_propagation_leak_check_frequency",
+              "options_compared": "old_solver_vs_new_solver",
+              "preferred_option": "new_solver_for_soundness"
+            },
+            "summary": "The choice between the old and new solver impacts the unsoundness, with the new solver leading to a sound result.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "trade_off_argument"
+          },
+          {
+            "metadata": {
+              "impact_scope": "coroutine_sendability_solver_interactions",
+              "reasoning_kind": "behavior_explanation",
+              "supports_artifact_type": "design_decision"
+            },
+            "summary": "The interaction between the old and new solver's behavior explains why the unsoundness only appears in certain scenarios.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "constraint_type": "behavior",
+              "scope": "coroutine_sendability_analysis",
+              "severity": "critical"
+            },
+            "summary": "The leak check during the trait solver affects whether a coroutine is considered sendable.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "component": "typeck",
+              "implementation_action": "investigate_typing_mode_impact",
+              "lifecycle_stage": "implementation_in_progress"
+            },
+            "summary": "The code for proving sendability during MIR validation uses `TypingMode::PostAnalysis`, leading to region constraint issues.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "intended_use": "illustrate_sendability_proofs",
+              "language": "Rust",
+              "snippet_kind": "example"
+            },
+            "summary": "Snippet demonstrating the use of opaque types to preserve sendability proofs.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "intended_use": "illustrate_region_constraint_issues",
+              "language": "Rust",
+              "snippet_kind": "example"
+            },
+            "summary": "Snippet illustrating the region constraint issue during codegen.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "question_kind": "open_issue",
+              "target_area": "trait_solver_codegen_interactions",
+              "urgency": "high"
+            },
+            "summary": "How can we ensure soundness in the presence of region constraints during trait solver and codegen?",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "lcnr",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-4003677647"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rust_api",
+              "problem_kind": "logic_bug",
+              "user_or_system_impact": "system"
+            },
+            "summary": "tracking an underlying unsoundness issue in the Rust language",
+            "tags": [
+              "api"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "lcnr",
+        "comment_link": "https://github.com/rust-lang/rust/issues/152735#issuecomment-4021689001"
+      }
+    ],
+    "issue_number": 152735,
+    "issue_title": "Miscompilation causing segfault with `dyn Future` on recent nightly versions",
+    "issue_url": "https://github.com/rust-lang/rust/issues/152735"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/rust-lang__rust/issue_152735.json",
+  "repository": "rust-lang/rust",
+  "status": "completed"
+}

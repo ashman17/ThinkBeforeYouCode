@@ -1,0 +1,259 @@
+{
+  "issue": {
+    "artifact_count": 12,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "compiler",
+              "problem_kind": "bug",
+              "user_or_system_impact": "crashes"
+            },
+            "summary": "Sporadic segmentation faults in rustc during compilation of a Rust project.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "HarryRust",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification_request",
+              "target_area": "compilation_crash",
+              "urgency": "unknown"
+            },
+            "summary": "Theemathas asked about code reproducibility and requested the problematic code.",
+            "tags": [
+              "bug"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943466043"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "unknown",
+              "problem_kind": "bug",
+              "user_or_system_impact": "more frequent occurrence of an issue"
+            },
+            "summary": "After upgrading Rust to 1.93.1, the issue is happening more frequently.",
+            "tags": [
+              "performance_issue",
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "HarryRust",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943473320"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "compilation",
+              "problem_kind": "crash",
+              "user_or_system_impact": "occasional"
+            },
+            "summary": "Compiling the same code sometimes crashes the compiler while at other times it works fine.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943481329"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "Environment is not specified. Prerequisites are unknown. Determinism is not clear.",
+            "tags": [
+              "bug"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "HarryRust",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943495449"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rustc",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "unstable behavior"
+            },
+            "summary": "The issue may be related to defective hardware, possibly RAM or CPU.",
+            "tags": [
+              "bug",
+              "compatibility_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Noratrieb",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943697071"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "reproducibility",
+              "target_area": "cross-environment behavior",
+              "urgency": "unknown"
+            },
+            "summary": "Inquiry about the reproducibility of a problem across different environments.",
+            "tags": [
+              "bug",
+              "regression",
+              "test_flakiness"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "pitust",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943746106"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "unknown",
+              "problem_kind": "inconsistent_codebase_behavior",
+              "user_or_system_impact": "only_user_affected"
+            },
+            "summary": "Problem of inconsistent behavior in codebase; issue only reproducible on one user's machine.",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "HarryRust",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943934542"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "environmental_details",
+              "target_area": "performance_degradation",
+              "urgency": "unknown"
+            },
+            "summary": "Requesting information on CPU and memory test results from the user.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "bjorn3",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943939238"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "HarryRust",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943953426"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "testing",
+              "problem_kind": "availability_of_tool",
+              "user_or_system_impact": "inconvenience"
+            },
+            "summary": "user reports inability to run memtest86+ due to lack of USB flash drive",
+            "tags": [
+              "missing_output"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "HarryRust",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3943971725"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rustc compilation process",
+              "problem_kind": "compile_error",
+              "user_or_system_impact": "user's system stability"
+            },
+            "summary": "user reports spurious error on their computer; likely hardware issue (bad RAM)",
+            "tags": [
+              "runtime_error",
+              "incorrect_behavior",
+              "memory_issue",
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Noratrieb",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3944724440"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Disk I/O operations in the compiler",
+              "problem_kind": "Data corruption due to bad storage devices",
+              "user_or_system_impact": "Potential data loss or system instability"
+            },
+            "summary": "Bad SSDs/HDDs can fail/corrupt writes and the compiler does a lot of disk writing and reading, which may cause issues.",
+            "tags": [
+              "data_corruption",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "workingjubilee",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153010#issuecomment-3947226662"
+      }
+    ],
+    "issue_number": 153010,
+    "issue_title": "Sporadic segmentation faults in rustc",
+    "issue_url": "https://github.com/rust-lang/rust/issues/153010"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/rust-lang__rust/issue_153010.json",
+  "repository": "rust-lang/rust",
+  "status": "completed"
+}

@@ -1,0 +1,73 @@
+{
+  "issue": {
+    "artifact_count": 3,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "trait_resolution",
+              "problem_kind": "internal_error",
+              "user_or_system_impact": "compilation_fails"
+            },
+            "summary": "The code ICEs during the compilation process due to unresolved instance for <bool as Droppable>::drop.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Anonymous1-design",
+        "comment_link": "https://github.com/rust-lang/rust/issues/154073"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "illustration of an issue",
+              "language": "Rust",
+              "snippet_kind": "example"
+            },
+            "summary": "Provided a concise Rust code example demonstrating a missing implementation in a trait.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          }
+        ],
+        "comment_author": "theemathas",
+        "comment_link": "https://github.com/rust-lang/rust/issues/154073#issuecomment-4087734659"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "unknown",
+              "problem_kind": "bug",
+              "user_or_system_impact": "user reported"
+            },
+            "summary": "user_or_system_impact: user reported a potential duplicate issue; problem_kind: bug or regression; affected_area: not specified in comment.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "matthiaskrgr",
+        "comment_link": "https://github.com/rust-lang/rust/issues/154073#issuecomment-4102772874"
+      }
+    ],
+    "issue_number": 154073,
+    "issue_title": "[ICE]:  failed to resolve instance for <bool as Droppable>::drop",
+    "issue_url": "https://github.com/rust-lang/rust/issues/154073"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/rust-lang__rust/issue_154073.json",
+  "repository": "rust-lang/rust",
+  "status": "completed"
+}

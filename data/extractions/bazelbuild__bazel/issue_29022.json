@@ -1,0 +1,35 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "documentation",
+              "problem_kind": "unknown",
+              "user_or_system_impact": "user experience"
+            },
+            "summary": "user reports an issue with the /install page on bazel.build website but does not provide specific details.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "alsa765",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29022"
+      }
+    ],
+    "issue_number": 29022,
+    "issue_title": "[bazel.build] Problem with /install",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/29022"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_29022.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

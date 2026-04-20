@@ -1,0 +1,227 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "JPPinto-SS"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Is there an existing issue for this?\n\n- [x] I have searched the existing issues\n\n### Current behaviour\n\n<img width=\"828\" height=\"637\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/0a607957-b068-4b58-83ca-27e8a8296eef\" />\n\nDir path cannot get any shorter but I think its misleading, there are no files even close to 256 char, might be an issue because its on E:\\ ? Nothing useful in debug.log. Fix the data for core as well, it's still showing 2009-2024. \n\n### Expected behaviour\n\nExpected behavior is that it should continue to write the blocks. \n\n### Steps to reproduce\n\nInstall Bitcoin core 28.1.0. \n\n### Relevant log output\n\n[debug.zip](https://github.com/user-attachments/files/25315742/debug.zip)\n\n### How did you obtain Bitcoin Core\n\nCompiled from source\n\n### What version of Bitcoin Core are you using?\n\n28.1.0\n\n### Operating system and version\n\nWindows 10\n\n### Machine specifications\n\n8core i7 16gb ram, 14TB ssd",
+  "closedAt": "2026-03-02T23:37:09Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "hebasto"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> ### What version of Bitcoin Core are you using?\n> \n> 28.1.0\n> ### Operating system and version\n> \n> Windows 10\n\nHave you tried the most recent release [v30.2](https://bitcoincore.org/en/releases/30.2/)?",
+      "createdAt": "2026-02-14T15:27:14Z",
+      "id": "IC_kwDOABII587olL6R",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3902062225"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Is this still an issue with a recent version of Bitcoin Core? If yes, what are the steps to reproduce? That is, what is your config + settings + command line args (etc). Also, what is the relevant section of the debug log? No need to zip it up, you can just share it here directly, possibly wrapped in a \n\n```\n<details><summary>debug log</summary>\n\n\\```\n content\n\\```\n\n</details>",
+      "createdAt": "2026-02-17T12:28:22Z",
+      "id": "IC_kwDOABII587pUaoS",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3914443282"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JPPinto-SS"
+      },
+      "authorAssociation": "NONE",
+      "body": "I have installed 30.2 and its still synchronizing with network, it usually throws the error when there is ~1 year left to sync. I will report back if it completes or not. \n\n<img width=\"561\" height=\"50\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/9f2adfe8-27ac-481b-a65e-e30036efcb8d\" />",
+      "createdAt": "2026-02-17T15:42:04Z",
+      "id": "IC_kwDOABII587pYRid",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3915454621"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What is the filesystem? FAT32?\n\nI presume the exception comes from `src/flatfile.cpp:    fs::create_directories(path.parent_path());`, which is confusing, because some errors are handled locally in the function and a failure is returned, and other errors are thrown.",
+      "createdAt": "2026-02-17T15:55:45Z",
+      "id": "IC_kwDOABII587pYlD_",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3915534591"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JPPinto-SS"
+      },
+      "authorAssociation": "NONE",
+      "body": "<img width=\"396\" height=\"467\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/78d910a9-9d05-4f5a-aa30-989ac68540a8\" />",
+      "createdAt": "2026-02-17T16:05:32Z",
+      "id": "IC_kwDOABII587pYxbx",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3915585265"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I have installed 30.2 and its still synchronizing with network, it usually throws the error when there is ~1 year left to sync. I will report back if it completes or not.\n> <img alt=\"Image\" width=\"561\" height=\"50\" src=\"https://private-user-images.githubusercontent.com/77682310/551048839-9f2adfe8-27ac-481b-a65e-e30036efcb8d.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzE4MzQwNjUsIm5iZiI6MTc3MTgzMzc2NSwicGF0aCI6Ii83NzY4MjMxMC81NTEwNDg4MzktOWYyYWRmZTgtMjdhYy00ODFiLWE2NWUtZTMwMDM2ZWZjYjhkLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNjAyMjMlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjYwMjIzVDA4MDI0NVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWZjMzQ1ZTE5YTY4MmVmNDg3ZmJiYzkzNzVhYmUzYzFhYTZmODFlNmE4OTU3ZGRmZDMwNDZmOGY4ZGFhNWQ4YzAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.8Olc0cU4piBWHul9aM9azjoF3tDEEfzdVwe4VcX-FgY\">\n\nAny update on this? Also, once the issue happens again, it should not be needed to re-sync from scratch and it should be possible to test if the same error message happens on every re-start.",
+      "createdAt": "2026-02-23T08:06:38Z",
+      "id": "IC_kwDOABII587rCR4E",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3943243268"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JPPinto-SS"
+      },
+      "authorAssociation": "NONE",
+      "body": "Its still going... no issues yet.  \n\n<img width=\"830\" height=\"274\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/a770e98f-5bd7-4db5-a687-5dea9a654c10\" />",
+      "createdAt": "2026-02-23T12:57:08Z",
+      "id": "IC_kwDOABII587rHm2E",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3944639876"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Well, but it looks like the last crash was for a block time of March 2024, but the last screenshot already shows a block time of June 2024, so it doesn't seem to be deterministic?\n\nMaybe a cosmic ray or hardware corruption?",
+      "createdAt": "2026-03-02T11:52:38Z",
+      "id": "IC_kwDOABII587tdaSl",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3983910053"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> 14TB ssd\n\nAlso, an 14TB external ssd seems a bit fragile to put the leveldb on. At a minimum, it will slow down the IBD.\n\nMy recommendation would be to at most put the blocksdir on the external drive.",
+      "createdAt": "2026-03-02T11:59:58Z",
+      "id": "IC_kwDOABII587tdjpa",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3983948378"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "willcl-ark"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Also, an 14TB external ssd seems a bit fragile to put the leveldb on. At a minimum, it will slow down the IBD.\n\nI presume this is actualy a spinning disk HDD too. In which case using it for chainstate will be doubly-dodgy.\n\nShould we close for now, seeing as this seems to not be reproducible? We can re-open if @JPPinto-SS reports another failure.",
+      "createdAt": "2026-03-02T20:18:53Z",
+      "id": "IC_kwDOABII587toDYn",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3986699815"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JPPinto-SS"
+      },
+      "authorAssociation": "NONE",
+      "body": "Its still running, I did pull the USB as a test and to ensure it was on a 3.0 port. It resumed with no issues. Is there not a way to backfill the files? like via FTP? When I use this machine at all, it slows the download to a crawl.  \n\n\nCurrent status: \n\n<img width=\"830\" height=\"279\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/3c6e440a-3870-4685-b85b-3e0d32b3c9f1\" />",
+      "createdAt": "2026-03-02T23:35:28Z",
+      "id": "IC_kwDOABII587trpMi",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3987641122"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JPPinto-SS"
+      },
+      "authorAssociation": "NONE",
+      "body": "ok to close",
+      "createdAt": "2026-03-02T23:37:09Z",
+      "id": "IC_kwDOABII587trrTZ",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34592#issuecomment-3987649753"
+    }
+  ],
+  "createdAt": "2026-02-14T15:00:32Z",
+  "id": "I_kwDOABII587q789s",
+  "labels": [
+    {
+      "name": "Windows"
+    },
+    {
+      "name": "Block storage"
+    },
+    {
+      "name": "Data corruption"
+    }
+  ],
+  "number": 34592,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "willcl-ark"
+      },
+      "createdAt": "2026-02-17T12:09:46Z",
+      "label": {
+        "name": "Windows"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "willcl-ark"
+      },
+      "createdAt": "2026-02-17T12:09:46Z",
+      "label": {
+        "name": "Questions and Help"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "createdAt": "2026-02-17T17:52:19Z",
+      "label": {
+        "name": "Questions and Help"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "createdAt": "2026-02-17T17:52:23Z",
+      "label": {
+        "name": "Block storage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "createdAt": "2026-03-02T11:52:50Z",
+      "label": {
+        "name": "Data corruption"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "JPPinto-SS"
+      },
+      "createdAt": "2026-03-02T23:37:10Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Fatal Error: Filename too long.",
+  "url": "https://github.com/bitcoin/bitcoin/issues/34592"
+}

@@ -1,0 +1,227 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "csmulhern"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "### Description of the bug:\n\n\nDepending on proto library targets from `@bazel_tools`, e.g. `@bazel_tools//src/main/protobuf:analysis_v2_proto` causes issues in Bazel 9.\n\n### Which category does this issue belong to?\n\nCore\n\n### What's the simplest, easiest way to reproduce this bug? Please provide a minimal example if possible.\n\n\n```bzl\nload(\"@protobuf//bazel:py_proto_library.bzl\", \"py_proto_library\")\n\npy_proto_library(\n    name = \"analysis_v2_pb2\",\n    deps = [\"@bazel_tools//src/main/protobuf:analysis_v2_proto\"],\n)\n```\n\nThis results in the following error:\n```\nERROR: error loading package '@@bazel_tools//src/main/protobuf': Unable to find package for @@[unknown repo 'grpc-java' requested from @@bazel_tools]//:java_grpc_library.bzl: The repository '@@[unknown repo 'grpc-java' requested from @@bazel_tools]' could not be resolved: No repository visible as '@grpc-java' from repository '@@bazel_tools'.\n```\n\nYou also get errors if you attempt to depend on the py_proto_library defined in `@bazel_tools` as well.\n\n```bzl\npy_library(\n    name = \"target\",\n    srcs = [...],\n    deps = [\"@bazel_tools//src/main/protobuf:analysis_v2_py_proto\"],\n)\n```\n\n```\nERROR: error loading package '@@bazel_tools//src/main/protobuf': Unable to find package for @@[unknown repo 'com_github_grpc_grpc' requested from @@bazel_tools]//bazel:cc_grpc_library.bzl: The repository '@@[unknown repo 'com_github_grpc_grpc' requested from @@bazel_tools]' could not be resolved: No repository visible as '@com_github_grpc_grpc' from repository '@@bazel_tools'.\n```\n\nThis used to work in Bazel 8.\n\n### Which operating system are you running Bazel on?\n\n\nmacOS\n\n### What is the output of `bazel info release`?\n\n\nrelease 9.0.0\n\n### If `bazel info release` returns `development version` or `(@non-git)`, tell us how you built Bazel.\n\n\n_No response_\n\n### What's the output of `git remote get-url origin; git rev-parse HEAD` ?\n\n\n```text\n\n```\n\n### If this is a regression, please try to identify the Bazel commit where the bug was introduced with bazelisk --bisect.\n\n\n_No response_\n\n### Have you found anything relevant by searching the web?\n\n_No response_\n\n### Any other information, logs, or outputs that you want to share?\n\n_No response_",
+  "closedAt": "2026-02-03T10:06:52Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "meisterT"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "cc @meteorcloudy \n\n(side-note: I wonder whether we should do something like https://github.com/bazelbuild/bazel-worker-api for this proto?)",
+      "createdAt": "2026-01-23T12:52:42Z",
+      "id": "IC_kwDOATz7jc7h6GcR",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-3790104337"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "meteorcloudy"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "See similar breakages and discussions at https://github.com/bazelbuild/bazel/issues/26579#issuecomment-3175395011\n\nDo we consider `analysis_v2_py_proto` as a public proto like bazel-worker-api? If not, then users should just vendor it.\n\n@csmulhern Can you give a bit more context why your build depend on this target and whether it's okay for you to vendor the proto in your source tree?\n",
+      "createdAt": "2026-01-23T15:38:17Z",
+      "id": "IC_kwDOATz7jc7h88Vw",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-3790849392"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "csmulhern"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> [@csmulhern](https://github.com/csmulhern) Can you give a bit more context why your build depend on this target and whether it's okay for you to vendor the proto in your source tree?\n\nI have a development tool that calls `bazel aquery` with `--output=proto`. It feels odd to have bazel support outputting protobufs in this format and not distribute the proto definitions with bazel. How are users expected to use `--output=proto`? I understand not wanting to publicly support code generation across multiple languages / involving bazel with managing multiple protobuf runtime dependencies. But it feels like exposing the `proto_library` rule definition or even just the raw `.proto` files with `exports_files` would still make sense.\n\nVendoring is a workaround, but is not an ideal solution as ideally the files themselves would be tied to the version of bazel being used.\n\nIf this is no longer expected to be supported, should we remove the public visibility on `@bazel_tools//src/main/protobuf` in Bazel 9 to make that explicit?",
+      "createdAt": "2026-01-24T00:35:36Z",
+      "id": "IC_kwDOATz7jc7iF444",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-3793194552"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lbcjbb"
+      },
+      "authorAssociation": "NONE",
+      "body": "I was exactly in the same situation (#27639), and to avoid to maintain a vendored version of these proto files, I created a repository rule to fetch them from the Bazel source repository.\n\nIt would be ideal to be able to have a @bazel_proto repository, provided by Bazel itself, to publish these proto files or proto libraries.\n\n\n\n",
+      "createdAt": "2026-01-24T08:10:26Z",
+      "id": "IC_kwDOATz7jc7iJpQa",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-3794179098"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "meteorcloudy"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@bazel-io fork 9.0.1",
+      "createdAt": "2026-01-26T09:33:09Z",
+      "id": "IC_kwDOATz7jc7iasI1",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-3798647349"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "meteorcloudy"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@bazel-io fork 9.1.0",
+      "createdAt": "2026-01-26T09:33:14Z",
+      "id": "IC_kwDOATz7jc7iasNP",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-3798647631"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "meteorcloudy"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@csmulhern @lbcjbb Do you think https://github.com/bazelbuild/bazel/pull/28428 will address this issue and make it a better migration experience?",
+      "createdAt": "2026-01-26T13:33:01Z",
+      "id": "IC_kwDOATz7jc7ieb_a",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-3799629786"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "csmulhern"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@meteorcloudy yes, the availability of the `proto_library` targets is sufficient for my needs, feels like the reasonable thing to expose on the Bazel side, and fixes the regression for my use case. Thank you!",
+      "createdAt": "2026-01-27T01:00:32Z",
+      "id": "IC_kwDOATz7jc7ipf-R",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-3802529681"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A fix for this issue has been included in\u00a0[Bazel 9.0.1 RC1](https://github.com/bazelbuild/bazel/releases/tag/9.0.1rc1). Please test out the release candidate and report any issues as soon as possible.\nIf you're using Bazelisk, you can point to the latest RC by setting USE_BAZEL_VERSION=9.0.1rc1. Thanks!",
+      "createdAt": "2026-03-06T05:39:06Z",
+      "id": "IC_kwDOATz7jc7u_1pO",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-4009712206"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "csmulhern"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@iancha1992 this issue is resolved for me using 9.0.1rc1. Thanks!",
+      "createdAt": "2026-03-06T16:05:26Z",
+      "id": "IC_kwDOATz7jc7vK49h",
+      "url": "https://github.com/bazelbuild/bazel/issues/28400#issuecomment-4012609377"
+    }
+  ],
+  "createdAt": "2026-01-23T04:58:43Z",
+  "id": "I_kwDOATz7jc7lOst3",
+  "labels": [
+    {
+      "name": "type: bug"
+    },
+    {
+      "name": "P1"
+    },
+    {
+      "name": "team-OSS"
+    }
+  ],
+  "number": 28400,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "csmulhern"
+      },
+      "createdAt": "2026-01-23T04:58:44Z",
+      "label": {
+        "name": "type: bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "csmulhern"
+      },
+      "createdAt": "2026-01-23T04:58:44Z",
+      "label": {
+        "name": "untriaged"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bharadwaj08-one"
+      },
+      "createdAt": "2026-01-23T06:09:04Z",
+      "label": {
+        "name": "team-Core"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "meisterT"
+      },
+      "createdAt": "2026-01-23T12:37:05Z",
+      "label": {
+        "name": "team-Core"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "meisterT"
+      },
+      "createdAt": "2026-01-23T12:37:05Z",
+      "label": {
+        "name": "team-OSS"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "meteorcloudy"
+      },
+      "createdAt": "2026-01-28T13:16:48Z",
+      "label": {
+        "name": "untriaged"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "meteorcloudy"
+      },
+      "createdAt": "2026-01-28T13:16:48Z",
+      "label": {
+        "name": "P1"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "meteorcloudy"
+      },
+      "createdAt": "2026-02-03T10:06:52Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Bazel 9 breaks usage of proto_library targets in @bazel_tools//src/main/protobuf",
+  "url": "https://github.com/bazelbuild/bazel/issues/28400"
+}

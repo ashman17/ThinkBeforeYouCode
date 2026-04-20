@@ -1,0 +1,31 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "vasild"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "It works like this:\n\n1. `sendrawtransaction` is called and given a transaction\n2. that transaction is added to the priority queue for broadcasting\n3. 3 new connections are started\n4. Each of those 3 connections picks the highest priority transaction and sends it, presumably this is the tx from 1.\n5. Periodically a resend-stale job is run which picks stale transactions and resends them. A transaction is considered stale if its reception was confirmed by some peer but we did not receive it back from the network for some time.\n\nThe issue is that the code from 5. would consider a freshly added transaction (after 2. before 4.) as stale. These odd messages might be logged:\n\n```\n2026-03-19T11:20:30Z [privatebroadcast] Requesting 3 new connections due to txid=123, wtxid=456\n2026-03-19T11:20:32Z [privatebroadcast] Reattempting broadcast of stale txid=123 wtxid=456\n```\n\nThis will not impede the broadcast. At worse some excess connections will be created and maybe the transaction will be broadcast more times. Or if the transaction makes it back to us before the last connection sends it, then that excess connection will be \"in vain\", or it will pick the next highest priority transaction to send.\n\nI think this deserves fixing because it is sub-optimal and the logs look odd - \"stale just 2 seconds after being added!?\".\n\nLooking at `PrivateBroadcast::DerivePriority()` for such fresh transactions it is going to return a priority for which the time in `Priority::last_confirmed` is default constructed, i.e. `0`. And that will later be compared to and be less than the stale time. One possible fix would be in `PrivateBroadcast::GetStale()` to also check if `p.num_picked` is greater than `0`. This will omit such fresh not-yet-picked transactions. I am not sure if that would make it possible for a tx to stay forever in this \"fresh\" state if something happens with its 3 connections and it is never picked. Maybe it would be better to remember the time the transaction was taken (when it was added to the queue) and also consider it stale at some point based on that.",
+  "closedAt": null,
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Mccalabrese"
+      },
+      "authorAssociation": "NONE",
+      "body": "I've been digging into the C++ internals on this and put together a fix over in PR #34873. It wraps the attempts vector in a TxState struct to natively track time_added upon emplace, preventing DerivePriority from defaulting to the 1970 Epoch for unconfirmed transactions.",
+      "createdAt": "2026-03-20T04:25:54Z",
+      "id": "IC_kwDOABII5870G4jT",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34862#issuecomment-4095445203"
+    }
+  ],
+  "createdAt": "2026-03-19T09:28:29Z",
+  "id": "I_kwDOABII5870Z8qx",
+  "labels": [],
+  "number": 34862,
+  "state": "OPEN",
+  "stateReason": null,
+  "timelineItems": [],
+  "title": "Transactions for private broadcast may be considered stale shortly after they are taken for sending",
+  "url": "https://github.com/bitcoin/bitcoin/issues/34862"
+}

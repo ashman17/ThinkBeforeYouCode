@@ -1,0 +1,111 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "Diggsey"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "See https://doc.rust-lang.org/beta/std/collections/struct.HashMap.html#method.get\n\n> The key may be any borrowed form of the map\u2019s key type, but [Hash](https://doc.rust-lang.org/beta/std/hash/trait.Hash.html) and [Eq](https://doc.rust-lang.org/beta/std/cmp/trait.Eq.html) on the borrowed form must match those for the key type.\n\nIMO, this requirement is so subtle that a documentation comment is not sufficient, we should aim to enforce this statically:\n\n- The caller of `HashMap::get` has no way to know that two types have identical hash functions, since the hashing algorithm is in almost all cases an unstable implementation detail of the type, and even if it happens to match in one version, may not match in another version.\n\n- There are legitimate reasons to need two \"similar\" types to hash differently (for example, interned strings may wish to hash themselves by hashing their address in memory, while also allowing the string contents to be borrowed with the Borrow trait, since hashing the address is much faster than iterating the string once the string is already interned)\n\n- The consequences are dangerous: the code may appear to work fine in many cases, but may exhibit hard to debug logic errors, or catastrophic performance (say if the HashMap is used as a cache).\n\nI would hope we can introduce a trait such as `HashCompatible<T>` that is implemented for all standard types. Obviously this cannot be added as a trait bound due to backwards compatibility issues, but a compiler warning could be introduced for when this bound is not satisfied, and this warning could be turned into a hard error in a future edition.",
+  "closedAt": "2026-03-18T11:26:31Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "eggyal"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Isn't this precisely what `Borrow<T>` asserts, and what differentiates it from `AsRef<T>`\u2014hence why it is used in `HashMap::get` etc?  How would the proposed `HashCompatible<T>` be any different?",
+      "createdAt": "2026-03-18T02:47:27Z",
+      "id": "IC_kwDOAAsO6M7zJJEV",
+      "url": "https://github.com/rust-lang/rust/issues/154021#issuecomment-4079259925"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lukaslueg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "FWIW I respectfully disagree with the premise: The quoted section of the docs do not establish said requirements just in passing; the method can only be called via a `Borrow<Q>` and a requirements for implementing `Borrow` are very clearly stated. If a type implements `Borrow` in a wrong way, it is 1) wrong everywhere, by definition, and can't be helped, and 2) is to be considered an API error not unlike a wrong `PartialEq`-impl. There is little one can do (although lints _do_ exists to spot obvious errors), and pushing this further down another abstraction layer doesn't solve the situation \"If you lie here, remember, no refunds!\" Afaics the second point (\"interned string\") does not even apply here, because a type that is 1) hashes differently than a string but 2) implements `Borrow` anyway is plain wrong according to pages and pages of documentation for `Borrow`; while `HashMap` is a dear customer of `Borrow`, the error is with the custom `impl Borrow` itself, not the `HashMap` type.",
+      "createdAt": "2026-03-18T09:45:48Z",
+      "id": "IC_kwDOAAsO6M7zQSI2",
+      "url": "https://github.com/rust-lang/rust/issues/154021#issuecomment-4081132086"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "mohammedsalman06112-blip"
+      },
+      "authorAssociation": "NONE",
+      "body": "This might be related to a recent Change\r\n\r\nOn Wed, Mar 18, 2026, 4:46 AM lukaslueg ***@***.***> wrote:\r\n\r\n> *lukaslueg* left a comment (rust-lang/rust#154021)\r\n> <https://github.com/rust-lang/rust/issues/154021#issuecomment-4081132086>\r\n>\r\n> FWIW I respectfully disagree with the premise: The quoted section of the\r\n> docs do not establish said requirements just in passing; the method can\r\n> only be called via a Borrow<Q> and a requirements for implementing Borrow\r\n> are very clearly stated. If a type implements Borrow in a wrong way, it\r\n> is 1) wrong everywhere, by definition, and can't be helped, and 2) is to be\r\n> considered an API error not unlike a wrong PartialEq-impl. There is\r\n> little one can do (although lints *do* exists to spot obvious errors),\r\n> and pushing this further down another abstraction layer doesn't solve the\r\n> situation \"If you lie here, remember, no refunds!\" Afaics the second point\r\n> (\"interned string\") does not even apply here, because a type that is 1)\r\n> hashes differently than a string but 2) implements Borrow anyway is plain\r\n> wrong according to pages and pages of documentation for Borrow; while\r\n> HashMap is a dear customer of Borrow, the error is with the custom impl\r\n> Borrow itself, not the HashMap type.\r\n>\r\n> \u2014\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/rust-lang/rust/issues/154021#issuecomment-4081132086>,\r\n> or unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/CABGL7CP3IF5G3OTFTFF6P34RJV6RAVCNFSM6AAAAACWVUBFK2VHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHM2DAOBRGEZTEMBYGY>\r\n> .\r\n> You are receiving this because you are subscribed to this thread.Message\r\n> ID: ***@***.***>\r\n>\r\n",
+      "createdAt": "2026-03-18T09:53:41Z",
+      "id": "IC_kwDOAAsO6M7zQb1S",
+      "url": "https://github.com/rust-lang/rust/issues/154021#issuecomment-4081171794"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Diggsey"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "When I opened this issue I could have sworn that the docs for Borrow did not mention this, but apparently I'm mistaken...\n\n> In particular Eq, Ord and Hash must be equivalent for borrowed and owned values: x.borrow() == y.borrow() should give the same result as x == y.\n\n",
+      "createdAt": "2026-03-18T11:26:31Z",
+      "id": "IC_kwDOAAsO6M7zShay",
+      "url": "https://github.com/rust-lang/rust/issues/154021#issuecomment-4081718962"
+    }
+  ],
+  "createdAt": "2026-03-17T23:03:50Z",
+  "id": "I_kwDOAAsO6M7z4cHC",
+  "labels": [
+    {
+      "name": "C-bug"
+    }
+  ],
+  "number": 154021,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Diggsey"
+      },
+      "createdAt": "2026-03-17T23:03:51Z",
+      "label": {
+        "name": "C-bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-17T23:03:53Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Diggsey"
+      },
+      "createdAt": "2026-03-18T11:26:31Z",
+      "stateReason": "COMPLETED"
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-18T11:26:34Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    }
+  ],
+  "title": "HashMap::get has a footgun when using a different type for lookup",
+  "url": "https://github.com/rust-lang/rust/issues/154021"
+}

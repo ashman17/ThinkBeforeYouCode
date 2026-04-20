@@ -1,0 +1,148 @@
+{
+  "issue": {
+    "artifact_count": 6,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "scheduling framework",
+              "problem_kind": "API misuse or configuration issue",
+              "user_or_system_impact": "System impact as the test failure could indicate a misconfiguration"
+            },
+            "summary": "Test [sig-scheduling] Workload [FeatureGate:GenericWorkload] [Alpha] [Feature:OffByDefault] CRUD Tests PodGroup API availability is failing due to a forbidden error related to the missing 'w1' workload.",
+            "tags": [
+              "test_flakiness",
+              "runtime_error",
+              "api_misuse"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137915"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092702335"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "release-informing CI",
+              "problem_kind": "CI failure",
+              "user_or_system_impact": "Impacting PRs"
+            },
+            "summary": "Inadequate coverage in release-informing CI due to missing PR job trigger for API packages.",
+            "tags": [
+              "test_infra_issue",
+              "ci_failure",
+              "api"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "BenTheElder",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092713280"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "yongruilin",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092766897"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "PodGroup and Workload API objects",
+              "problem_kind": "API misuse",
+              "user_or_system_impact": "Potential runtime errors"
+            },
+            "summary": "https://github.com/kubernetes/kubernetes/pull/137464 introduced a dependency that requires a matching Workload API object if the PodGroup API object refers to one.",
+            "tags": [
+              "api_misuse",
+              "dependency_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "tosi3k",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092785744"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "liggitt",
+              "deliverable": "PR to get the test back to green",
+              "due_context": "as soon as possible"
+            },
+            "summary": "assignee: liggitt; deliverable: PR to fix PodGroup test; due_context: ASAP",
+            "tags": [
+              "fix_proposed",
+              "test_adjustment"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "liggitt",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092794868"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "kannon92",
+              "deliverable": "unknown",
+              "due_context": "unknown"
+            },
+            "summary": "Assign task to kannon92 for issue 137915.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "kannon92",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092803679"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "kannon92",
+              "deliverable": "Fix PR: https://github.com/kubernetes/kubernetes/pull/137916",
+              "due_context": "issue resolution"
+            },
+            "summary": "Assign fix PR to kannon92 for issue #137915.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "kannon92",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137915#issuecomment-4092816554"
+      }
+    ],
+    "issue_number": 137915,
+    "issue_title": "failing test: [sig-scheduling] Workload [FeatureGate:GenericWorkload] [Alpha] [Feature:OffByDefault] CRUD Tests PodGroup API availability",
+    "issue_url": "https://github.com/kubernetes/kubernetes/issues/137915"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/kubernetes__kubernetes/issue_137915.json",
+  "repository": "kubernetes/kubernetes",
+  "status": "completed"
+}

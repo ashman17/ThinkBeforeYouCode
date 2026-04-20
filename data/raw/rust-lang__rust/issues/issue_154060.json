@@ -1,0 +1,89 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "kleinesfilmroellchen"
+  },
+  "authorAssociation": "NONE",
+  "body": "I last tested [this commit](https://git.filmroellchen.eu/filmroellchen/penplot/commit/6644b23f76639fca13e653fd191aab8a6082f112) in December 2025 with nightly 2025-12-04 (or thereabouts), which compiled. My specific command line was `RUSTFLAGS=\"-Z stack-protector=all -C link-arg=-Tlinkall.x -C link-arg=-Tdefmt.x -C force-frame-pointers -Z threads=20 \" DEFMT_LOG=\"debug,esp_rtos=info,penplot=trace\" cargo run -Z unstable-options -Zprofile-hint-mostly-unused --package penplot`, aka. with the parallel front-end.\n\nAfter upgrading to nightly 2026-03-17, instead, the query recursion limit is hit here:\n\n```\nerror: queries overflow the depth limit!\n  |\n  = help: consider increasing the recursion limit by adding a `#![recursion_limit = \"256\"]` attribute to your crate (`penplot`)\n  = note: query depth increased by 130 when computing layout of `embassy_executor::raw::TaskPool<<() as web::web_task::_EmbassyInternalTaskTrait>::Fut, #[embassy_executor::task(pool_size = WEB_TASK_POOL_SIZE + WEB_TASK_POOL_SIZE_AP)]>`\n```\n\nFrom the existing issues, I assumed this was a parallel frontend bug, but that\u2019s not the case, the same exact output happens with `RUSTFLAGS=\"-Z stack-protector=all -C link-arg=-Tlinkall.x -C link-arg=-Tdefmt.x -C force-frame-pointers\" DEFMT_LOG=\"debug,esp_rtos=info,penplot=trace\" cargo run --package penplot` as well (pretty much the minimal command line that shouldn\u2019t change codegen).\n\nFollowing the compiler\u2019s suggestion fixes the issue and produces correct code.\n\nIt seems like this hasn\u2019t been reported for embassy\u2019s futures specifically, but GitHub\u2019s search is not good enough for me to double-check. Apologies if this is a duplicate otherwise, as per the previous sentence I couldn\u2019t find anything that\u2019s quite exactly the same (also nothing that\u2019s both still open and not only caused by the parallel frontend).\n\n### Meta\n\nBroken nightly:\n\n`rustc --version --verbose`:\n```\nrustc 1.96.0-nightly (91021ccc7 2026-03-17)\nbinary: rustc\ncommit-hash: 91021ccc790478a1a89c003e7d32b8d155ae6aae\ncommit-date: 2026-03-17\nhost: x86_64-unknown-linux-gnu\nrelease: 1.96.0-nightly\nLLVM version: 22.1.0\n```\n\nWorking nightly:\n\n```\nrustc 1.93.0-nightly (83e49b75e 2025-12-03)\nbinary: rustc\ncommit-hash: 83e49b75e7daf827e4390ae0ccbcb0d0e2c96493\ncommit-date: 2025-12-03\nhost: x86_64-unknown-linux-gnu\nrelease: 1.93.0-nightly\nLLVM version: 21.1.5\n```",
+  "closedAt": "2026-03-19T06:45:39Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "RalfJung"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Could this be the same as https://github.com/rust-lang/rust/issues/152942 ?",
+      "createdAt": "2026-03-18T21:26:27Z",
+      "id": "IC_kwDOAAsO6M7zhnTi",
+      "url": "https://github.com/rust-lang/rust/issues/154060#issuecomment-4085675234"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kleinesfilmroellchen"
+      },
+      "authorAssociation": "NONE",
+      "body": "Looks like it, yes! You can close as a duplicate for now, I\u2019ll subscribe over there and re-open if necessary.",
+      "createdAt": "2026-03-18T22:53:53Z",
+      "id": "IC_kwDOAAsO6M7zjM8-",
+      "url": "https://github.com/rust-lang/rust/issues/154060#issuecomment-4086091582"
+    }
+  ],
+  "createdAt": "2026-03-18T21:14:48Z",
+  "id": "I_kwDOAAsO6M70PsMK",
+  "labels": [
+    {
+      "name": "C-bug"
+    }
+  ],
+  "number": 154060,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "kleinesfilmroellchen"
+      },
+      "createdAt": "2026-03-18T21:14:49Z",
+      "label": {
+        "name": "C-bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-18T21:14:51Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "RalfJung"
+      },
+      "createdAt": "2026-03-19T06:45:39Z",
+      "stateReason": "COMPLETED"
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-19T06:45:41Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    }
+  ],
+  "title": "regression on nightly: queries overflow the depth limit",
+  "url": "https://github.com/rust-lang/rust/issues/154060"
+}

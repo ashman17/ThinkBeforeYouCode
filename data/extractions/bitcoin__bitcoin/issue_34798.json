@@ -1,0 +1,74 @@
+{
+  "issue": {
+    "artifact_count": 3,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "timeline",
+              "target_area": "test_networks",
+              "urgency": "unknown"
+            },
+            "summary": "Query about Testnet3 deprecation and Testnet4 rollout timeline.",
+            "tags": [
+              "test_infra_issue",
+              "test_flakiness"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "saravadeanil",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34798"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "use of a fully functional testnet",
+              "target_area": "testing infrastructure",
+              "urgency": "unknown"
+            },
+            "summary": "suggest using an alternative testnet (mempool.space/testnet4) over the deprecated one (testnet3)",
+            "tags": [
+              "api"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "svanstaa",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34798#issuecomment-4039740529"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "guidance",
+              "target_area": "issue_tracker_usage",
+              "urgency": "unknown"
+            },
+            "summary": "Bitcoin Core issue tracker usage for general questions",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "maflcko",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34798#issuecomment-4039802005"
+      }
+    ],
+    "issue_number": 34798,
+    "issue_title": "[QUERY] bitcoin testnet3 deprecation and testnet4 rollout.",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34798"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34798.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

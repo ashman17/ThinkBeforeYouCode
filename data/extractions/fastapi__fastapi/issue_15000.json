@@ -1,0 +1,35 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "enhanced inclusiveness, reduced potential harm from terminology",
+              "target_area": "documentation and codebase",
+              "urgency": "unknown"
+            },
+            "summary": "Proposing updates to terminology in FastAPI documentation and codebase for more inclusive language.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "stuckvgn",
+        "comment_link": "https://github.com/fastapi/fastapi/issues/15000"
+      }
+    ],
+    "issue_number": 15000,
+    "issue_title": "Consider speciesist language in documentation",
+    "issue_url": "https://github.com/fastapi/fastapi/issues/15000"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/fastapi__fastapi/issue_15000.json",
+  "repository": "fastapi/fastapi",
+  "status": "completed"
+}

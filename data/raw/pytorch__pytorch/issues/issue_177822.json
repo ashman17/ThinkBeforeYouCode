@@ -1,0 +1,67 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "mihudaner"
+  },
+  "authorAssociation": "NONE",
+  "body": "I am attempting to write a pattern matcher to match fused operators, and currently encounter an issue: neither search_fn nor search_fn_pattern provides a way to perform fuzzy matching for optional parameters. For example, optional parameters like offset and bias in the following operator prototype appear differently in the FX graph when they are passed or omitted:\n\nOperator prototype as follows:\n``` \nnpu_quant_matmul(x1, x2, scale, *, offset=None, pertoken_scale=None, bias=None) -> Tensor\n``` \n\n\n**Case 1 (with optional parameters):**\ntorch.ops.npu.npu_quant_matmul.default(arg2_1, arg3_1, arg4_1, offset=arg5_1, bias=arg6_1);\n**Case 2 (without optional parameters):**\ntorch.ops.npu.npu_quant_matmul.default(arg2_1, arg3_1, arg4_1);\n**Attempt 1: Using search_fn**\nThe following search_fn only matches Case 1 and fails to match Case 2 (where optional parameters are omitted). **To cover Case 2, I have to write a separate search_fn:**\n``` \n# Only matches Case 1\ndef search_fn(x1, x2, scale, offset, bias):\n    trans = x2.transpose(0, 1)\n    return torch.ops.npu.npu_quant_matmul.default(x1, trans, scale, offset=offset, bias=bias)\n\n# Only matches Case 2\ndef search_fn(x1, x2, scale):\n    trans = x2.transpose(0, 1)\n    return torch.ops.npu.npu_quant_matmul.default(x1, trans, scale)\n```\n\n**Attempt 2: Using search_fn_pattern (CallFunction)**\nI also tried using search_fn_pattern (from torch._inductor.pattern_matcher import register_replacement as register) and wrote a CallFunction as shown below. However, using Ignored() results in a placeholder *, which causes a failure during the matching process when verifying len(self.args)!=len(node.args). It seems impossible to match both cases with a single CallFunction:\n```\ndef _build_search_pattern():\n        npu_transpose_func = CallFunction(\n            torch.ops.aten.transpose.int, \n            KeywordArg(\"x2\"), \n            Ignored(), \n            Ignored(), \n            _users=1\n        )\n\n        output = CallFunction(\n            torch.ops.npu.npu_quant_matmul.default, \n            KeywordArg(\"x1\"),\n            npu_transpose_func,\n            KeywordArg('scale'),\n            offset=KeywordArg('offset'), #Alternatively, writing Ignore() here will cause a failure during the matching process when verifying that len(self.args)!=len(node.args)\n            bias=KeywordArg('bias'), \n            _users=1\n        )\n\n        return output\n```\n\n**Impact:**\nSome operators may have more optional parameters (e.g., n optional parameters). In such cases, I would need to write 2\u207f search_fn or search_fn_pattern to cover all scenarios, which is extremely inefficient and unscalable.\n**Questions:**\n1. Is there any syntax to perform fuzzy matching for this scenario, so that both cases (with/without optional parameters passed) can be matched with a single pattern?\n2. What is the difference between the two writing methods in the matching process:\n    1.CallFunction(offset=KeywordArg('offset'))\n    2.CallFunction(KeywordArg('offset'))?\n\ncc @chauhang @penguinwu @voznesenskym @EikanWang @jgong5 @Guobing-Chen @XiaobingSuper @zhuhaozhe @blzheng @wenzhe-nrv @jiayisunx @kadeng @amjames @Lucaskabela @jataylo @mlazos",
+  "closedAt": "2026-03-19T07:57:10Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thank you for your interest in PyTorch! This issue appears to be a usage question rather than a bug report or feature request.\n\nFor usage questions, please use the [PyTorch Discussion Forum](https://discuss.pytorch.org/) where you'll get help from both the community and PyTorch maintainers.\n\nClosing this issue, but feel free to reopen if you believe this is actually a bug or feature request.",
+      "createdAt": "2026-03-19T07:57:07Z",
+      "id": "IC_kwDOA-j9z87zsKKI",
+      "url": "https://github.com/pytorch/pytorch/issues/177822#issuecomment-4088439432"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "mihudaner"
+      },
+      "authorAssociation": "NONE",
+      "body": "I'm not sure if this is a bug or a usage error.",
+      "createdAt": "2026-03-19T09:36:08Z",
+      "id": "IC_kwDOA-j9z87zt4t8",
+      "url": "https://github.com/pytorch/pytorch/issues/177822#issuecomment-4088892284"
+    }
+  ],
+  "createdAt": "2026-03-19T07:55:44Z",
+  "id": "I_kwDOA-j9z870YLBp",
+  "labels": [
+    {
+      "name": "bot-triaged"
+    }
+  ],
+  "number": 177822,
+  "state": "CLOSED",
+  "stateReason": "NOT_PLANNED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-19T07:57:09Z",
+      "label": {
+        "name": "bot-triaged"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-19T07:57:11Z",
+      "stateReason": "NOT_PLANNED"
+    }
+  ],
+  "title": "Why does register_replacement not support fuzzy matching for optional parameters in operators when using search_fn or search_fn_pattern?",
+  "url": "https://github.com/pytorch/pytorch/issues/177822"
+}

@@ -1,0 +1,295 @@
+{
+  "issue": {
+    "artifact_count": 14,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "configuration",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "User confusion"
+            },
+            "summary": "A bug where --nobuild_python_zip is ignored on Windows and inconsistent with `--@rules_python//python/config_settings:build_python_zip=false`.",
+            "tags": [
+              "bug",
+              "config_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "carpenterjc",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3773951681"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "build_flags",
+              "problem_kind": "configuration_issue",
+              "user_or_system_impact": "user"
+            },
+            "summary": "The `--build_python_zip` flag is being silently ignored without warning.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "gregestren",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3774072675"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "catch similar issues",
+              "target_area": "warning system",
+              "urgency": "unknown"
+            },
+            "summary": "suggesting a potential warning for catching the issue via PR #26854, unsure of backport to 9.x.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "gregestren",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3774689681"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "compared_against": "unknown",
+              "priority_level": "unknown",
+              "scope": "unknown"
+            },
+            "summary": "prioritizing a patch release for the issue",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "priority_discussion"
+          }
+        ],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3774887436"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "in_progress",
+              "status_kind": "merge_status"
+            },
+            "summary": "Status of PR #26854 and its merge timeline.",
+            "tags": [
+              "build_failure",
+              "workaround"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "gregestren",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3779591143"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "reduce user confusion and facilitate correct usage",
+              "target_area": "bazel configuration flags",
+              "urgency": "unknown"
+            },
+            "summary": "Suggest clearer warning and alternative in deprecation process for `--build_python_zip` flag.",
+            "tags": [
+              "api_misuse",
+              "config_issue"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "meteorcloudy",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3784355334"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "versioning",
+              "problem_kind": "bug",
+              "user_or_system_impact": "user_experience"
+            },
+            "summary": "problem_kind: bug, affected_area: versioning, user_or_system_impact: user_experience",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "meteorcloudy",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3784398173"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "@bazel-io",
+              "deliverable": "Fixing fork 9.0.1 issue",
+              "due_context": "Unknown"
+            },
+            "summary": "Assign task to @bazel-io for fixing fork 9.0.1 issue",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3786033140"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "@bazel-io",
+              "deliverable": "fork 9.1.0",
+              "due_context": "not specified"
+            },
+            "summary": "Assigning task to @bazel-io for fork 9.1.0",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3786033651"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "clearer user experience",
+              "target_area": "bazel configuration flags",
+              "urgency": "unknown"
+            },
+            "summary": "suggest adding a clear warning and an alternative to the `--build_python_zip` flag.",
+            "tags": [
+              "api_misuse",
+              "config_issue"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "gregestren",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3800695021"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocker_type": "unknown",
+              "blocking_target": "unknown",
+              "unblock_condition": "unknown"
+            },
+            "summary": "Release blocker for 9.0.1; issue needs to be resolved soonish.",
+            "tags": [
+              "build_failure",
+              "runtime_error",
+              "performance_degradation"
+            ],
+            "type": "blocking_issue"
+          }
+        ],
+        "comment_author": "meteorcloudy",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3847621685"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "in_progress",
+              "status_kind": "planned"
+            },
+            "summary": "Syncing on an issue in a meeting today and following up later.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "gregestren",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3848095902"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "improved code quality and consistency",
+              "solution_kind": "generalization of a warning",
+              "target_area": "boolean flags"
+            },
+            "summary": "The team will first address the specific flag issue and then generalize the warning to all boolean flags.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "gregestren",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-3849333601"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "in_progress",
+              "status_kind": "status_update"
+            },
+            "summary": "Bazel 9.0.1 RC1 includes a fix for the issue; user is encouraged to test and report issues.",
+            "tags": [
+              "fix_merged",
+              "test_infra_issue"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28348#issuecomment-4009713248"
+      }
+    ],
+    "issue_number": 28348,
+    "issue_title": "With 9.0.0rc1-6 --nobuild_python_zip seems to be now be a noop on windows",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/28348"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_28348.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

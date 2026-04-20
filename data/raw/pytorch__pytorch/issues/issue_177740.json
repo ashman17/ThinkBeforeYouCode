@@ -1,0 +1,140 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "dcci"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "### \ud83d\udc1b Describe the bug\n\nRepro:\n```\nimport torch\n\nt0 = torch.tensor([84.3125], dtype=torch.float64).reshape((1,)).to(torch.float16).to(\"cuda:0\")\nt1 = torch.tensor([21.078125], dtype=torch.float64).reshape((1,)).to(torch.float16).to(\"cuda:0\")\n\n# Eager\neager_out = torch.floor_divide(t0, t1)\n\n# Compiled\ntorch._dynamo.reset()\ndef fn(t0, t1):\n    return torch.floor_divide(t0, t1)\n\ncompiled_fn = torch.compile(fn, fullgraph=True)\ncompiled_out = compiled_fn(t0, t1)\n\n# Compare\nprint('eager  :', eager_out)\nprint('compiled:', compiled_out)\nprint('equal  :', torch.equal(eager_out, compiled_out))\nif eager_out.is_floating_point():\n    diff = (eager_out.to(torch.float64) - compiled_out.to(torch.float64)).abs()\n    print('max diff:', diff.max().item())\n```\n\nOutput:\n\n```\n$ python repro.py\neager  : tensor([4.], device='cuda:0', dtype=torch.float16)\ncompiled: tensor([3.], device='cuda:0', dtype=torch.float16)\nequal  : False\nmax diff: 1.0\n\n>>> torch.__version__\n'2.12.0.dev20260317+cu128'\n```\n\n### Versions\n\n```\nIs CUDA available: True                                                                                                                              \nCUDA runtime version: 12.8.93                                                                                                                        \nCUDA_MODULE_LOADING set to:                                                                                                                          \nGPU models and configuration:                                                   \nGPU 0: NVIDIA GB200                                                                                                                                        \nGPU 1: NVIDIA GB200                                                                                  \n```\n\n```\n[conda] nvidia-nccl-cu12          2.29.3                   pypi_0    pypi\n[conda] nvidia-nvjitlink-cu12     12.8.93                  pypi_0    pypi\n[conda] nvidia-nvtx-cu12          12.8.90                  pypi_0    pypi\n[conda] torch                     2.12.0.dev20260317+cu128          pypi_0    pypi\n[conda] triton                    3.6.0+git9844da95          pypi_0    pypi\n```\n\ncc @ptrblck @msaroufim @eqy @jerryzh168 @tinglvv @nWEIdia @chauhang @penguinwu @voznesenskym @EikanWang @jgong5 @Guobing-Chen @XiaobingSuper @zhuhaozhe @blzheng @wenzhe-nrv @jiayisunx @ipiszy @kadeng @muchulee8 @amjames @aakhundov @coconutruben @jataylo",
+  "closedAt": "2026-03-20T19:42:41Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "dsashidh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Working on this",
+      "createdAt": "2026-03-18T19:56:26Z",
+      "id": "IC_kwDOA-j9z87zf36j",
+      "url": "https://github.com/pytorch/pytorch/issues/177740#issuecomment-4085218979"
+    }
+  ],
+  "createdAt": "2026-03-18T16:28:50Z",
+  "id": "I_kwDOA-j9z870KNGz",
+  "labels": [
+    {
+      "name": "triage review"
+    },
+    {
+      "name": "module: cuda"
+    },
+    {
+      "name": "module: correctness (silent)"
+    },
+    {
+      "name": "oncall: pt2"
+    },
+    {
+      "name": "module: decompositions"
+    },
+    {
+      "name": "module: inductor"
+    },
+    {
+      "name": "bot-triaged"
+    }
+  ],
+  "number": 177740,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-18T16:31:01Z",
+      "label": {
+        "name": "triage review"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-18T16:31:01Z",
+      "label": {
+        "name": "module: cuda"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-18T16:31:01Z",
+      "label": {
+        "name": "module: correctness (silent)"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-18T16:31:01Z",
+      "label": {
+        "name": "oncall: pt2"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-18T16:31:01Z",
+      "label": {
+        "name": "module: decompositions"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-18T16:31:01Z",
+      "label": {
+        "name": "module: inductor"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "github-actions"
+      },
+      "createdAt": "2026-03-18T16:31:05Z",
+      "label": {
+        "name": "bot-triaged"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "pytorchmergebot"
+      },
+      "createdAt": "2026-03-20T19:42:41Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "[Inductor] Eager and inductor produce different results for floor_divide",
+  "url": "https://github.com/pytorch/pytorch/issues/177740"
+}

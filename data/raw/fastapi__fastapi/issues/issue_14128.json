@@ -1,0 +1,162 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "boreyleang"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Privileged issue\n\n- [x] I'm @tiangolo or he asked me directly to create an issue here.\n\n### Issue Content\n\nlatest version of Fastapi is not support with Starlette 0.48.0.\n\nFAFastAPI 0.118.0\nStarlette 0.48.0",
+  "closedAt": "2025-09-30T09:00:43Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nsoranzo"
+      },
+      "authorAssociation": "NONE",
+      "body": "Not sure if it's the same issue, but we are seeing the similar \"AssertionError: fastapi_middleware_astack not found in request scope\n\" in https://github.com/galaxyproject/galaxy/actions/runs/18114950033/job/51548802086 since the release of fastapi 0.118.0",
+      "createdAt": "2025-09-30T07:52:52Z",
+      "id": "IC_kwDOCZduT87HtEeB",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3350480769"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Do you have an MRE?",
+      "createdAt": "2025-09-30T08:47:23Z",
+      "id": "IC_kwDOCZduT87HuExy",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3350744178"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "tiangolo"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "To be able to help you, we would need a minimal reproducible example and all the information that we ask in a GitHub Discussion question.\n\nThat's why there's a check box for:\n\n> I'm @tiangolo or he asked me directly to create an issue here.\n\nPlease, create a GitHub Discussion question with your specific use case and a minimal reproducible example and we'll be able to understand your use case and help you: https://github.com/fastapi/fastapi/discussions/new?category=questions\n\nFor now, I'll close this one. \u2615 ",
+      "createdAt": "2025-09-30T09:00:42Z",
+      "id": "IC_kwDOCZduT87HuTvO",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3350805454"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nsoranzo"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Do you have an MRE?\n\nYou can run pytest of https://github.com/galaxyproject/galaxy/blob/dev/test/unit/webapps/api/test_cbv.py where cbv.py is https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/webapps/galaxy/api/cbv.py\n\nThis works fine under fastapi 0.117.0 and fails under 0.118.0 with:\n\n```\nequest = <starlette.requests.Request object at 0x7763eace1450>\n\n    async def app(request: Request) -> Response:\n        response: Union[Response, None] = None\n        file_stack = request.scope.get(\"fastapi_middleware_astack\")\n>       assert isinstance(file_stack, AsyncExitStack), (\n            \"fastapi_middleware_astack not found in request scope\"\n        )\nE       AssertionError: fastapi_middleware_astack not found in request scope\n```",
+      "createdAt": "2025-09-30T09:08:18Z",
+      "id": "IC_kwDOCZduT87HueSS",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3350848658"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I need an MRE to help.",
+      "createdAt": "2025-09-30T09:16:24Z",
+      "id": "IC_kwDOCZduT87Hul1f",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3350879583"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nsoranzo"
+      },
+      "authorAssociation": "NONE",
+      "body": "Is this better? https://gist.github.com/nsoranzo/75be3a2ac682802bed71bfc18c99aef6",
+      "createdAt": "2025-09-30T09:25:34Z",
+      "id": "IC_kwDOCZduT87HuwHL",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3350921675"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Ah, I see. The problem is that FastAPI doesn't run the `build_middleware_stack` for an `APIRouter`.\n\nIf in your test, you use the router from the `FastAPI` object instead, your test will pass.\n\nFrom 0.118.0, it seems FastAPI doesn't work in \"ASGI blocks\" anymore. ",
+      "createdAt": "2025-09-30T09:51:33Z",
+      "id": "IC_kwDOCZduT87HvM6A",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3351039616"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "btw, this is an MRE:\n```py\nfrom fastapi import APIRouter\nfrom starlette.testclient import TestClient\n\n\nrouter = APIRouter()\n\n\n@router.get(\"/items\")\nasync def root():\n    return \"hi\"\n\n\nclient = TestClient(router)\nclient.get(\"/items\")\n```",
+      "createdAt": "2025-09-30T10:20:23Z",
+      "id": "IC_kwDOCZduT87HvsDD",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3351167171"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nsoranzo"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks @Kludex !\n\nThis fixes the above MRE:\n\n```diff\n--- mre.py\t2025-09-30 12:50:30.605246667 +0100\n+++ mre_fixed.py\t2025-09-30 13:19:36.406692058 +0100\n@@ -1,4 +1,7 @@\n-from fastapi import APIRouter\n+from fastapi import (\n+    APIRouter,\n+    FastAPI\n+)\n from starlette.testclient import TestClient\n \n \n@@ -10,5 +13,7 @@\n     return \"hi\"\n \n \n-client = TestClient(router)\n+app = FastAPI()\n+app.include_router(router)\n+client = TestClient(app)\n client.get(\"/items\")\n```",
+      "createdAt": "2025-09-30T12:05:11Z",
+      "id": "IC_kwDOCZduT87Hxu3b",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3351703003"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "JhonSoto99"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tiangolo @Kludex  hello, this error ocurrs when paginating resuts:\n\nfrom fastapi_pagination import Page\nfrom fastapi_pagination.ext.sqlalchemy import paginate\n\n@contents_router.get(\n    \"\",\n    response_model=Page[UploadedContentResponse],\n    status_code=status.HTTP_200_OK,\n    tags=[\"Contents\"],\n)\n\n\nIs there any solution for this issue?",
+      "createdAt": "2025-10-01T19:35:27Z",
+      "id": "IC_kwDOCZduT87IJNkE",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3357858052"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "YuriiMotov"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> this error ocurrs when paginating resuts:\n\nPlease, report this in the repository of `fastapi_pagination` package that you are using",
+      "createdAt": "2025-10-01T19:39:02Z",
+      "id": "IC_kwDOCZduT87IJQGb",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3357868443"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "nermand"
+      },
+      "authorAssociation": "NONE",
+      "body": "> [@tiangolo](https://github.com/tiangolo) [@Kludex](https://github.com/Kludex) hello, this error ocurrs when paginating resuts:\n> \n> from fastapi_pagination import Page from fastapi_pagination.ext.sqlalchemy import paginate\n> \n> @contents_router.get( \"\", response_model=Page[UploadedContentResponse], status_code=status.HTTP_200_OK, tags=[\"Contents\"], )\n> \n> Is there any solution for this issue?\n\nJust in case someone else stumbles upon this error - it's solved with `fastapi-pagination` v0.14.2 [[link](https://github.com/uriyyo/fastapi-pagination/issues/1599)]",
+      "createdAt": "2025-11-06T12:24:30Z",
+      "id": "IC_kwDOCZduT87QcD7s",
+      "url": "https://github.com/fastapi/fastapi/issues/14128#issuecomment-3497017068"
+    }
+  ],
+  "createdAt": "2025-09-30T03:36:27Z",
+  "id": "I_kwDOCZduT87OrCsi",
+  "labels": [],
+  "number": 14128,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "tiangolo"
+      },
+      "createdAt": "2025-09-30T09:00:43Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "AssertionError: fastapi_inner_astack not found in request scope",
+  "url": "https://github.com/fastapi/fastapi/issues/14128"
+}

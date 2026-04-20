@@ -1,0 +1,28 @@
+{
+  "issue": {
+    "artifact_count": 0,
+    "comments": [
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "linzhp",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29000"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "bharadwaj08-one",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29000#issuecomment-4065048805"
+      }
+    ],
+    "issue_number": 29000,
+    "issue_title": "[Mirror] Zig 0.15.2",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/29000"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_29000.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

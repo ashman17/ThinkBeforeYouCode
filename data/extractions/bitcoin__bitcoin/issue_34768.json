@@ -1,0 +1,173 @@
+{
+  "issue": {
+    "artifact_count": 11,
+    "comments": [
+      {
+        "artifact_count": 6,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Node Discovery and Networking",
+              "problem_kind": "Observation",
+              "user_or_system_impact": "Potential misreporting of peer capabilities."
+            },
+            "summary": "Peers advertising services = UINT64_MAX (all service bits set) in getnodeinfo responses.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "question_kind": "Behavior Clarification",
+              "target_area": "Node Discovery and Networking",
+              "urgency": "Medium"
+            },
+            "summary": "Clarify the intended behavior for peers advertising services = UINT64_MAX in getnodeinfo.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          },
+          {
+            "metadata": {
+              "evidence_type": "Observational Data",
+              "reliability": "High (multiple observations)",
+              "sample_source": "Local node connections and p2p network traffic"
+            },
+            "summary": "Observation of 21 peers with services = UINT64_MAX out of a sample of 50 nodes.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "empirical_evidence"
+          },
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "Initial",
+              "status_kind": "Observation Report"
+            },
+            "summary": "21 out of 50 nodes observed advertising services = UINT64_MAX, no immediate impact reported.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          },
+          {
+            "metadata": {
+              "compared_against": "Other known issues",
+              "priority_level": "Medium",
+              "scope": "Node Discovery and Networking"
+            },
+            "summary": "Evaluate the priority of investigating and addressing potential issues related to UINT64_MAX service field.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "priority_discussion"
+          },
+          {
+            "metadata": {
+              "constraint_type": "Implementation Constraint",
+              "scope": "Node Discovery Module",
+              "severity": "Moderate"
+            },
+            "summary": "Constraints on the implementation of getnodeinfo responses may require changes to avoid misreporting.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          }
+        ],
+        "comment_author": "jonasnicolao-tech",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34768"
+      },
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "address_manager",
+              "problem_kind": "protocol_violation",
+              "user_or_system_impact": "potential security risk, incorrect behavior"
+            },
+            "summary": "Anyone can send an addr message with any address and service flags set, which could lead to nodes storing invalid addresses.",
+            "tags": [
+              "incorrect_behavior",
+              "api_misuse",
+              "security_issue"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "impact_scope": "address_validation",
+              "reasoning_kind": "protocol_consistency",
+              "supports_artifact_type": "problem_statement"
+            },
+            "summary": "Due to the nature of service flags in addr messages, it's impossible for a node implementation to definitively determine if an address is invalid.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "constraint_type": "functional_constraint",
+              "scope": "address_manager",
+              "severity": "moderate"
+            },
+            "summary": "The implementation must handle any service flags set in addr messages, as they could be used by other implementations.",
+            "tags": [
+              "compatibility_issue",
+              "api_misuse"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "enhanced security and data integrity",
+              "target_area": "address_validation",
+              "urgency": "medium"
+            },
+            "summary": "Consider implementing additional validation logic for addr messages to mitigate potential security risks.",
+            "tags": [
+              "security_issue",
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "0xB10C",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34768#issuecomment-4019966503"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "guidance",
+              "target_area": "issue_tracker_usage",
+              "urgency": "informative"
+            },
+            "summary": "Bitcoin Core issue tracker usage guidance - general questions should be directed elsewhere.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "maflcko",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34768#issuecomment-4029573336"
+      }
+    ],
+    "issue_number": 34768,
+    "issue_title": "Peers advertising services = 18446744073709551615 (UINT64_MAX)",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34768"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34768.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

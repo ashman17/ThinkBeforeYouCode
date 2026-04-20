@@ -1,0 +1,85 @@
+{
+  "issue": {
+    "artifact_count": 3,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "kubectl_command",
+              "problem_kind": "k8s_api_request_failure",
+              "user_or_system_impact": "user_experience"
+            },
+            "summary": "kubectl exec sporadically fails with 'unable to upgrade connection' error under frequent operations.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "chymy",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137877"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137877#issuecomment-4088290700"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "chymy",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137877#issuecomment-4088300134"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "GitHub issue labeling",
+              "problem_kind": "API misuse",
+              "user_or_system_impact": "System unable to apply required labels"
+            },
+            "summary": "The label `sig/nod` cannot be applied due to the repository lacking those labels.",
+            "tags": [
+              "api_misuse"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "k8s-ci-robot",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137877#issuecomment-4088300462"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "compared_against": "other_kubernetes_areas",
+              "priority_level": "high",
+              "scope": "node_team"
+            },
+            "summary": "discussing the importance of node-related issues; affected_area: sig_node",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "priority_discussion"
+          }
+        ],
+        "comment_author": "chymy",
+        "comment_link": "https://github.com/kubernetes/kubernetes/issues/137877#issuecomment-4088302803"
+      }
+    ],
+    "issue_number": 137877,
+    "issue_title": "Occasional 'Internal error occurred: unable to upgrade connection' when running 'kubectl exec' ",
+    "issue_url": "https://github.com/kubernetes/kubernetes/issues/137877"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/kubernetes__kubernetes/issue_137877.json",
+  "repository": "kubernetes/kubernetes",
+  "status": "completed"
+}

@@ -1,0 +1,29 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "survivorforge"
+  },
+  "authorAssociation": "NONE",
+  "body": "## Proposal: Add a `.cursorrules` file for Cursor IDE contributors\n\nHi\\! I noticed the FastAPI repo does not have a `.cursorrules` file. FastAPI is hugely popular and many contributors use [Cursor IDE](https://cursor.sh). A `.cursorrules` file tells Cursor's AI assistant about the project's conventions, helping contributors write matching code from the start.\n\n### What `.cursorrules` does\n\nIt instructs Cursor's AI to follow your project's:\n- Coding style and naming conventions\n- Architectural patterns (dependency injection, Pydantic models, etc.)\n- Testing approach\n- Common patterns to follow and pitfalls to avoid\n\nFor FastAPI specifically this is valuable since Pydantic v2 + async patterns have non-obvious conventions new contributors often get wrong.\n\n### What I'd suggest\n\nA `.cursorrules` for this repo could cover:\n- Pydantic v2 model patterns (`model_config = ConfigDict(...)`, validators)\n- `Depends()` injection patterns\n- Async-first with `asyncio.gather()` for concurrent operations\n- `pytest` + `httpx.AsyncClient` testing patterns\n- Strict type annotation conventions (no implicit `Any`)\n\nI maintain an open-source collection at https://github.com/survivorforge/cursor-rules that includes a [python-fastapi rules file](https://github.com/survivorforge/cursor-rules/tree/main/rules/python-fastapi) that could serve as a starting point.\n\n### Options\n\n1. **I can submit a PR** with a `.cursorrules` tailored to FastAPI's codebase conventions\n2. **You can adapt** the [python-fastapi rules](https://github.com/survivorforge/cursor-rules/tree/main/rules/python-fastapi) from our collection\n3. **No action needed** if you prefer to keep the repo lightweight\n\nFree contribution, no strings attached.",
+  "closedAt": "2026-03-04T16:14:52Z",
+  "comments": [],
+  "createdAt": "2026-03-04T16:08:33Z",
+  "id": "I_kwDOCZduT87vxyAo",
+  "labels": [],
+  "number": 15049,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "createdAt": "2026-03-04T16:14:52Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Add .cursorrules file to help Cursor IDE users follow FastAPI conventions",
+  "url": "https://github.com/fastapi/fastapi/issues/15049"
+}

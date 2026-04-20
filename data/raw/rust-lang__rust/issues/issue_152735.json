@@ -1,0 +1,488 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "bgw"
+  },
+  "authorAssociation": "NONE",
+  "body": "This is the smallest possible reproduction I was able to come up with:\n\n```rust\nuse std::{any::Any, future::Future, pin::Pin};\n\ntrait TaskFn {\n    fn call_task(&self) -> Pin<Box<dyn Future<Output = ()> + Send>>;\n}\n\ntype Node = dyn Any;\n\nimpl<F: Fn() -> Fut, Fut: Future<Output = ()> + Send + 'static> TaskFn for F {\n    fn call_task(&self) -> Pin<Box<dyn Future<Output = ()> + Send>> {\n        Box::pin((self)())\n    }\n}\n\ntrait Visit {\n    type EdgesFuture: Send;\n}\n\nimpl<VisitFn: Fn(&Node) -> EdgesFuture, EdgesFuture: Send> Visit for VisitFn {\n    type EdgesFuture = EdgesFuture;\n}\n\nfn visit<V: Visit>(_: V) -> impl Future<Output = Option<V::EdgesFuture>> + Send {\n    futures::future::ready(None::<V::EdgesFuture>)\n}\n\nfn main() {\n    futures::executor::block_on(\n        (Box::new(|| async {\n            visit(|_: &Node| async {}).await;\n        }) as Box<dyn TaskFn>)\n            .call_task(),\n    )\n}\n```\n\nI expected to see this happen: Exit code zero\n\nInstead, this happened: `SIGSEGV` (or `SIGILL` if compiled in release mode)\n\nThis can be reproduced in the rust playground by selecting the nightly compiler: https://play.rust-lang.org/?version=nightly&mode=debug&edition=2024&gist=aaf6f4c5584fe181293b5f6cfbcd56de\n\nThis example uses the `futures` crate, but this is a simply a minimal reduction of a bug I encountered with `tokio`.\n\n### Meta\n\nThis happens with any `rust-toolchain.toml` with a value equal to or newer than:\n\n```\n[toolchain]\nchannel = \"nightly-2026-02-10\"\n```\n\n---\n\nThat translates to:\n\n`rustc --version --verbose`:\n\n```\nrustc 1.95.0-nightly (18d13b533 2026-02-09)\nbinary: rustc\ncommit-hash: 18d13b5332916ffca8eadb9106d54b5b434e9978\ncommit-date: 2026-02-09\nhost: aarch64-unknown-linux-gnu\nrelease: 1.95.0-nightly\nLLVM version: 22.1.0\n```\n\n---\n\nThis also reproduces on the latest nightly:\n\n```\nrustc 1.95.0-nightly (873b4beb0 2026-02-15)\nbinary: rustc\ncommit-hash: 873b4beb0cc726493b94c8ef21f68795c04fbbc1\ncommit-date: 2026-02-15\nhost: aarch64-unknown-linux-gnu\nrelease: 1.95.0-nightly\nLLVM version: 22.1.0\n```\n\nThis does not reproduce on any nightly releases older than what's shown here.\n",
+  "closedAt": "2026-03-09T07:20:49Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "eggyal"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Regressed by #152287 cc @jakubadamw @petrochenkov\n\n@rustbot label +A-dyn-trait +I-unsound -needs-triage",
+      "createdAt": "2026-02-16T23:45:48Z",
+      "id": "IC_kwDOAAsO6M7pHVOm",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911013286"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In-progress minimization (no longer depends on futures or crates other than `std`, still depends on coroutines tho):\n\n```rs\n#![feature(coroutines, stmt_expr_attributes, yield_expr)]\n\ntrait TraitA { fn m(&self); }\nimpl<G: Send> TraitA for G { fn m(&self) {} }\n\ntrait TraitB { type Ty: Send; }\n\nimpl<F, T> TraitB for F\nwhere\n    F: for<'a> Fn(&'a (dyn TraitC + 'static)) -> T,\n    T: Send,\n{\n    type Ty = T;\n}\n\ntrait TraitC {}\n\nfn main() {\n    let x: &dyn TraitA = &#[coroutine] || {\n        let _x = g(|_: &_| {});\n        yield ();\n    };\n    x.m()\n}\n\nfn g<T: TraitB>(_: T) -> impl Send {\n    (loop {}) as T::Ty\n}\n```",
+      "createdAt": "2026-02-17T01:45:22Z",
+      "id": "IC_kwDOAAsO6M7pJA_U",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911454676"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "A different minimization\n\n```rust\ntrait TaskFn {\n    fn call_task(&self);\n}\n\nimpl<Fut: Send> TaskFn for Fut {\n    fn call_task(&self) {}\n}\n\ntrait Visit {\n    type Unit: Send;\n}\n\nimpl Visit for for<'a> fn(&'a &'static i32) {\n    type Unit = ();\n}\n\nfn make_none<V: Visit>() -> Option<impl Send> {\n    None::<V::Unit>\n}\n\nfn main() {\n    let _ = (&async {\n        let _x = make_none::<for<'a> fn(&'a &'static i32)>();\n        std::future::pending::<()>().await;\n    } as &dyn TaskFn)\n        .call_task();\n}\n```",
+      "createdAt": "2026-02-17T02:02:30Z",
+      "id": "IC_kwDOAAsO6M7pJaO-",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911558078"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Neither looks like an MCVE to me \ud83d\ude05. Ideally we would add sth. nicer to Jubilee's revert PR.\n\nSide note: Under the next solver this fails MIR validation:\n\n```\nerror: internal compiler error: /rustc-dev/a423f68a0d75656eabab4982a06bed9f316f7109/compiler/rustc_mir_transform/src/validate.rs:81:25: broken MIR in Item(DefId(0:14 ~ u_min1[bcc4]::main)) (after phase change to runtime-optimized) at bb0[1]:\n                                Unsize coercion, but `&{coroutine@u_min1.rs:16:40: 16:42}` isn't coercible to `&dyn TraitA`\n```\n\nUnder `RUSTC_LOG=debug` I could find the problematic call:\n\n```\n34ms DEBUG rustc_trait_selection::traits instantiate_and_check_impossible_predicates(key=(DefId(0:4 ~ u_min1[bc15]::TraitA::m), [Coroutine(DefId(0:15 ~ u_min1[bc15]::main::{closure#0}), [(), (), (), (), ()])])) = true\n```\n\nThese two pieces of information aren't that insightful, I know. I'm just really annoyed that I can't get rid of the coroutine in favor a normal closure ^^'.",
+      "createdAt": "2026-02-17T02:25:16Z",
+      "id": "IC_kwDOAAsO6M7pJu8x",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911642929"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@fmease In my reproducer, I think that rust is confused on whether the async block implements Send or not. The problematic variable `_x` is being held across an await point.",
+      "createdAt": "2026-02-17T02:31:24Z",
+      "id": "IC_kwDOAAsO6M7pJ3jQ",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911678160"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think this is related to https://github.com/rust-lang/rust/issues/110338",
+      "createdAt": "2026-02-17T02:33:11Z",
+      "id": "IC_kwDOAAsO6M7pJ6bm",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911689958"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "See also https://github.com/rust-lang/trait-system-refactor-initiative/issues/251\n\ncc @lcnr",
+      "createdAt": "2026-02-17T02:35:48Z",
+      "id": "IC_kwDOAAsO6M7pJ95L",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911704139"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> [@fmease](https://github.com/fmease) In my reproducer, I think that rust is confused on whether the async block implements Send or not. The problematic variable `_x` is being held across an await point.\n\nIn both your and my reduced reproducers, the compiler ends up checking the same thing, namely whether `{coroutine@\u2026}: Send` holds. async blocks desugar to coroutines, so there's nothing surprising. I literally copy/pasted the HIR expansion of the async block which is a coroutine.\n\nNote the coroutine / async block is generally considered to impl `Send` by rustc (I guess that's correct?). It's just that prior to PR #152287 when checking if it's possible to omit the vtable entry for `TraitA::m` (`TaskFn::call_task`) due to trivially unsatisfiable bounds, we apparently used to check 0 predicates according to the logs but now we check whether `{coroutine@\u2026}: Send` (that's the `G: Send` from the parent but instantiated) holds in an empty env which it doesn't (interestingly \ud83e\udd14), so we omit `m` / `call_task`. Hmm, but yea it's unclear why the answers differ. After all `main`'s `ParamEnv` is also empty\u2026 Maybe the generic args (of the coroutine) differ or bound vars get instantiated differently?",
+      "createdAt": "2026-02-17T03:06:27Z",
+      "id": "IC_kwDOAAsO6M7pKn7Y",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911876312"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "workingjubilee"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "LLVM says the optimized form's IR is\n```llvm\n; try_mcve_2026_2_16::main\n; Function Attrs: mustprogress nofree norecurse noreturn nosync nounwind nonlazybind willreturn memory(none) uwtable\ndefine hidden void @try_mcve_2026_2_16::main() unnamed_addr #3 personality ptr @rust_eh_personality {\nstart:\n  unreachable\n}\n```\nwhich is consistent with this reaching SIGILL.",
+      "createdAt": "2026-02-17T03:08:16Z",
+      "id": "IC_kwDOAAsO6M7pKqYF",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911886341"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Relatedly, this code doesn't compile. (Note that `make_none` now returns an `impl Sized` instead of `impl Send`.)\n\nI think this ought to compile, since auto traits are supposed to work through `impl Trait` opaque types.\n\n```rust\ntrait Visit {\n    type Unit: Send;\n}\n\nimpl Visit for for<'a> fn(&'a &'static i32) {\n    type Unit = ();\n}\n\nfn make_none<V: Visit>() -> Option<impl Sized> {\n    None::<V::Unit>\n}\n\nfn foo() -> impl Send {\n    async {\n        let _x = make_none::<for<'a> fn(&'a &'static i32)>();\n        std::future::pending::<()>().await;\n    }\n}\n```\n\n```\nerror: implementation of `Visit` is not general enough\n  --> src/lib.rs:14:5\n   |\n14 | /     async {\n15 | |         let _x = make_none::<for<'a> fn(&'a &'static i32)>();\n16 | |         std::future::pending::<()>().await;\n17 | |     }\n   | |_____^ implementation of `Visit` is not general enough\n   |\n   = note: `for<'a> fn(&'a &'0 i32)` must implement `Visit`, for any lifetime `'0`...\n   = note: ...but `Visit` is actually implemented for the type `for<'a> fn(&'a &'static i32)`\n```",
+      "createdAt": "2026-02-17T03:17:15Z",
+      "id": "IC_kwDOAAsO6M7pK252",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3911937654"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm guessing that, whatever was checking whether the async block implements Send for the purposes of generating the vtable, it didn't see that the `make_none` function returned an `impl Send`, so it looked inside the `make_none` function and somehow concluded that the concrete type behind `impl Send` doesn't implement `Send`.",
+      "createdAt": "2026-02-17T03:36:34Z",
+      "id": "IC_kwDOAAsO6M7pLNgQ",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3912030224"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "workingjubilee"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "After a few initial passes, SROA and then EarlyCSE notices the program is bogus:\n\n```diff\n@vtable.0 = private constant <{ ptr, [16 x i8], [8 x i8] }> <{ ptr @core[57d357369df3eb5e]::ptr::drop_in_place::<example[e560b268c9334b1b]::broken::{closure#0}>, [16 x i8] c\"\\01\\00\\00\\00\\00\\00\\00\\00\\01\\00\\00\\00\\00\\00\\00\\00\", [8 x i8] undef }>, align 8\n\ndefine internal void @core[57d357369df3eb5e]::ptr::drop_in_place::<example[e560b268c9334b1b]::broken::{closure#0}>(ptr noalias noundef align 1 dereferenceable(1) %_1) unnamed_addr {\nstart:\n  ret void\n}\n\ndefine void @broken() unnamed_addr #0 personality ptr @rust_eh_personality {\nstart:\n- %0 = alloca [16 x i8], align 8\n- %dyn_a.dbg.spill = alloca [16 x i8], align 8\n  %coro = alloca [1 x i8], align 1\n  call void @llvm.lifetime.start.p0(ptr %coro)\n  store i8 0, ptr %coro, align 1\n- store ptr %coro, ptr %dyn_a.dbg.spill, align 8\n- %1 = getelementptr inbounds i8, ptr %dyn_a.dbg.spill, i64 8\n- store ptr @vtable.0, ptr %1, align 8\n- %2 = load ptr, ptr getelementptr inbounds (i8, ptr @vtable.0, i64 24), align 8\n- invoke void %2(ptr noundef align 1 %coro)\n+ invoke void undef(ptr noundef align 1 %coro)\n          to label %bb1 unwind label %cleanup\n\ncleanup:                                          ; preds = %start\n```\n\n(the contents of `cleanup` don't matter after this.)\n\nso as far as I can tell, we basically forget to generate some uhh *mildly important* parts of the coroutine and/or vtable.",
+      "createdAt": "2026-02-17T06:35:25Z",
+      "id": "IC_kwDOAAsO6M7pNUeX",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3912583063"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "workingjubilee"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "After the merged revert, this is no longer a *critical*-level concern. I am leaving this open with the I-unsound and I-miscompile cases because this... well, what Ralf just added.\n\n@rustbot label: -P-critical -regression-from-stable-to-nightly",
+      "createdAt": "2026-02-17T21:47:25Z",
+      "id": "IC_kwDOAAsO6M7pfG8n",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-3917246247"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lcnr"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "That's a fun one. We fixed the unsoundness by reverting https://github.com/rust-lang/rust/pull/152287. However, that PR was reasonable and should not have caused an unsoundness, so what's going on here.\n\nThe core issue is the interation of https://github.com/rust-lang/rust/issues/110338 with opaque types. When computing the witness type for coroutines we do not have region information available, so every occurance of a region is replaced with a unique bound region.\n```rust\ntrait Trait {\n    type Assoc;\n}\nimpl Trait for &'static u32 {\n    type Assoc = ();\n}\nstruct W<T: Trait>(T::Assoc);\n\nfn is_send<T: Send>(_: T) {}\nfn main() {\n    // The witness contains `W<&'static u32>`. We don't know that\n    // when computing the witness type and return `exists<'a> W<&'a u32>`\n    // instead.\n    //\n    // To prove that the coroutine implements `Send` we need to show\n    // `for<'a> W<&'a u32>: Send`, however, `'!a != 'static`, resulting\n    // in an error when normalizing the field of `W`.\n    is_send(async {\n        std::future::ready(W::<&'static u32>(())).await;\n    });\n}\n```\n\nWe can \"preserve\" the `W<&'static u32>: Send` proof by hiding it behind an opaque type:\n```rust\ntrait Trait {\n    type Assoc;\n}\nimpl Trait for &'static u32 {\n    type Assoc = ();\n}\nstruct W<T: Trait>(T::Assoc);\n\nfn prove_send_and_hide<T: Send>(x: T) -> impl Send { x } \nfn is_send<T: Send>(_: T) {}\npub fn main() {\n    // The witness is now `exists<'a> opaque::<W<&'a u32>>`\n    // we never actually look into the opaque when proving\n    // `opaque::<W<&'!a u32>>` during analysis, so this\n    // coroutine does actually implement `Send`.\n    is_send(async {\n        let opaque_ty = prove_send_and_hide(W::<&'static u32>(()));\n        std::future::ready(opaque_ty).await;\n    });\n}\n```\n\nHowever, this only works as long as we treat `impl Send` opaquely, if proving `Send` for it actually tries to look at its underlying type we get a higher-ranked region error.\n\nWe look into opaque types during codegen, so checking whether this coroutine is `Send` there will emit a `'placeholder: 'static` region constraint again: \n```rust\n//@ compile-flags: -Znext-solver\n//@ known-bug: trait-system-refactor-initiative#251\ntrait Trait {\n    type Assoc;\n}\nimpl Trait for &'static u32 {\n    type Assoc = ();\n}\nstruct W<T: Trait>(T::Assoc);\n\nfn prove_send_and_hide<T: Send>(x: T) -> impl Send { x } \nfn as_dyn_send(_: &dyn Send) {}\npub fn main() {\n    // Checking whether the cast to the trait object is correct\n    // during MIR validation uses `TypingMode::PostAnalysis` and\n    // therefore looks into the opaque.\n    as_dyn_send(&async move {\n        let opaque_ty = prove_send_and_hide(W::<&'static u32>(()));\n        std::future::ready(opaque_ty).await;\n    });\n}\n```\n\nWe do not check these region constraints outside of analysis, except in the *leak check* during trait solver. This means whether proving that the coroutine witness is `Send` fails after analysis depends on the specifics of whether we propagate region constraints and where we leak check. This differs between the old and new solver.\n\nIn the old solver, `select` does not propagate constraints from nested `Trait` goals and also only uses the `leak_check` when doing candidate winnowing. While the old solver also adds this incorrect region constraint here, it never actually checks it and successfully compiles.\n\nThe new solver does always propagate region constraints upwards, and also always uses the leak check at the end of every candidate. This means we're able to prove that the coroutine is `Send` during analysis, but not during codegen.\n\n**This was already unsound before https://github.com/rust-lang/rust/pull/152287** as this can affect any use of `impossible_predicates`. That PR just made it easier to hit, as right now we only check this for specific vtable entries:\n```rust\ntrait Trait {\n    type Assoc;\n}\nimpl Trait for &'static u32 {\n    type Assoc = ();\n}\nstruct W<T: Trait>(T::Assoc);\n\nfn prove_send_and_hide<T: Send>(x: T) -> impl Send { x } \ntrait ImpossiblePredicates<F> {\n    fn call_me(&self)\n    where \n        F: Send,\n    {\n        println!(\"method body\");\n    }\n}\nimpl<F> ImpossiblePredicates<F> for () {}\n\nfn mk_trait_object<F>(_: F) -> Box<dyn ImpossiblePredicates<F>> {\n    Box::new(())\n}\npub fn main() {\n    let obj = mk_trait_object(async {\n        let opaque_ty = prove_send_and_hide(W::<&'static u32>(()));\n        std::future::ready(opaque_ty).await;\n    });\n    // `call_me` is not a valid entry of the vtable as we consider\n    // the coroutine witness to not implement `Send` during codegen.\n    // This is UB.\n    obj.call_me();\n}\n```\n\nOne way in which this issue is harder to trigger is that the only errors during codegen are due to the leak check. As the leak check does not currently consider `TypeOutlives` constraints, replacing the self type of the `Trait` impl with `T` and `T: 'static` avoids this issue:\n\n```rust\n//@ compile-flags: -Znext-solver\n//@ check-pass\ntrait Trait {\n    type Assoc;\n}\nimpl<T: 'static> Trait for T {\n    type Assoc = ();\n}\nstruct W<T: Trait>(T::Assoc);\n\nfn prove_send_and_hide<T: Send>(x: T) -> impl Send { x } \nfn as_dyn_send(_: &dyn Send) {}\npub fn main() {\n    // Checking whether the cast to the trait object is correct\n    // during MIR validation uses `TypingMode::PostAnalysis` and\n    // therefore looks into the opaque.\n    as_dyn_send(&async move {\n        let opaque_ty = prove_send_and_hide(W::<&'static u32>(()));\n        std::future::ready(opaque_ty).await;\n    });\n}\n```\n",
+      "createdAt": "2026-03-05T09:32:45Z",
+      "id": "IC_kwDOAAsO6M7uo0XP",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-4003677647"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "lcnr"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "tracking the more general underlying unsoundness in https://github.com/rust-lang/rust/issues/153596",
+      "createdAt": "2026-03-09T07:20:49Z",
+      "id": "IC_kwDOAAsO6M7vthqp",
+      "url": "https://github.com/rust-lang/rust/issues/152735#issuecomment-4021689001"
+    }
+  ],
+  "createdAt": "2026-02-16T23:35:31Z",
+  "id": "I_kwDOAAsO6M7rb_M2",
+  "labels": [
+    {
+      "name": "E-needs-test"
+    },
+    {
+      "name": "T-compiler"
+    },
+    {
+      "name": "I-unsound"
+    },
+    {
+      "name": "A-impl-trait"
+    },
+    {
+      "name": "C-bug"
+    },
+    {
+      "name": "A-async-await"
+    },
+    {
+      "name": "A-auto-traits"
+    },
+    {
+      "name": "S-has-mcve"
+    },
+    {
+      "name": "I-types-nominated"
+    },
+    {
+      "name": "T-types"
+    },
+    {
+      "name": "A-dyn-trait"
+    },
+    {
+      "name": "A-higher-ranked"
+    },
+    {
+      "name": "I-miscompile"
+    }
+  ],
+  "number": 152735,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bgw"
+      },
+      "createdAt": "2026-02-16T23:35:32Z",
+      "label": {
+        "name": "C-bug"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-02-16T23:35:34Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-02-16T23:49:50Z",
+      "label": {
+        "name": "A-dyn-trait"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-02-16T23:49:50Z",
+      "label": {
+        "name": "I-unsound"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-02-16T23:49:51Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-02-16T23:49:52Z",
+      "label": {
+        "name": "I-prioritize"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "createdAt": "2026-02-16T23:54:29Z",
+      "label": {
+        "name": "T-compiler"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "fmease"
+      },
+      "createdAt": "2026-02-17T00:05:46Z",
+      "label": {
+        "name": "E-needs-mcve"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "saethlin"
+      },
+      "createdAt": "2026-02-17T00:38:01Z",
+      "label": {
+        "name": "I-miscompile"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "saethlin"
+      },
+      "createdAt": "2026-02-17T00:38:11Z",
+      "label": {
+        "name": "P-critical"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "saethlin"
+      },
+      "createdAt": "2026-02-17T00:38:33Z",
+      "label": {
+        "name": "I-prioritize"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-02-17T01:13:28Z",
+      "label": {
+        "name": "regression-from-stable-to-nightly"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-02-17T01:13:44Z",
+      "label": {
+        "name": "A-async-await"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "BoxyUwU"
+      },
+      "createdAt": "2026-02-17T01:27:57Z",
+      "label": {
+        "name": "T-types"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "BoxyUwU"
+      },
+      "createdAt": "2026-02-17T01:31:20Z",
+      "label": {
+        "name": "I-types-nominated"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-02-17T02:03:27Z",
+      "label": {
+        "name": "A-auto-traits"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-02-17T02:03:27Z",
+      "label": {
+        "name": "A-higher-ranked"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-02-17T02:03:46Z",
+      "label": {
+        "name": "E-needs-mcve"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-02-17T02:03:46Z",
+      "label": {
+        "name": "S-has-mcve"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "theemathas"
+      },
+      "createdAt": "2026-02-17T02:19:05Z",
+      "label": {
+        "name": "A-impl-trait"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "RalfJung"
+      },
+      "createdAt": "2026-02-17T21:46:13Z",
+      "label": {
+        "name": "E-needs-test"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-02-17T21:47:27Z",
+      "label": {
+        "name": "P-critical"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-02-17T21:47:27Z",
+      "label": {
+        "name": "regression-from-stable-to-nightly"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "lcnr"
+      },
+      "createdAt": "2026-03-09T07:20:50Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Miscompilation causing segfault with `dyn Future` on recent nightly versions",
+  "url": "https://github.com/rust-lang/rust/issues/152735"
+}

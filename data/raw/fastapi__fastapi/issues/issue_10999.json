@@ -1,0 +1,177 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "Kludex"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "### Discussed in https://github.com/tiangolo/fastapi/discussions/10937\r\n\r\n<div type='discussions-op-text'>\r\n\r\n<sup>Originally posted by **SeeRich** January 11, 2024</sup>\r\n### First Check\r\n\r\n- [X] I added a very descriptive title here.\r\n- [X] I used the GitHub search to find a similar question and didn't find it.\r\n- [X] I searched the FastAPI documentation, with the integrated search.\r\n- [X] I already searched in Google \"How to X in FastAPI\" and didn't find any information.\r\n- [X] I already read and followed all the tutorial in the docs and didn't find an answer.\r\n- [X] I already checked if it is not related to FastAPI but to [Pydantic](https://github.com/pydantic/pydantic).\r\n- [X] I already checked if it is not related to FastAPI but to [Swagger UI](https://github.com/swagger-api/swagger-ui).\r\n- [X] I already checked if it is not related to FastAPI but to [ReDoc](https://github.com/Redocly/redoc).\r\n\r\n### Commit to Help\r\n\r\n- [X] I commit to help with one of those options \ud83d\udc46\r\n\r\n### Example Code\r\n\r\n```python\r\nfrom typing import Annotated\r\nfrom fastapi import FastAPI, UploadFile, Form, File\r\n\r\n# Run using uvicorn main:app --reload\r\n# Visit: http://127.0.0.1:8000/docs\r\n\r\napp = FastAPI()\r\n\r\n@app.post(\"/form-test\")\r\nasync def form_test(\r\n        str_data: Annotated[str, Form(examples=[\"HELLO\"])],\r\n        file: Annotated[UploadFile, File()]):\r\n    return\r\n```\r\n\r\n\r\n### Description\r\n\r\nThe `HELLO` example is not shown in the docs.\r\n\r\n![fastapi](https://github.com/tiangolo/fastapi/assets/33664011/6b4deec4-c7bf-4d43-970c-25b30eacc376)\r\n\r\n\r\n### Operating System\r\n\r\nWindows\r\n\r\n### Operating System Details\r\n\r\n_No response_\r\n\r\n### FastAPI Version\r\n\r\n0.108.0\r\n\r\n### Pydantic Version\r\n\r\n2.5.3\r\n\r\n### Python Version\r\n\r\n3.11.3\r\n\r\n### Additional Context\r\n\r\n_No response_</div>",
+  "closedAt": "2025-12-10T14:01:48Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Using `json_schema_extra` works as expected:\r\n```py\r\nfrom typing import Annotated\r\nfrom fastapi import FastAPI, UploadFile, Form, File\r\n\r\n# Run using uvicorn main:app --reload\r\n# Visit: http://127.0.0.1:8000/docs\r\n\r\napp = FastAPI()\r\n\r\n\r\n@app.post(\"/form-test\")\r\nasync def form_test(\r\n    str_data: Annotated[str, Form(json_schema_extra={\"example\": \"test\"})],\r\n    file: Annotated[UploadFile, File()],\r\n):\r\n    return\r\n```\r\n\r\nBut using only `Form(example=...)` doesn't.",
+      "createdAt": "2024-01-21T12:40:42Z",
+      "id": "IC_kwDOCZduT85xZ5_x",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-1902616561"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "notypecheck"
+      },
+      "authorAssociation": "NONE",
+      "body": "@Kludex Alias in `File(alias=\"someAlias\")` doesn't seem to work either, just ran into this in my codebase \ud83e\udd14 ",
+      "createdAt": "2024-02-09T13:59:28Z",
+      "id": "IC_kwDOCZduT85zZMH_",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-1935983103"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> @Kludex Alias in `File(alias=\"someAlias\")` doesn't seem to work either, just ran into this in my codebase \ud83e\udd14\r\n\r\n- https://github.com/tiangolo/fastapi/issues/10286",
+      "createdAt": "2024-02-09T14:10:10Z",
+      "id": "IC_kwDOCZduT85zZQFx",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-1935999345"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "notypecheck"
+      },
+      "authorAssociation": "NONE",
+      "body": "Seems like currently you can specify `json_schema_extra={\"alias\": alias}` as a workaround",
+      "createdAt": "2024-02-09T14:14:10Z",
+      "id": "IC_kwDOCZduT85zZRn2",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-1936005622"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "jean0t"
+      },
+      "authorAssociation": "NONE",
+      "body": "If you use Forms the way you first did, it will end up in the **extra part of arguments, kwargs basically. But it is also stated in the code that this option is deprecated and also recommends to use json_schema_extra instead.\r\n![Screenshot from 2024-04-19 20-52-45](https://github.com/tiangolo/fastapi/assets/127698173/23d9e378-df3b-4e2c-9ec0-4505ea3bcac5)\r\n\r\nwhat you found might be an error because of that, so just stick to the recommended :)\r\nif you want to see more about it, just go to the file `param_functions.py` ",
+      "createdAt": "2024-04-19T23:55:21Z",
+      "id": "IC_kwDOCZduT857OhZH",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-2067404359"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "giunio-prc"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "As stated in the swagger.io documentation, the examples field should be a list of dict containing a key name and a value. Currently it is rendered as list of values in the openapi.json file\r\n\r\n<img width=\"389\" alt=\"image\" src=\"https://github.com/user-attachments/assets/cde0722f-365c-40fd-ae60-4e450dc214e9\">\r\n\r\nsource: https://swagger.io/docs/specification/adding-examples/",
+      "createdAt": "2024-09-02T07:37:17Z",
+      "id": "IC_kwDOCZduT86KhdOX",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-2324026263"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "fernandosmither"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yeah, a little frustrating. [This](https://stackoverflow.com/questions/65504438/how-to-add-both-file-and-json-body-in-a-fastapi-post-request/70640522#70640522) has been the [case](https://stackoverflow.com/questions/71650452/use-fastapi-to-parse-incoming-post-request-from-slack/71650857#71650857) for quite some time.\r\n\r\nFor me the best workaround is doing the `json_schema_extra` suggested above. Thanks!",
+      "createdAt": "2025-01-07T01:23:37Z",
+      "id": "IC_kwDOCZduT86Zb2iC",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-2574215298"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "IdleSys"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hi, I\u2019d like to work on this issue. Can someone guide me on how to get started?",
+      "createdAt": "2025-01-28T14:10:49Z",
+      "id": "IC_kwDOCZduT86cHIWA",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-2619114880"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "a3ng7n"
+      },
+      "authorAssociation": "NONE",
+      "body": "> But using only `Form(example=...)` doesn't.\n\nI think I'm confirming the same thing, but just `Form(examples=[\"HELLO\"])` without having to specify it via `json_schema_extra={\"example\": \"test\"}` seems to work for me (it shows the example value only after clicking \"Try it out\"\n\nI did try passing `Form(openapi_examples={...})` but never got it to show up in the openapi json schema file, so I'm wondering if there's some funny business going on there.",
+      "createdAt": "2025-05-10T00:06:18Z",
+      "id": "IC_kwDOCZduT86q9B0e",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-2868124958"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "tiangolo"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In the first example, trying it out shows up in Swagger UI:\n\n<img width=\"2344\" height=\"1191\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/51074a01-b7a1-44fd-ab04-e5e663b803a5\" />\n\n---\n\nThe example is indeed included in OpenAPI, so showing (or not showing) the examples would be an issue in Swagger UI, not really here.\n\nBut this is all related to the difference between OpenAPI's `example` vs JSON Schema `examples` vs OpenAPI 3.1.0 support for JSON Schema's `examples`.\n\nAll the details are explained here: https://fastapi.tiangolo.com/tutorial/schema-extra-example/#technical-details\n\nI'll now close this one. \u2615 ",
+      "createdAt": "2025-12-10T14:01:48Z",
+      "id": "IC_kwDOCZduT87Yy8dD",
+      "url": "https://github.com/fastapi/fastapi/issues/10999#issuecomment-3637233475"
+    }
+  ],
+  "createdAt": "2024-01-21T12:40:27Z",
+  "id": "I_kwDOCZduT858uhDD",
+  "labels": [
+    {
+      "name": "bug"
+    }
+  ],
+  "number": 10999,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "createdAt": "2024-01-21T12:40:27Z",
+      "label": {
+        "name": "question"
+      }
+    },
+    {
+      "__typename": "UnlabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "createdAt": "2024-01-21T12:40:51Z",
+      "label": {
+        "name": "question"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "createdAt": "2024-01-21T12:40:51Z",
+      "label": {
+        "name": "bug"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "tiangolo"
+      },
+      "createdAt": "2025-12-10T14:01:49Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "OpenAPI Example with multipart/form-data not showing up",
+  "url": "https://github.com/fastapi/fastapi/issues/10999"
+}

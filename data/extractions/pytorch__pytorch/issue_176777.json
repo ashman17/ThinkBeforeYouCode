@@ -1,0 +1,269 @@
+{
+  "issue": {
+    "artifact_count": 13,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "torchbench",
+              "problem_kind": "performance_issue",
+              "user_or_system_impact": "breakage"
+            },
+            "summary": "Something regressed torchbench graph breaks due to potential PRs.",
+            "tags": [
+              "regression",
+              "performance_degradation"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "zou3519",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "migrations",
+              "problem_kind": "code_migration_issue",
+              "user_or_system_impact": "unclear"
+            },
+            "summary": "subject: __dict__ migration; event: bug; key technical detail: the user suspects their code is at fault.",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "guilhermeleobas",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017093819"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "Determined",
+              "environment": "GitHub issue comment thread",
+              "prerequisites": "A specific pull request by @guilhermeleobas"
+            },
+            "summary": "Reproduction steps for a bug that doesn't revert cleanly.",
+            "tags": [
+              "bug"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "zou3519",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017499096"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "guilhermeleobas",
+              "deliverable": "quick fix for the reported issue",
+              "due_context": "unknown"
+            },
+            "summary": "guilhermeleobas is assigned to fix a bug.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "guilhermeleobas",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017524966"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": "unknown",
+              "progress_state": "unknown",
+              "status_kind": "unknown"
+            },
+            "summary": "status_kind=informational, progress_state=in_progress, blocking=no_blocking",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "zou3519",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017555176"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "PRs",
+              "problem_kind": "reverting_changes",
+              "user_or_system_impact": "difficulty_in_reverting"
+            },
+            "summary": "Affected area is PRs; user/system impact is difficulty in reverting changes.",
+            "tags": [
+              "build_failure",
+              "compile_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "guilhermeleobas",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017614683"
+      },
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "baseline": "-",
+              "candidate": "CPU",
+              "environment": "-",
+              "metric": "graph breaks"
+            },
+            "summary": "A benchmark run on CPU shows 62 graph breaks.",
+            "tags": [
+              "performance_issue"
+            ],
+            "type": "benchmark_result"
+          },
+          {
+            "metadata": {
+              "impact": "62 graph breaks",
+              "rarity": "unknown",
+              "trigger": "specific workload"
+            },
+            "summary": "The benchmark result occurs with a specific workload on CPU, indicating an edge case scenario.",
+            "tags": [
+              "performance_issue",
+              "edge_case"
+            ],
+            "type": "edge_case"
+          }
+        ],
+        "comment_author": "guilhermeleobas",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4017839691"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "zou3519",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4019764020"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "environment: local machine; prerequisites: detectron installed; determinism: steps are reproducible but do not match expected behavior",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "guilhermeleobas",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4020358494"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "clarification_request",
+              "target_area": "CI/CD pipeline",
+              "urgency": "immediate"
+            },
+            "summary": "ask for assistance in reverting PRs to resolve CI issues and gather thoughts on potential problems.",
+            "tags": [
+              "ci_failure",
+              "runtime_error",
+              "test_flakiness"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "zou3519",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4025449664"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "guilhermeleobas",
+              "deliverable": "https://github.com/pytorch/pytorch/pull/176934",
+              "due_context": "unknown"
+            },
+            "summary": "guilhermeleobas assigned the task of submitting a pull request to zou3519.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "guilhermeleobas",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4027047407"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "environment: macOS; prerequisites: torch installed; determinism: yes",
+            "tags": [
+              "bug"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "guilhermeleobas",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4027651753"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "resolved",
+              "status_kind": "issue_status"
+            },
+            "summary": "Closing an issue as it is now fixed.",
+            "tags": [
+              "fix_merged"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "guilhermeleobas",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/176777#issuecomment-4101630028"
+      }
+    ],
+    "issue_number": 176777,
+    "issue_title": "something regressed torchbench graph breaks",
+    "issue_url": "https://github.com/pytorch/pytorch/issues/176777"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/pytorch__pytorch/issue_176777.json",
+  "repository": "pytorch/pytorch",
+  "status": "completed"
+}

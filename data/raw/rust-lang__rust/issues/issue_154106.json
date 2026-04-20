@@ -1,0 +1,86 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "rustbot"
+  },
+  "authorAssociation": "COLLABORATOR",
+  "body": "This is a tracking issue for MCP \"Remove -Csoft-float\" (rust-lang/compiler-team#971).\n\n> [!NOTE]\n> Tracking issues are used to record the overall progress of implementation.\n> They are also used as hubs connecting to other relevant issues, e.g., bugs or open design questions.\n>\n> A tracking issue is however *not* meant for large scale discussion, questions, or bug reports.\n> Instead, open a dedicated issue for the specific matter, link to this tracking issue and ping the MCP author.\n> Alternatively, post in the Zulip stream linked from the MCP.\n>\n> Discussion comments will get marked as off-topic or deleted.\n> Repeated discussions on the tracking issue may lead to the tracking issue getting locked.\n\n### Steps\n\n- [ ] Implement the MCP\n- [ ] Adjust documentation\n  - [ ] In the [Rust Compiler Development Guide] if applicable (e.g., for refactorings)\n  - [ ] In the [Rust Forge] if applicable (e.g., for policy changes)\n  - [ ] In the [rustc book] if applicable (e.g., for target tier or CLI changes)\n\n[Rust Compiler Development Guide]: https://rustc-dev-guide.rust-lang.org/\n[Rust Forge]: https://forge.rust-lang.org/compiler/index.html\n[rustc book]: https://doc.rust-lang.org/rustc/index.html\n\n### Unresolved questions\n\n*None so far.*\n\n### Implementation history\n\n*Empty so far.*\n\n---\n\n@RalfJung, consider `@rustbot claim`'ing the work.\n",
+  "closedAt": "2026-03-20T10:54:47Z",
+  "comments": [],
+  "createdAt": "2026-03-19T17:09:43Z",
+  "id": "I_kwDOAAsO6M70j5-A",
+  "labels": [
+    {
+      "name": "T-compiler"
+    },
+    {
+      "name": "C-tracking-issue"
+    },
+    {
+      "name": "S-tracking-unimplemented"
+    },
+    {
+      "name": "B-MCP-approved"
+    }
+  ],
+  "number": 154106,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-19T17:09:45Z",
+      "label": {
+        "name": "T-compiler"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-19T17:09:46Z",
+      "label": {
+        "name": "C-tracking-issue"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-19T17:09:46Z",
+      "label": {
+        "name": "S-tracking-unimplemented"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rustbot"
+      },
+      "createdAt": "2026-03-19T17:09:46Z",
+      "label": {
+        "name": "B-MCP-approved"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "Bot",
+        "login": "rust-bors"
+      },
+      "createdAt": "2026-03-20T10:54:48Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Tracking issue for MCP 971: Remove -Csoft-float",
+  "url": "https://github.com/rust-lang/rust/issues/154106"
+}

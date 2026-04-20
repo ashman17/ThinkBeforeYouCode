@@ -1,0 +1,41 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "bazel-io"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "Forked from #28946",
+  "closedAt": "2026-03-20T06:59:10Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Cherry-picked in https://github.com/bazelbuild/bazel/pull/29025",
+      "createdAt": "2026-03-18T20:20:13Z",
+      "id": "IC_kwDOATz7jc7zgWL6",
+      "url": "https://github.com/bazelbuild/bazel/issues/29024#issuecomment-4085342970"
+    }
+  ],
+  "createdAt": "2026-03-18T18:54:32Z",
+  "id": "I_kwDOATz7jc70NV4q",
+  "labels": [],
+  "number": 29024,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "iancha1992"
+      },
+      "createdAt": "2026-03-20T06:59:10Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "[8.7.0] Update jarjar for multi-release support",
+  "url": "https://github.com/bazelbuild/bazel/issues/29024"
+}

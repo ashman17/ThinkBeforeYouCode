@@ -1,0 +1,128 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "dims"
+  },
+  "authorAssociation": "MEMBER",
+  "body": "Bunch of things broke yesterday!\n\n<img width=\"904\" height=\"187\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/8b301ac1-8a7a-473d-9497-80cad5570d57\" />\n\nsee here:\nhttps://storage.googleapis.com/k8s-triage/index.html?job=ci-kubernetes-e2e-kind-alpha-beta-features&xjob=azure%7Ckops%7Ccrio%7Cautoscaling%7Ccapz%7Cci-kubernetes-verify%7Ccluster-api%7C-cos-%7Cfedora%7Cwindows%7Clocal-e2e%7Calpha-enabled-default%7Cci-gcp%7Cdocker-docker%7Cdocker-containerd%7Cci-minikube%7Ckvm-docker\n\n### Failure cluster [e469f04104593e0f1718](https://go.k8s.io/triage#e469f04104593e0f1718)\n\n## Failed tests\n- `Kubernetes e2e suite [It] [sig-node] PLR Pod InPlace Resize [FeatureGate:InPlacePodLevelResourcesVerticalScaling] [Alpha] [Feature:OffByDefault] PLR guaranteed qos - 1 container with resize policy cpu & mem restart resizing pod-level cpu`\n- `Kubernetes e2e suite [It] [sig-node] PLR Pod InPlace Resize [FeatureGate:InPlacePodLevelResourcesVerticalScaling] [Alpha] [Feature:OffByDefault] PLR pod-level burstable pods - 1 container with all requests & limits set and resize policy cpu restart resizing pod-level requests & limits in opposite directions`\n- `Kubernetes e2e suite [It] [sig-node] PLR Pod InPlace Resize [FeatureGate:InPlacePodLevelResourcesVerticalScaling] [Alpha] [Feature:OffByDefault] burstable pods - pod-level resources pod-level resize with limits add`\n- `Kubernetes e2e suite [It] [sig-node] PLR Pod InPlace Resize [FeatureGate:InPlacePodLevelResourcesVerticalScaling] [Alpha] [Feature:OffByDefault] burstable pods - pod-level resources pod-level resize with no container requests and limits`\n\n##### Error text:\n```\n[FAILED] [pod cgroup cpu weight verification failed: Told to stop trying after 1.101s.\nUnexpected final error while getting <nil>: value of cgroup \"/sysfscgroup/kubelet.slice/kubelet-kubepods.slice/kubelet-kubepods-pod1b80b330_6c26_48ba_b73a_5cebe0471a4c.slice/cpu.weight\" for container \"c1\" was \"100\"; expected one of [\"4\" \"15\"]: Expected\n    <string>: 100\nto be an element of\n    <[]string | len:2, cap:2>: [\"4\", \"15\"], pod cgroup cpu limit verification failed: Told to stop trying after 1.101s.\nUnexpected final error while getting <nil>: value of cgroup \"/sysfscgroup/kubelet.slice/kubelet-kubepods.slice/kubelet-kubepods-pod1b80b330_6c26_48ba_b73a_5cebe0471a4c.slice/cpu.max\" for container \"c1\" was \"max 100000\"; expected one of [\"8000 100000\"]: Expected\n    <string>: max 100000\nto be an element of\n    <[]string | len:1, cap:1>: [\"8000 100000\"], pod cgroup memory limit verification failed: Told to stop trying after 1.199s.\nUnexpected final error while getting <nil>: value of cgroup \"/sysfscgroup/kubelet.slice/kubelet-kubepods.slice/kubelet-kubepods-pod1b80b330_6c26_48ba_b73a_5cebe0471a4c.slice/memory.max\" for container \"c1\" was \"max\"; expected one of [\"99614720\"]: Expected\n    <string>: max\nto be an element of\n    <[]string | len:1, cap:1>: [\"99614720\"]]\nIn [It] at: k8s.io/kubernetes/test/e2e/common/node/pod_level_resources_resize.go:704 @ 03/19/26 06:41:09.029\n\n```\n#### Recent failures:\n[3/19/2026, 6:27:44 AM ci-kubernetes-e2e-kind-alpha-beta-features](https://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-kind-alpha-beta-features/2034577424389246976)\n[3/19/2026, 4:26:39 AM ci-kubernetes-e2e-kind-alpha-beta-features](https://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-kind-alpha-beta-features/2034546973708652544)\n[3/19/2026, 3:29:26 AM ci-kubernetes-e2e-kind-alpha-beta-features-race](https://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-kind-alpha-beta-features-race/2034532125914435584)\n[3/19/2026, 2:25:38 AM ci-kubernetes-e2e-kind-alpha-beta-features](https://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-kind-alpha-beta-features/2034516523283910656)\n[3/19/2026, 2:12:30 AM ci-kubernetes-e2e-kind-alpha-beta-features-canary](https://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-kind-alpha-beta-features-canary/2034512747613392896)\n\n\n/kind failing-test\n<!-- If this is a flake, please add: /kind flake -->\n\n/sig node",
+  "closedAt": "2026-03-19T19:19:03Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This issue is currently awaiting triage.\n\nIf a SIG or subproject determines this is a relevant issue, they will accept it by applying the `triage/accepted` label and provide further guidance.\n\nThe `triage/accepted` label can be added by org members by writing `/triage accepted` in a comment.\n\n\n<details>\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-03-19T14:39:44Z",
+      "id": "IC_kwDOAToIks7z0d7b",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4090617563"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "dims"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "/sig node",
+      "createdAt": "2026-03-19T14:40:03Z",
+      "id": "IC_kwDOAToIks7z0eZZ",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4090619481"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "dims"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "  - Issue #137886 (https://github.com/kubernetes/kubernetes/issues/137886): failing alpha/beta feature job for InPlacePodLevelResourcesVerticalScaling\n  - Issue #137894 (https://github.com/kubernetes/kubernetes/issues/137894): failure cluster e469f041...\n  - Issue #137891 (https://github.com/kubernetes/kubernetes/issues/137891): MemoryQoS rollback test failure\n  - PR #137889 (https://github.com/kubernetes/kubernetes/pull/137889): targeted fix-forward removing reconcilePodMemoryProtection; approved, and pull-kubernetes-e2e-kind-alpha-beta-features is passing there\n  - PR #137878 (https://github.com/kubernetes/kubernetes/pull/137878): WIP revert of PR #137719; that same alpha/beta kind job is also passing there\n\n  liggitt already summarized it on #137886 (https://github.com/kubernetes/kubernetes/issues/137886): either revert in #137878 (https://github.com/kubernetes/kubernetes/pull/137878) or fix-forward in #137889 (https://github.com/kubernetes/kubernetes/pull/137889).",
+      "createdAt": "2026-03-19T15:26:44Z",
+      "id": "IC_kwDOAToIks7z1vU6",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4090950970"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this is recovered now:\nhttps://testgrid.k8s.io/sig-release-master-informing#kind-master-alpha-beta-features\n\nWe have a different interesting failure that I've seen in other runs:\nhttps://prow.k8s.io/view/gs/kubernetes-ci-logs/logs/ci-kubernetes-e2e-kind-alpha-beta-features/2034668777659961344",
+      "createdAt": "2026-03-19T18:48:26Z",
+      "id": "IC_kwDOAToIks7z7uFp",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4092518761"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "https://github.com/kubernetes/kubernetes/issues/137915 tracks the other, unrelated failure\n\nThis cluster should be resolved based on recent results.",
+      "createdAt": "2026-03-19T19:19:03Z",
+      "id": "IC_kwDOAToIks7z8evh",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137894#issuecomment-4092718049"
+    }
+  ],
+  "createdAt": "2026-03-19T14:39:36Z",
+  "id": "I_kwDOAToIks70giq6",
+  "labels": [
+    {
+      "name": "sig/node"
+    },
+    {
+      "name": "kind/failing-test"
+    },
+    {
+      "name": "needs-triage"
+    }
+  ],
+  "number": 137894,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-19T14:39:39Z",
+      "label": {
+        "name": "kind/failing-test"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-19T14:39:40Z",
+      "label": {
+        "name": "sig/node"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-03-19T14:39:43Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "BenTheElder"
+      },
+      "createdAt": "2026-03-19T19:19:03Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Failure cluster [e469f041...] failures in `ci-kubernetes-e2e-kind-alpha-beta-features`",
+  "url": "https://github.com/kubernetes/kubernetes/issues/137894"
+}

@@ -1,0 +1,74 @@
+{
+  "issue": {
+    "artifact_count": 3,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "module resolution",
+              "problem_kind": "internal_compiler_error",
+              "user_or_system_impact": "compiler crash"
+            },
+            "summary": "ICE: argument `DefId` is not a module",
+            "tags": [
+              "bug"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "sososopy",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153848"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "Regression identified in commit c043085801b7a884054add21a94882216df5971c",
+            "tags": [
+              "regression",
+              "fix_proposed"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "mu001999",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153848#issuecomment-4065789189"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "mu001999",
+              "deliverable": "claiming the issue",
+              "due_context": "immediate"
+            },
+            "summary": "Assign task to @mu001999 for claiming the issue.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "mu001999",
+        "comment_link": "https://github.com/rust-lang/rust/issues/153848#issuecomment-4068029928"
+      }
+    ],
+    "issue_number": 153848,
+    "issue_title": "[ICE]: argument `DefId` is not a module",
+    "issue_url": "https://github.com/rust-lang/rust/issues/153848"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/rust-lang__rust/issue_153848.json",
+  "repository": "rust-lang/rust",
+  "status": "completed"
+}

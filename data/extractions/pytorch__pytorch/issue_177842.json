@@ -1,0 +1,66 @@
+{
+  "issue": {
+    "artifact_count": 3,
+    "comments": [
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "intended_use": "unknown",
+              "language": "unknown",
+              "snippet_kind": "unknown"
+            },
+            "summary": "A code snippet demonstrating the issue with PyTorch's cuDNN backend for custom-shaped attention masks.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "code_snippet"
+          },
+          {
+            "metadata": {
+              "affected_area": "unknown",
+              "problem_kind": "unknown",
+              "user_or_system_impact": "unknown"
+            },
+            "summary": "The problem is that cuDNN does not respect custom-shaped attention masks, leading to incorrect outputs in positions where masked values should be 0. The math backend works as expected with such masks.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "Cherrling",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/177842"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "unknown",
+              "environment": "unknown",
+              "prerequisites": "unknown"
+            },
+            "summary": "environment: PyTorch; prerequisites: `bfloat16` vs `float16` handling; determinism: reproducible",
+            "tags": [
+              "bug"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "eqy",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/177842#issuecomment-4091426050"
+      }
+    ],
+    "issue_number": 177842,
+    "issue_title": "When using the cuDNN backend, custom masks become ineffective.",
+    "issue_url": "https://github.com/pytorch/pytorch/issues/177842"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/pytorch__pytorch/issue_177842.json",
+  "repository": "pytorch/pytorch",
+  "status": "completed"
+}

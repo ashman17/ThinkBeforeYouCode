@@ -1,0 +1,241 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "bowenerchen"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Privileged issue\n\n- [ ] I'm @tiangolo or he asked me directly to create an issue here.\n\n### Issue Content\n\nhttps://fastapi.tiangolo.com/tutorial/query-params-str-validations/#required-parameters\r\n![QQ_1727594279276](https://github.com/user-attachments/assets/86d8893a-4c3f-45cb-8fc3-7f97cad6ac00)\r\npython interpreter:3.12.4\r\nfastapi version:0.115.0\r\n\r\nmy codes:\r\n```\r\nfrom __future__ import annotations\r\nfrom typing import Annotated\r\nimport uvicorn\r\nfrom fastapi import FastAPI, Query\r\napp = FastAPI()\r\n@app.get(\"/items/\")\r\nasync def read_items(q: Annotated[str, Query(min_length = 3)] = ...):\r\n    \"\"\"\r\n    curl -X 'GET' 'http://127.0.0.1:18081/items/' -H 'accept: application/json'\r\n    ValueError: [TypeError(\"'ellipsis' object is not iterable\"), TypeError('vars() argument must have __dict__ attribute')]\r\n    \"\"\"\r\n    results = {\"items\": [{\"item_id\": \"Foo\"}, {\"item_id\": \"Bar\"}]}\r\n    if q:\r\n        results.update({\"q\": q})\r\n    return results\r\n\r\n\r\nif __name__ == '__main__':\r\n    uvicorn.run(app, host = '127.0.0.1', port = 18081)\r\n```\r\nswagger docs:\r\n![QQ_1727594546393](https://github.com/user-attachments/assets/c1b94031-5145-4f27-981a-6d35f6cc2fe2)\r\n\r\n![QQ_1727594603897](https://github.com/user-attachments/assets/4d370afd-5642-4948-8521-65483a460514)\r\n\r\nValueError: [TypeError(\"'ellipsis' object is not iterable\"), TypeError('vars() argument must have __dict__ attribute')]\r\n    \r\n   ",
+  "closedAt": "2025-02-15T16:25:43Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bowenerchen"
+      },
+      "authorAssociation": "NONE",
+      "body": "on MacBook Pro M2 Max\r\nPyCharm 2024.2.3 (Professional Edition)",
+      "createdAt": "2024-09-29T07:25:42Z",
+      "id": "IC_kwDOCZduT86N7hR7",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381190267"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yeah, it seems that's wrong.\r\n\r\nThat also doesn't seem to be type hint compliant.\r\n\r\nI think the wanted would have been:\r\n```py\r\nfrom typing import Annotated\r\n\r\nfrom fastapi import FastAPI, Query\r\n\r\napp = FastAPI()\r\n\r\n\r\n@app.get(\"/items/\")\r\nasync def read_items(q: Annotated[str, Query(default=..., min_length=3)]):\r\n    results = {\"items\": [{\"item_id\": \"Foo\"}, {\"item_id\": \"Bar\"}]}\r\n    if q:\r\n        results.update({\"q\": q})\r\n    return results\r\n```\r\n\r\nI think that part of the docs is automatically generated from a script.",
+      "createdAt": "2024-09-29T07:52:21Z",
+      "id": "IC_kwDOCZduT86N7vU8",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381247804"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bowenerchen"
+      },
+      "authorAssociation": "NONE",
+      "body": "![QQ_1727596896301](https://github.com/user-attachments/assets/b26c1f50-7820-4bc6-b622-36fd6bf698a6)\r\n![QQ_1727596918838](https://github.com/user-attachments/assets/18f52873-3ac0-4486-950f-49ec60171729)\r\n![QQ_1727596942036](https://github.com/user-attachments/assets/80c7e630-7e28-4f52-bd56-3d069ddf9b3f)\r\n![QQ_1727596962417](https://github.com/user-attachments/assets/200a350c-ea5c-41d5-a708-e7a0c21ad414)\r\nyeah, it worked!\r\n",
+      "createdAt": "2024-09-29T08:03:02Z",
+      "id": "IC_kwDOCZduT86N7wO5",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381251513"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Please don't close it. This is a documentation issue. \ud83d\ude05 ",
+      "createdAt": "2024-09-29T08:05:28Z",
+      "id": "IC_kwDOCZduT86N7wbh",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381252321"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bowenerchen"
+      },
+      "authorAssociation": "NONE",
+      "body": "ok!!!",
+      "createdAt": "2024-09-29T08:05:47Z",
+      "id": "IC_kwDOCZduT86N7wdR",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381252433"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bowenerchen"
+      },
+      "authorAssociation": "NONE",
+      "body": "hi,Marcelo, I would like to confirm one more question about best practices:\r\n\r\nIs it a recommended practice to make a parameter required by setting Query(default=...)? I noticed that using this method triggers another warning:\r\n`PydanticJsonSchemaWarning: Default value Ellipsis is not JSON serializable; excluding default from JSON schema [non-serializable-default].`\r\n\r\nSo, I understand that the best practice to make a parameter required is to simply not assign a default value to it, for example:\r\n```\r\n@app.get(\"/validation\")\r\nasync def async_root(str_param: Annotated[str, Query(min_length=3,\r\n                                                     max_length=20,\r\n                                                     pattern='^[a-zA-Z0-9]+$',\r\n                                                     description='This is a string parameter')])\r\n```",
+      "createdAt": "2024-09-29T08:57:42Z",
+      "id": "IC_kwDOCZduT86N708Q",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381270800"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> So, I understand that the best practice to make a parameter required is to simply not assign a default value to it, for example:\r\n\r\nOh yeah, you are right. You don't need the `...` in that case.\r\n\r\nI couldn't reproduce the `PydanticJsonSchemaWarning`. Can you provide a full MRE?",
+      "createdAt": "2024-09-29T09:54:37Z",
+      "id": "IC_kwDOCZduT86N75uf",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381290399"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bowenerchen"
+      },
+      "authorAssociation": "NONE",
+      "body": "Okay, here it is. \r\nLet's try the following code:\r\n```\r\nfrom __future__ import annotations\r\n\r\nfrom typing import Annotated\r\n\r\nimport fastapi\r\nimport uvicorn\r\nfrom fastapi import FastAPI, Query\r\n\r\napp = FastAPI()\r\nprint(fastapi.__version__)\r\n\r\n\r\n@app.get(\"/prepare\")\r\nasync def prepare(str_param: Annotated[str, Query()] = ...):\r\n    return {'str_param': str_param}\r\n\r\n\r\n@app.get(\"/test\")\r\nasync def full_mre(str_param: Annotated[str, Query(default = ...)]):\r\n    return {'str_param': str_param}\r\n\r\n\r\nif __name__ == '__main__':\r\n    uvicorn.run(app, host = '127.0.0.1', port = 18081)\r\n```\r\nAfter running this code as a server, visit http://127.0.0.1:18081/docs#/default/prepare_prepare_get or http://127.0.0.1:18081/docs#/default/full_mre_test_get in your browser.\r\nYou will see that the warning appears only once when you first refresh the docs:\r\n![QQ_1727606309174](https://github.com/user-attachments/assets/83a24ad3-c5fe-4043-a2de-818a2cd8e230)\r\n\r\nTo be honest, reproducing this warning message is indeed a bit complex, \r\nI tried several combinations before I was able to reproduce it, and it doesn't appear consistently.\r\n it only triggers when the documentation is refreshed for the first time.",
+      "createdAt": "2024-09-29T10:44:24Z",
+      "id": "IC_kwDOCZduT86N79u9",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381306813"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is the part that reproduces the warning:\r\n\r\n```py\r\nfrom typing import Annotated\r\n\r\nimport uvicorn\r\nfrom fastapi import FastAPI, Query\r\n\r\napp = FastAPI()\r\n\r\n\r\n@app.get(\"/prepare\")\r\nasync def prepare(str_param: Annotated[str, Query()] = ...):\r\n    return {\"str_param\": str_param}\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    uvicorn.run(app, host=\"127.0.0.1\", port=18081)\r\n```\r\n\r\nIt makes sense, but we already said that this is not needed. You can just do:\r\n```py\r\n@app.get(\"/prepare\")\r\nasync def prepare(str_param: Annotated[str, Query()]):\r\n    return {\"str_param\": str_param}\r\n```\r\n\r\nYou only see the issue on the first time you call `/docs` because that's when the OpenAPI is generated. After that, the OpenAPI object is cached.",
+      "createdAt": "2024-09-29T17:50:56Z",
+      "id": "IC_kwDOCZduT86N8e3R",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381442513"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bowenerchen"
+      },
+      "authorAssociation": "NONE",
+      "body": "OK! I see bro, thx!",
+      "createdAt": "2024-09-29T22:45:02Z",
+      "id": "IC_kwDOCZduT86N9OzO",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2381638862"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Viicos"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Note that in Pydantic, we recently moved away from using the ellipsis, and we now recommend against using it: https://github.com/pydantic/pydantic/pull/10661.",
+      "createdAt": "2024-11-04T12:40:19Z",
+      "id": "IC_kwDOCZduT86STnId",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2454614557"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Note that in Pydantic, we recently moved away from using the ellipsis, and we now recommend against using it: [pydantic/pydantic#10661](https://github.com/pydantic/pydantic/pull/10661).\r\n\r\nThe problem here is what is in the documentation.",
+      "createdAt": "2024-11-04T12:41:38Z",
+      "id": "IC_kwDOCZduT86STnxr",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2454617195"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Viicos"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I started looking into it, by discouraging using the ellipsis in docs. But I realized FastAPI still supports Pydantic V1, where `f: Optional[<type>]` is different from `f: Optional[<type>] = ...` (because in V1 `Optional[...]` added a default value of `None`, so the ellipsis was a way to still make it required). Maybe it's best to wait for FastAPI to drop support for V1 so that the documentation can easily be updated.",
+      "createdAt": "2024-11-04T12:57:29Z",
+      "id": "IC_kwDOCZduT86STv1T",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2454650195"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "- Given https://github.com/fastapi/fastapi/issues/10360, I don't think it makes sense for FastAPI to support V1 anymore.",
+      "createdAt": "2024-11-04T13:07:10Z",
+      "id": "IC_kwDOCZduT86ST06r",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2454671019"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "tiangolo"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Thanks for the discussion everyone! This was handled here: https://github.com/fastapi/fastapi/pull/13377\n\nEllipsis is discouraged and has been for quite a while. Those particular docs examples were not tested, and indeed they were failing. I just updated those docs to use the newest version of the language syntax and the recommended patterns.\n\nI'll now close this issue, thanks all! \u2615 ",
+      "createdAt": "2025-02-15T16:25:43Z",
+      "id": "IC_kwDOCZduT86em4Ls",
+      "url": "https://github.com/fastapi/fastapi/issues/12313#issuecomment-2660991724"
+    }
+  ],
+  "createdAt": "2024-09-29T07:24:07Z",
+  "id": "I_kwDOCZduT86YRqqs",
+  "labels": [
+    {
+      "name": "docs"
+    },
+    {
+      "name": "confirmed"
+    }
+  ],
+  "number": 12313,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "createdAt": "2024-09-29T07:52:25Z",
+      "label": {
+        "name": "docs"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "createdAt": "2024-09-29T07:52:29Z",
+      "label": {
+        "name": "confirmed"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bowenerchen"
+      },
+      "createdAt": "2024-09-29T08:03:02Z",
+      "stateReason": "COMPLETED"
+    },
+    {
+      "__typename": "ReopenedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Kludex"
+      },
+      "createdAt": "2024-09-29T08:05:15Z"
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "tiangolo"
+      },
+      "createdAt": "2025-02-15T16:25:43Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Required with Ellipsis may not work",
+  "url": "https://github.com/fastapi/fastapi/issues/12313"
+}

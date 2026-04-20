@@ -1,0 +1,268 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "kosuodhmwa"
+  },
+  "authorAssociation": "NONE",
+  "body": "### Is there an existing issue for this?\n\n- [x] I have searched the existing issues\n\n### Current behaviour\n\nbitcoind sync gets very, very slow on Augst 2023 in BTC chain (maybe 2/3 progressed or something like that)\n\nEarlier (e.g. first sync in 2024), it was faster, but i also used another version there. the version i use now, is v30.99.0-0ffb20dee178 (self-compiled from master branch)\n\nAND: i also changed my HW: From SSD SATA on LSI SATA-3 controller to a Seagate video SATA-33 HDD on UBS 2.0 controller (because it can bypass the to VM on VirtualBox 7.2.x on MS Window$ (maybe on Linux, i would be able to bypass PCI SATA devices or VHD files in a raw mode - but on Windows, PCIE SATA bypass is not supported and VHD file raw mode is not cleanly implemented. So i need to use USB drives to bypass it completely/in a raw mode)\n\n(But i don't think that is the problem TBH)\n\n**Currently, it needs ~1 day for 1 day in block chain:** On 2026-02-06, on blockchain it was on 2023-08-05 and now we have 2026-02-16 and blockchain sync is on 2023-08-19. **Which means, it will result in an infinite process** \n\n### Expected behaviour\n\nShould be synced in maybe 2-3 weeks maximum so i think, similar to the last sync (2024 when i remember right? But it was another version, don't know that's the reason or not?).\n\n### Steps to reproduce\n\nbitcoind sync gets very, very slow on Augst 2023 in BTC chain (maybe 2/3 progressed or something like that)\n\nEarlier (e.g. first sync in 2024), it was faster, but i also used another version there. the version i use now, is v30.99.0-0ffb20dee178 \n\nAND: i also changed my HW: From SSD SATA on LSI SATA-3 controller to a Seagate video SATA-33 HDD on UBS 2.0 controller (because it can bypass the to VM on VirtualBox 7.2.x on MS Window$ (maybe on Linux, i would be able to baypass PCI SATA devices or VHD files in a raw mode - but on Windows, PCIE SATA bypass is not supported and bypass file raw mode is not cleanly implemented. So i need to use USB drives to bypass it completely/in a raw mode)\n\n(But i don't think that is the problem TBH)\n\n**Currently, it needs ~1 day for 1 day in block chain:** On 2026-02-06, on blockchain it was on 2023-08-05 and now we have 2026-02-16 and blockchain sync is on 2023-08-19. **Which means, it will result in an infinite process** \n\n### Relevant log output\n\n<!-- Failed to upload \"debug.zip\" -->\n\n### How did you obtain Bitcoin Core\n\nCompiled from source\n\n### What version of Bitcoin Core are you using?\n\nv30.99.0-0ffb20dee178\n\n### Operating system and version\n\nDebian 12.x x64, most current version, with most current updates\n\n### Machine specifications\n\n**PRIMERGY TX120 S3 Server with 4-core (8 virt. Cores) Xeon, 32GB of RAM**",
+  "closedAt": "2026-03-02T14:40:17Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "PS: I was not able to attach zipped debug log here. Got an error message... \n\nHERE, because of that issue: \nhttps://limewire.com/d/5xAA1#NmroMAVYvc ",
+      "createdAt": "2026-02-16T19:01:38Z",
+      "id": "IC_kwDOABII587pD0w2",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3910093878"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "sipa"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What is your `dbcache` setting set to?",
+      "createdAt": "2026-02-16T19:08:55Z",
+      "id": "IC_kwDOABII587pD_85",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3910139705"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "sipa"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Based on your debug.log, it looks like you have the default dbcache setting, 450 MiB. With that much RAM, I recommend setting it to `dbcache=10000` or so, to cache most of the chainstate in memory.",
+      "createdAt": "2026-02-16T19:13:31Z",
+      "id": "IC_kwDOABII587pEHu5",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3910171577"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "l0rinc"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> to cache most of the chainstate in memory\n\nYeah, especially for a HDD through a USB 2.\n\n> the version i use now, is v30.99.0-0ffb20dee178\n\nThat's very recent, basically a month old: https://github.com/bitcoin/bitcoin/commit/0ffb20dee17858e0f13b23fce3dd0ec06cbeb9a2",
+      "createdAt": "2026-02-16T19:17:59Z",
+      "id": "IC_kwDOABII587pEMik",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3910191268"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you very much for your fast feedback! :-) \n\n**bitcoin.conf's content:**\n\n\u00b4\u00b4\u00b4\nroot@debian12-btc-node:~/.bitcoin# cat  bitcoin.conf\n# --- Core ---\nserver=1\ntxindex=1\ndisablewallet=1\n\n# --- Netzwerk ---\nlisten=1\nbind=127.0.0.1\n#bind=192.168.1.174\nrpcbind=127.0.0.1\n#rpcbind=192.168.1.174\n\n# --- RPC / REST (f\u00fcr lnd) ---\nrpcuser=.....\nrpcpassword=.....\nrpcallowip=127.0.0.1\n#rpcallowip=192.168.1.174\n#rpcallowip=192.168.1.0/24\nrest=1\n\n# --- Whitelisting ---\nwhitelist=127.0.0.1\n#whitelist=192.168.1.174\n#whitelist=192.168.1.0/24\n\n# --- Tor ---\nproxy=127.0.0.1:9050\nlistenonion=1\nonlynet=onion\n\n# --- Pfade ---\ndatadir=/root/.bitcoin\n\u00b4\u00b4\u00b4\n\n**_\"That very recent, basically a month old: https://github.com/bitcoin/bitcoin/commit/0ffb20dee17858e0f13b23fce3dd0ec06cbeb9a2\"_**\n\nYes, i also had the same problem before with a version that was a few monts old. Because of that, i used the latest master branch when i tried to solve the problem a few weeks ago.",
+      "createdAt": "2026-02-16T19:50:44Z",
+      "id": "IC_kwDOABII587pEk0L",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3910290699"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "OK, so i will cancel the process now, the add \"dbcache=10000\", then start it again... :-) ",
+      "createdAt": "2026-02-16T19:51:57Z",
+      "id": "IC_kwDOABII587pElup",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3910294441"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "**so bitcoind.conf is now like that:** \n\n\u00b4\u00b4\u00b4\n# --- Core ---\nserver=1\ntxindex=1\ndisablewallet=1\ndbcache=10000\n\n# --- Netzwerk ---\n...\n...\n...\n\u00b4\u00b4\u00b4",
+      "createdAt": "2026-02-16T19:54:43Z",
+      "id": "IC_kwDOABII587pEoCa",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3910303898"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "l0rinc"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Did it improve? Expect that when the in-memory data gets dumped again (after the 10 GB dbcache gets filled), the process will \"freeze\" for a long time - should still be a lot faster than dumping every time the 450 MB dbcache gets full.",
+      "createdAt": "2026-02-17T08:26:35Z",
+      "id": "IC_kwDOABII587pPD8s",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3913039660"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hmmm... still slow so it seems, now i'm on 2023-08-21 in block chain sync... yesterday, so before that setting change, it was on 2023-08-19 :-( ",
+      "createdAt": "2026-02-17T13:41:57Z",
+      "id": "IC_kwDOABII587pVq95",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3914772345"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "Maybe a lil bit faster - without setting change, i would maybe still on 2023-08-19 or on 2023-08-20... instead of 21th",
+      "createdAt": "2026-02-17T13:43:23Z",
+      "id": "IC_kwDOABII587pVspa",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3914779226"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "willcl-ark"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think here you have essentially stacked every possible (random IO) performance-related bottleneck that I know of :(\n\n- spinning HDD (probably totally dominated by random reads/writes to the LevelDB)\n- USB 2.0 (extra latency per IO operation, very slow random IO)\n- VirtualBox (another layer of IO overhead)\n- tor (possibly contributing, possibly not)\n- `txindex=1` even more random IO via the above for another DB\n- (previously) `dbcache=450` - increasing random IO needed even further\n\nI think you may have addressed the final point in increasing that value, but I think with the rest iof the stack remaining, you are still not going to have a good time.\n\nI don't think this is anything that can be solved on our side, and it needs hardware/configuration  to be changed. The other low-hanging fruit could be to disable `txindex` and see if that speeds it up (and re-enable after you are synced). But I suspect without addressing other bottlenecks you might still not have a great time.",
+      "createdAt": "2026-02-17T13:52:33Z",
+      "id": "IC_kwDOABII587pV2nb",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3914820059"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "l0rinc"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> you have essentially stacked every possible (random IO) performance-related bottleneck that I know of\n\nExcept for swapping (probably) :D\n\nIt might even be faster for you to restart IBD and do everything in-memory with a high dbcache",
+      "createdAt": "2026-02-17T14:15:00Z",
+      "id": "IC_kwDOABII587pWSZv",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3914933871"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think increasing dbcache will not affect IO write requirements? After https://github.com/bitcoin/bitcoin/pull/30611, a write will happen every hour, which seems more frequent than write  due to a full dbcache? Also, restarting to increase dbcache will clear the dbache, so everything will need to be read again into memory from HDD, which is slow.\n\n\nsince you already have an SSD, and have used it in the past, my recommendation would be to figure out how to use the SSD.\n",
+      "createdAt": "2026-02-17T14:45:56Z",
+      "id": "IC_kwDOABII587pXDsX",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3915135767"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "darosior"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> since you already have an SSD, and have used it in the past, my recommendation would be to figure out how to use the SSD.\n\nMaybe one pointer here. If you have a large-enough SSD to contain the chainstate (the UTxO database) but not the full block chain, consider pointing the `-datadir` to your SSD and the `-blocksdir` to the HDD.",
+      "createdAt": "2026-02-18T15:44:07Z",
+      "id": "IC_kwDOABII587pvk78",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3921563388"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "OK, thx, firstly, my ideas was to use it for another device, but when formated it with \"low level format tool\" (on a usb 3 adapter on laptop), i saw that it only reaches ~40mb/s (adapter and/or laptop should not be the problem here). Usually, SSDs reach 300mb/s or something like that on that usb 3.0 adapter... so the SSD seems to be \"used\". \n\n**So i will buy a new one ASAP.** BTW: What is future-proof , maybe for the next ~5y? What do you think? 3TB is OK or better 4? (maybe difficult to say haha). And a \"small card size\" USB 3.0 adapter too.* \n\n\n\n*Maybe another detail, but it's not relevant i.m.o.: The adapter on the server where VirtualBox BTC node VM is has ONLY usb 2.0 ports, but the adapter i used is USB 3.0. (USB 2.0 speed in both cases..)",
+      "createdAt": "2026-02-19T18:40:59Z",
+      "id": "IC_kwDOABII587qMk8g",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3929165600"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "Now i bought a USB 3.0 PCIE controller (so no bottleneck anymore with USB 3.0/SATA-III adapter), will see it increases the speed of the current Seagate Video HDD... if not, i will look for a new SSD, maybe bigger than 2TB (so future-proof for BTC chain size, ;-)) ",
+      "createdAt": "2026-02-25T18:41:16Z",
+      "id": "IC_kwDOABII587sG9Ud",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3961247005"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I guess the questions have been answered, and this can be closed for now?",
+      "createdAt": "2026-03-02T12:07:21Z",
+      "id": "IC_kwDOABII587tdtno",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3983989224"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "I'm still waiting for my USB 3.0 pcie controller card HAHAHA ",
+      "createdAt": "2026-03-02T17:45:35Z",
+      "id": "IC_kwDOABII587tlEW5",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-3985917369"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "kosuodhmwa"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, now it seems to be faster, now it processes ~1.x month of BTC blockchain in ~1 day... :-) \n\nPS: 32GB RAM was total in physical - for the bitcoind Debian VM there is 8192 MB virtual memory reserved. So i changed the config value from \"10000\" to \"3072\". ",
+      "createdAt": "2026-03-05T06:19:57Z",
+      "id": "IC_kwDOABII587ukeYs",
+      "url": "https://github.com/bitcoin/bitcoin/issues/34601#issuecomment-4002539052"
+    }
+  ],
+  "createdAt": "2026-02-16T19:00:43Z",
+  "id": "I_kwDOABII587rY1xW",
+  "labels": [
+    {
+      "name": "Resource usage"
+    },
+    {
+      "name": "Questions and Help"
+    }
+  ],
+  "number": 34601,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "createdAt": "2026-02-17T07:20:28Z",
+      "label": {
+        "name": "Resource usage"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "maflcko"
+      },
+      "createdAt": "2026-02-17T07:20:28Z",
+      "label": {
+        "name": "Questions and Help"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "willcl-ark"
+      },
+      "createdAt": "2026-03-02T14:40:17Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "bitcoind sync gets very, very slow on Augst 2023 in btc chain (maybe 2/3 progressed or something like that)",
+  "url": "https://github.com/bitcoin/bitcoin/issues/34601"
+}

@@ -1,0 +1,41 @@
+{
+  "issue": {
+    "artifact_count": 1,
+    "comments": [
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29019"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "Potential issue",
+              "environment": "GitHub repository",
+              "prerequisites": "Commits from PR #29003"
+            },
+            "summary": "Failed commits likely due to merge conflicts; link provided for reference.",
+            "tags": [
+              "build_failure"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "bazel-io",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/29019#issuecomment-4075996978"
+      }
+    ],
+    "issue_number": 29019,
+    "issue_title": "[9.1.0] This is for testing",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/29019"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_29019.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

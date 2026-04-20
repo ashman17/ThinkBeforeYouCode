@@ -1,0 +1,316 @@
+{
+  "issue": {
+    "artifact_count": 17,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "MODULE.bazel file handling and patch application",
+              "problem_kind": "behavioral issue",
+              "user_or_system_impact": "User cannot apply patches to fix bugs in downloaded modules"
+            },
+            "summary": "Patching MODULE.bazel has no effect on module extension evaluation",
+            "tags": [
+              "bug",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "philwo",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "reduces misuses and bugs",
+              "target_area": "unknown",
+              "urgency": "unknown"
+            },
+            "summary": "Set 'version' as required for 'single_version_override' with patches to avoid applying them to all versions.",
+            "tags": [
+              "api_misuse",
+              "config_issue"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3860026321"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_benefit": "improved error reporting",
+              "solution_kind": "better_error_message",
+              "target_area": "Starlark evaluation"
+            },
+            "summary": "Suggests `rules_python` emitting a better error message indicating the specific module that provided an invalid version during Starlark evaluation of a module extension.",
+            "tags": [
+              "performance_issue",
+              "runtime_error",
+              "incorrect_behavior"
+            ],
+            "type": "proposed_solution"
+          }
+        ],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3860034321"
+      },
+      {
+        "artifact_count": 5,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "Bazel dependency management",
+              "problem_kind": "Behavioral",
+              "user_or_system_impact": "User experience"
+            },
+            "summary": "Unexpected behavior of single_version_override with patches without version",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "Reduced user confusion and errors",
+              "target_area": "Bazel dependency management configuration",
+              "urgency": "Medium"
+            },
+            "summary": "Single version override without a specified version is confusing and error-prone",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          },
+          {
+            "metadata": {
+              "impact_scope": "User experience",
+              "reasoning_kind": "Expected user behavior vs actual implementation",
+              "supports_artifact_type": "Configuration"
+            },
+            "summary": "Single version override with patches should only apply to the specified version, not all versions",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "rationale"
+          },
+          {
+            "metadata": {
+              "constraint_type": "Usability",
+              "scope": "User interaction with Bazel configuration",
+              "severity": "High"
+            },
+            "summary": "Single version override with patches without a specified version is non-actionable for users",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "constraint"
+          },
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "Bazel dependency management configuration",
+              "urgency": "Medium"
+            },
+            "summary": "Clarification on the behavior of single_version_override with patches without a specified version",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "philwo",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3860326479"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "bazel build command",
+              "problem_kind": "key_error",
+              "user_or_system_impact": "System impacted"
+            },
+            "summary": "User reports a key error during bazel build with no output about the grpc dependency.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "philwo",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3860339858"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "rules_python",
+              "problem_kind": "bug",
+              "user_or_system_impact": "developer_experience"
+            },
+            "summary": "User reports that the patch does not apply due to git-style patching and expected errors only occur for a particular version of `grpc`.",
+            "tags": [
+              "version_mismatch"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3860881359"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "bazel build system",
+              "problem_kind": "patch application failure",
+              "user_or_system_impact": "developer experience"
+            },
+            "summary": "MODULE.bazel patch cannot be applied correctly due to missing file names.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "philwo",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3862738829"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "awaiting_review",
+              "status_kind": "patch_submitted"
+            },
+            "summary": "A fix for the problem has been submitted. The cause is that not all files of a module are available during patch application.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3862918054"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "mehrdadbn9",
+              "deliverable": "fix or improvement for the reported issue",
+              "due_context": "unspecified"
+            },
+            "summary": "Mehrdadbn9 requests to work on the issue and is assigned by a maintainer.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "mehrdadbn9",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3864910184"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "developer mentioned in PR #28566",
+              "deliverable": "merged PR #28566",
+              "due_context": "unspecified"
+            },
+            "summary": "fmeum assigns the issue to a developer through mentioning PR #28566.",
+            "tags": [
+              "fix_proposed"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "fmeum",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3864914442"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "assignee": "mehrdadbn9",
+              "deliverable": "fix for the bug",
+              "due_context": "not specified"
+            },
+            "summary": "mehrdadbn9 assigns themselves to investigate and fix a MODULE.bazel extension evaluation bug.",
+            "tags": [
+              "bug"
+            ],
+            "type": "task_assignment"
+          }
+        ],
+        "comment_author": "mehrdadbn9",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3868004907"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "completed",
+              "status_kind": "new_release"
+            },
+            "summary": "Bazel 8.6.0 RC2 released with fix for the issue; user testing requested.",
+            "tags": [
+              "fix_merged"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-3930948934"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "available_for_testing",
+              "status_kind": "release_status"
+            },
+            "summary": "Bazel 9.0.1 RC1 has been released to address the issue; users are encouraged to test and report any issues.",
+            "tags": [
+              "fix_proposed",
+              "version_mismatch"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "iancha1992",
+        "comment_link": "https://github.com/bazelbuild/bazel/issues/28560#issuecomment-4009714574"
+      }
+    ],
+    "issue_number": 28560,
+    "issue_title": "Patching MODULE.bazel has no effect on module extension evaluation",
+    "issue_url": "https://github.com/bazelbuild/bazel/issues/28560"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bazelbuild__bazel/issue_28560.json",
+  "repository": "bazelbuild/bazel",
+  "status": "completed"
+}

@@ -1,0 +1,249 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "Rajalakshmi-Girish"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "### Which jobs are flaking?\n\nhttps://prow.k8s.io/job-history/gs/kubernetes-ci-logs/logs/ci-kubernetes-unit-windows-master\nhttps://prow.k8s.io/job-history/gs/kubernetes-ci-logs/logs/ci-kubernetes-unit-ppc64le\n\n### Which tests are flaking?\n\n`k8s.io/kubernetes/pkg/scheduler:TestSchedulerScheduleOne/prebind_pod_cancelled_during_prebind`\n\n### Since when has it been flaking?\n\nSince the merge of https://github.com/kubernetes/kubernetes/pull/135502\n\n### Testgrid link\n\nhttps://testgrid.k8s.io/sig-release-master-blocking#ci-kubernetes-unit\n\n### Reason for failure (if possible)\n\n```\n=== RUN   TestSchedulerScheduleOne/prebind_pod_cancelled_during_prebind_(external_preemption)_(QueueingHints:_true,_AsyncAPICalls:_true,_NominatedNodeNameForExpectation:_true,_Schedule_as_PodGroup:_true)\n    feature_gate.go:170: I0218 16:52:35.266848] Updated featureGates={\"GenericWorkload\":true}\n    framework.go:463: I0218 16:52:35.267140] the scheduler starts to work with those plugins Plugins={\"PreEnqueue\":{\"Enabled\":null,\"Disabled\":null},\"QueueSort\":{\"Enabled\":[{\"Name\":\"PrioritySort\",\"Weight\":0}],\"Disabled\":null},\"PreFilter\":{\"Enabled\":null,\"Disabled\":null},\"Filter\":{\"Enabled\":null,\"Disabled\":null},\"PostFilter\":{\"Enabled\":null,\"Disabled\":null},\"PreScore\":{\"Enabled\":null,\"Disabled\":null},\"Score\":{\"Enabled\":null,\"Disabled\":null},\"Reserve\":{\"Enabled\":null,\"Disabled\":null},\"Permit\":{\"Enabled\":null,\"Disabled\":null},\"PreBind\":{\"Enabled\":[{\"Name\":\"BlockingPreBindPlugin\",\"Weight\":0}],\"Disabled\":null},\"Bind\":{\"Enabled\":[{\"Name\":\"DefaultBinder\",\"Weight\":0}],\"Disabled\":null},\"PostBind\":{\"Enabled\":null,\"Disabled\":null},\"MultiPoint\":{\"Enabled\":null,\"Disabled\":null}}\nW0218 16:52:35.267198   59636 mutation_detector.go:54] Mutation detector is enabled, this will result in memory leakage.\nW0218 16:52:35.267247   59636 mutation_detector.go:54] Mutation detector is enabled, this will result in memory leakage.\n    active_queue.go:111: I0218 16:52:35.267298] Pod moved to an internal scheduling queue pod=\"foo\" event=\"UnschedulablePodAdd\" queue=\"Active\"\n    schedule_one_podgroup.go:143: I0218 16:52:35.267710] Pod available in pod group state not available in scheduling queue podGroup=\"workload/pg/\" pod=\"foo\"\n    schedule_one_podgroup.go:71: I0218 16:52:35.267752] Attempting to schedule pod group podGroup=\"workload/pg/\"\n    schedule_one_podgroup.go:280: I0218 16:52:35.267791] Running a pod group scheduling algorithm podGroup=\"workload/pg/\" unscheduledPodsCount=1\n    schedule_one_podgroup.go:319: I0218 16:52:35.267825] Attempting to schedule a pod belonging to a pod group podGroup=\"workload/pg/\" pod=\"foo\"\n    schedule_one_podgroup.go:457: I0218 16:52:35.267911] Successfully scheduled a pod group podGroup=\"workload/pg/\" scheduledPods=1 unschedulablePods=0\n    framework.go:1473: E0218 16:52:35.268014] PreBind: Plugin failed err=\"context cancelled externally\" podGroup=\"workload/pg/\" plugin=\"BlockingPreBindPlugin\" pod=\"foo\" node=\"node1\"\n    runtime.go:221: E0218 16:52:35.268088] UnhandledError: Error scheduling pod; retrying err=\"running PreBind plugin \\\"BlockingPreBindPlugin\\\": context cancelled externally\" podGroup=\"workload/pg/\" pod=\"foo\"\n    backoff_queue.go:310: I0218 16:52:35.268145] Pod moved to an internal scheduling queue podGroup=\"workload/pg/\" pod=\"foo\" event=\"ScheduleAttemptFailure\" queue=\"Backoff\"\n    scheduling_queue.go:930: I0218 16:52:35.268185] Pod moved to an internal scheduling queue podGroup=\"workload/pg/\" pod=\"foo\" event=\"ScheduleAttemptFailure\" queue=\"Backoff\" schedulingCycle=1 hint=1 unschedulable plugins={}\n    schedule_one_test.go:1187: Expected nominated node name \"node1\", got \"\"\n    feature_gate.go:170: I0218 16:52:35.468704] Updated featureGates={\"GenericWorkload\":false}\n--- FAIL: TestSchedulerScheduleOne/prebind_pod_cancelled_during_prebind_(external_preemption)_(QueueingHints:_true,_AsyncAPICalls:_true,_NominatedNodeNameForExpectation:_true,_Schedule_as_PodGroup:_true) (0.20s)\n```\n\n### Anything else we need to know?\n\n[Triage Link](https://storage.googleapis.com/k8s-triage/index.html?text=TestSchedulerScheduleOne%2Fprebind_pod_cancelled_during_prebin&test=k8s.io%2Fkubernetes%2Fpkg%2Fscheduler)\n\n### Relevant SIG(s)\n\n/sig scheduling",
+  "closedAt": "2026-02-25T12:35:55Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This issue is currently awaiting triage.\n\nIf a SIG or subproject determines this is a relevant issue, they will accept it by applying the `triage/accepted` label and provide further guidance.\n\nThe `triage/accepted` label can be added by org members by writing `/triage accepted` in a comment.\n\n\n<details>\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-02-19T07:38:18Z",
+      "id": "IC_kwDOAToIks7p9Xqd",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3925179037"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Rajalakshmi-Girish"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@Argh4k / @macsko ^^",
+      "createdAt": "2026-02-19T07:41:33Z",
+      "id": "IC_kwDOAToIks7p9aNH",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3925189447"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Argh4k"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Ack, probably caused by my latest PR:  https://github.com/kubernetes/kubernetes/pull/135502",
+      "createdAt": "2026-02-19T08:01:34Z",
+      "id": "IC_kwDOAToIks7p944I",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3925315080"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Argh4k"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "So I added more logging and it looks like the problem stems from the async api calls. It looks like sometimes with async api calls enabled, the call to update NNN is not registered before the check happens.\n\nBut diving deeper it seems that there is one more problem. If we fail in the prebind we should clearNominatedNodeName. And based on logging we try to do so:\n```\n        schedule_one.go:1304: I0219 10:02:22.863937] Updating pod condition and nominated node name pod=\"foo\" conditionType=\"PodScheduled\" conditionStatus=\"False\" conditionReason=\"SchedulerError\" nominatedNodeName=\"\" nominatingMode=\"ModeOverride\"\n```\n\nBut it looks like we are not hiting the `if nnnNeedsUpdate` branch in updatePod. My understanding is that this is caused by a way we update the NNN in first call (done in if preFlightStatus.IsSuccess() || schedFramework.WillWaitOnPermit(ctx, assumedPod)`. The problem is that even we call it on assumed pod (which is QueuedPodInfo.Pod) we do not update the pod itself as we update podStatusCopy and send it. So in the another call to updatePod, even when we pass the same QueuedPodInfo.Pod, the podStatus is still set to previous NNN (empty by default), so the second call does not clear NNN. \n\nSo, based on all this the logic is as follow:\n1. Preflight passes, NNN is set to selected Node\n2. Prebind fails, logic tries to clear NNN but works on old PodStatus so NNN is not update\n3. In the test case depending whether the first NNN update happened before reaching the check (NNN update can be delayed with async calls) the NNN is either empty or equal to test node name, but it should always be cleared by second NNN. \n\n@macsko, @ania-borowiec can you check whether I am not missing some logic that should update PodStatus of QueuedPodInfo between Preflight and Prebind? Especially that it might be connected to https://github.com/kubernetes/kubernetes/pull/135007\n \nFull logs:\n```\n--- FAIL: TestSchedulerScheduleOne (68.65s)\n    --- FAIL: TestSchedulerScheduleOne/prebind_pod_cancelled_during_prebind_(external_preemption)_(QueueingHints:_true,_AsyncAPICalls:_true,_NominatedNodeNameForExpectation:_true,_Schedule_as_PodGroup:_false) (1.20s)\n        framework.go:463: I0219 10:02:21.657647] the scheduler starts to work with those plugins Plugins={\"PreEnqueue\":{\"Enabled\":null,\"Disabled\":null},\"QueueSort\":{\"Enabled\":[{\"Name\":\"PrioritySort\",\"Weight\":0}],\"Disabled\":null},\"PreFilter\":{\"Enabled\":null,\"Disabled\":null},\"Filter\":{\"Enabled\":null,\"Disabled\":null},\"PostFilter\":{\"Enabled\":null,\"Disabled\":null},\"PreScore\":{\"Enabled\":null,\"Disabled\":null},\"Score\":{\"Enabled\":null,\"Disabled\":null},\"Reserve\":{\"Enabled\":null,\"Disabled\":null},\"Permit\":{\"Enabled\":null,\"Disabled\":null},\"PreBind\":{\"Enabled\":[{\"Name\":\"BlockingPreBindPlugin\",\"Weight\":0}],\"Disabled\":null},\"Bind\":{\"Enabled\":[{\"Name\":\"DefaultBinder\",\"Weight\":0}],\"Disabled\":null},\"PostBind\":{\"Enabled\":null,\"Disabled\":null},\"MultiPoint\":{\"Enabled\":null,\"Disabled\":null}}\n        active_queue.go:111: I0219 10:02:21.657800] Pod moved to an internal scheduling queue pod=\"foo\" event=\"UnschedulablePodAdd\" queue=\"Active\"\n        schedule_one.go:106: I0219 10:02:21.658228] About to try and schedule pod pod=\"foo\"\n        schedule_one.go:122: I0219 10:02:21.658272] Attempting to schedule pod pod=\"foo\"\n        schedule_one.go:1304: I0219 10:02:21.658384] Updating pod condition and nominated node name pod=\"foo\" nominatedNodeName=\"node1\" nominatingMode=\"ModeOverride\" asyncApiCall=true\n        framework.go:1473: E0219 10:02:21.658442] PreBind: Plugin failed err=\"context cancelled externally\" plugin=\"BlockingPreBindPlugin\" pod=\"foo\" node=\"node1\"\n        schedule_one_test.go:1081: patch pods called\n        schedule_one_test.go:1102: Updated NNN: node1\n        runtime.go:221: E0219 10:02:21.658592] UnhandledError: Error scheduling pod; retrying err=\"running PreBind plugin \\\"BlockingPreBindPlugin\\\": context cancelled externally\" pod=\"foo\"\n        backoff_queue.go:310: I0219 10:02:21.658916] Pod moved to an internal scheduling queue pod=\"foo\" event=\"ScheduleAttemptFailure\" queue=\"Backoff\"\n        scheduling_queue.go:930: I0219 10:02:21.658986] Pod moved to an internal scheduling queue pod=\"foo\" event=\"ScheduleAttemptFailure\" queue=\"Backoff\" schedulingCycle=1 hint=1 unschedulable plugins={}\n        schedule_one.go:1304: I0219 10:02:21.659100] Updating pod condition and nominated node name pod=\"foo\" conditionType=\"PodScheduled\" conditionStatus=\"False\" conditionReason=\"SchedulerError\" nominatedNodeName=\"\" nominatingMode=\"ModeOverride\" asyncApiCall=true\n        schedule_one_test.go:1164: closing called because of event: &Event{ObjectMeta:{foo.18959da0a0d8793e  default    0 0001-01-01 00:00:00 +0000 UTC <nil> <nil> map[] map[] [] [] []},EventTime:2026-02-19 10:02:21.659019465 +0000 UTC m=+106.177536936,Series:nil,ReportingController:test-scheduler,ReportingInstance:test-scheduler-mwyrzuc.c.googlers.com,Action:Scheduling,Reason:FailedScheduling,Regarding:{Pod  foo foo v1  },Related:nil,Note:running PreBind plugin \"BlockingPreBindPlugin\": context cancelled externally,Type:Warning,DeprecatedSource:{ },DeprecatedFirstTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedLastTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedCount:0,}\n        schedule_one_test.go:1081: patch pods called\n        schedule_one_test.go:1098: patch doesn't include nominatedNodeName: \"{\\\"status\\\":{\\\"conditions\\\":[{\\\"lastProbeTime\\\":null,\\\"lastTransitionTime\\\":\\\"2026-02-19T10:02:21Z\\\",\\\"message\\\":\\\"running PreBind plugin \\\\\\\"BlockingPreBindPlugin\\\\\\\": context cancelled externally\\\",\\\"reason\\\":\\\"SchedulerError\\\",\\\"status\\\":\\\"False\\\",\\\"type\\\":\\\"PodScheduled\\\"}]}}\"\n        schedule_one_test.go:1193: Expected nominated node name \"X\", got \"node1\"\n    --- FAIL: TestSchedulerScheduleOne/prebind_pod_cancelled_during_prebind_(external_preemption)_(QueueingHints:_true,_AsyncAPICalls:_false,_NominatedNodeNameForExpectation:_true,_Schedule_as_PodGroup:_false) (1.21s)\n        framework.go:463: I0219 10:02:22.860944] the scheduler starts to work with those plugins Plugins={\"PreEnqueue\":{\"Enabled\":null,\"Disabled\":null},\"QueueSort\":{\"Enabled\":[{\"Name\":\"PrioritySort\",\"Weight\":0}],\"Disabled\":null},\"PreFilter\":{\"Enabled\":null,\"Disabled\":null},\"Filter\":{\"Enabled\":null,\"Disabled\":null},\"PostFilter\":{\"Enabled\":null,\"Disabled\":null},\"PreScore\":{\"Enabled\":null,\"Disabled\":null},\"Score\":{\"Enabled\":null,\"Disabled\":null},\"Reserve\":{\"Enabled\":null,\"Disabled\":null},\"Permit\":{\"Enabled\":null,\"Disabled\":null},\"PreBind\":{\"Enabled\":[{\"Name\":\"BlockingPreBindPlugin\",\"Weight\":0}],\"Disabled\":null},\"Bind\":{\"Enabled\":[{\"Name\":\"DefaultBinder\",\"Weight\":0}],\"Disabled\":null},\"PostBind\":{\"Enabled\":null,\"Disabled\":null},\"MultiPoint\":{\"Enabled\":null,\"Disabled\":null}}\n        active_queue.go:111: I0219 10:02:22.861048] Pod moved to an internal scheduling queue pod=\"foo\" event=\"UnschedulablePodAdd\" queue=\"Active\"\n        schedule_one.go:106: I0219 10:02:22.861430] About to try and schedule pod pod=\"foo\"\n        schedule_one.go:122: I0219 10:02:22.861457] Attempting to schedule pod pod=\"foo\"\n        schedule_one.go:1304: I0219 10:02:22.861535] Updating pod condition and nominated node name pod=\"foo\" nominatedNodeName=\"node1\" nominatingMode=\"ModeOverride\"\n        schedule_one_test.go:1081: patch pods called\n        schedule_one_test.go:1102: Updated NNN: node1\n        framework.go:1473: E0219 10:02:22.863749] PreBind: Plugin failed err=\"context cancelled externally\" plugin=\"BlockingPreBindPlugin\" pod=\"foo\" node=\"node1\"\n        runtime.go:221: E0219 10:02:22.863812] UnhandledError: Error scheduling pod; retrying err=\"running PreBind plugin \\\"BlockingPreBindPlugin\\\": context cancelled externally\" pod=\"foo\"\n        backoff_queue.go:310: I0219 10:02:22.863855] Pod moved to an internal scheduling queue pod=\"foo\" event=\"ScheduleAttemptFailure\" queue=\"Backoff\"\n        scheduling_queue.go:930: I0219 10:02:22.863884] Pod moved to an internal scheduling queue pod=\"foo\" event=\"ScheduleAttemptFailure\" queue=\"Backoff\" schedulingCycle=1 hint=1 unschedulable plugins={}\n        schedule_one.go:1304: I0219 10:02:22.863937] Updating pod condition and nominated node name pod=\"foo\" conditionType=\"PodScheduled\" conditionStatus=\"False\" conditionReason=\"SchedulerError\" nominatedNodeName=\"\" nominatingMode=\"ModeOverride\"\n        schedule_one_test.go:1081: patch pods called\n        schedule_one_test.go:1098: patch doesn't include nominatedNodeName: \"{\\\"status\\\":{\\\"conditions\\\":[{\\\"lastProbeTime\\\":null,\\\"lastTransitionTime\\\":\\\"2026-02-19T10:02:22Z\\\",\\\"message\\\":\\\"running PreBind plugin \\\\\\\"BlockingPreBindPlugin\\\\\\\": context cancelled externally\\\",\\\"reason\\\":\\\"SchedulerError\\\",\\\"status\\\":\\\"False\\\",\\\"type\\\":\\\"PodScheduled\\\"}]}}\"\n        schedule_one_test.go:1164: closing called because of event: &Event{ObjectMeta:{foo.18959da0e8a96cf6  default    0 0001-01-01 00:00:00 +0000 UTC <nil> <nil> map[] map[] [] [] []},EventTime:2026-02-19 10:02:22.863898703 +0000 UTC m=+107.382416175,Series:nil,ReportingController:test-scheduler,ReportingInstance:test-scheduler-mwyrzuc.c.googlers.com,Action:Scheduling,Reason:FailedScheduling,Regarding:{Pod  foo foo v1  },Related:nil,Note:running PreBind plugin \"BlockingPreBindPlugin\": context cancelled externally,Type:Warning,DeprecatedSource:{ },DeprecatedFirstTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedLastTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedCount:0,}\n        schedule_one_test.go:1193: Expected nominated node name \"X\", got \"node1\"\nFAIL\nFAIL    k8s.io/kubernetes/pkg/scheduler 137.822s\nFAIL\n```",
+      "createdAt": "2026-02-19T10:27:30Z",
+      "id": "IC_kwDOAToIks7qBkau",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3926279854"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Argh4k"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "So, the test should have `expectNominatedNodeName: \"\"`, the test case logic should be updated to wait for all api calls even when they are done by async api and the updatePod logic should be changed to also update the status of our internal copy of the Pod.  ",
+      "createdAt": "2026-02-19T10:56:08Z",
+      "id": "IC_kwDOAToIks7qCR6E",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3926466180"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "macsko"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@Argh4k Thanks for sharing your findings. It appears to be a bug where we might not consider the new NNN in updatePod. When the first API call is synchronous and there are no network delays, this line should retrieve the pod with NNN set and correctly evaluate `if nnnNeedsUpdate`:\n\nhttps://github.com/kubernetes/kubernetes/blob/b08fa0cdf18610be74d9741cf361446a5f42ff76/pkg/scheduler/schedule_one.go#L1229\n\nHowever, this may not work for async API calls or in real clusters. It looks like we need to add a line that sets NNN on a pod or checks `if nnnNeedsUpdate` in a different way.",
+      "createdAt": "2026-02-19T10:57:02Z",
+      "id": "IC_kwDOAToIks7qCTOr",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3926471595"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Argh4k"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "It's interesting because even the scenario with async calls disabled fails. I added a log line to print out the object it gets from cache:\n```\nschedule_one.go:1243: I0219 11:19:21.405258] Got pod from cache pod=\"&Pod{ObjectMeta:{foo    foo  0 0001-01-01 00:00:00 +0000 UTC <nil> <nil> map[] map[] [] [] []},Spec:PodSpec{Volumes:[]Volume{},Containers:[]Container{},RestartPolicy:,TerminationGracePeriodSeconds:nil,ActiveDeadlineSeconds:nil,DNSPolicy:,NodeSelector:map[string]string{},ServiceAccountName:,DeprecatedServiceAccount:,NodeName:node1,HostNetwork:false,HostPID:false,HostIPC:false,SecurityContext:nil,ImagePullSecrets:[]LocalObjectReference{},Hostname:,Subdomain:,Affinity:nil,SchedulerName:test-scheduler,InitContainers:[]Container{},AutomountServiceAccountToken:nil,Tolerations:[]Toleration{},HostAliases:[]HostAlias{},PriorityClassName:,Priority:nil,DNSConfig:nil,ShareProcessNamespace:nil,ReadinessGates:[]PodReadinessGate{},RuntimeClassName:nil,EnableServiceLinks:nil,PreemptionPolicy:nil,Overhead:ResourceList{},TopologySpreadConstraints:[]TopologySpreadConstraint{},EphemeralContainers:[]EphemeralContainer{},SetHostnameAsFQDN:nil,OS:nil,HostUsers:nil,SchedulingGates:[]PodSchedulingGate{},ResourceClaims:[]PodResourceClaim{},Resources:nil,HostnameOverride:nil,WorkloadRef:nil,},Status:PodStatus{Phase:,Conditions:[]PodCondition{},Message:,Reason:,HostIP:,PodIP:,StartTime:<nil>,ContainerStatuses:[]ContainerStatus{},QOSClass:,InitContainerStatuses:[]ContainerStatus{},NominatedNodeName:,PodIPs:[]PodIP{},EphemeralContainerStatuses:[]ContainerStatus{},Resize:,ResourceClaimStatuses:[]PodResourceClaimStatus{},HostIPs:[]HostIP{},ObservedGeneration:0,ExtendedResourceClaimStatus:nil,AllocatedResources:ResourceList{},Resources:nil,},}\"\n```\n\nso it looks like in the test even though we are using the same client that is used by informer passed to the framework it's somehow not persisted after the patch call.  ",
+      "createdAt": "2026-02-19T11:23:35Z",
+      "id": "IC_kwDOAToIks7qC2Yh",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3926615585"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Argh4k"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@macsko I think there is one more bug in the logic that you mentioned. The new pod info based on cachedPod is assigned to podInfo.PodInfo here: https://github.com/kubernetes/kubernetes/blob/b08fa0cdf18610be74d9741cf361446a5f42ff76/pkg/scheduler/schedule_one.go#L1243\n\nBut actually the pod that we are sending to the updatePod is a pod extracted earlier: https://github.com/kubernetes/kubernetes/blob/b08fa0cdf18610be74d9741cf361446a5f42ff76/pkg/scheduler/schedule_one.go#L1205\n\nSo the \"pod\" is pointing to old pod data.  ",
+      "createdAt": "2026-02-19T13:07:15Z",
+      "id": "IC_kwDOAToIks7qFB6R",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3927187089"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Argh4k"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "So to sum up:\n1. pod passed to updatePod in handleSchedulingFailure is actually not updated based on data from Informer\n2. even if it were updated based on response from Informer there are still two race conditions here:\n- watch can be delayed and informer can have stale data (async on and off)\n- pod status call from previous updatePod can still be ongoing (async on)  \n3. the test case is in even worse shape because it syncs on event watcher",
+      "createdAt": "2026-02-19T13:11:44Z",
+      "id": "IC_kwDOAToIks7qFINr",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3927212907"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Argh4k"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Three possible approaches that I came up with:\n\n1. Replace call `cachedPod, e := podLister.Pods(pod.Namespace).Get(pod.Name)` with a strong get directly via client.\n\nThis solves a problem with delayed informer, and it should solve the problem completely for async=off cases. It does not guarantee that with async=on we will not hit similar issue. It also adds a quite heavy (compared to other operations in  handleSchedulingFailure) call.\n\n2. Add NominatedNodeName to QueuedPodInfo.\n\nWe could store current NNN of the pod in QueuedPodInfo and instead of comparing the new NNN against current pod status in updatePod we would compare the new NNN against NNN from  QueuedPodInfo.  The one problem that I can see is that we can send unnecessary updates if some external component set the NNN one we are trying to update to. I would also need to dig deeper to understand whether we need to sync this NNN in other places than updatePod\n\n3. Try to always update NNN in updatePod\n\nThis would be cheap and pretty straight forward to implement. If the nominatingInfo has NominatingMode override, we always call PatchPodStatus with `podStatusCopy.NominatedNodeName = nominatingInfo.NominatedNodeName`. The only drawback of this solution is that we would throw away an optimization, where if NNN set on pod is the same and \npodConditions do not require an update we do not send pod status update. But how often does it happen? I guess this optimization is useful for cases where pods fail scheduling with exactly the same reason. \n\n\n @macsko @sanposhiho I would like to know your opinion on those approaches",
+      "createdAt": "2026-02-19T14:07:42Z",
+      "id": "IC_kwDOAToIks7qGVdE",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3927529284"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Prajyot-Parab"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "latest [Triage](https://storage.googleapis.com/k8s-triage/index.html?job=ci-kubernetes-unit$&test=k8s.io/kubernetes/pkg/scheduler.scheduler) (flaking rate very high)\n\ncc @kubernetes/release-team-release-signal",
+      "createdAt": "2026-02-21T10:13:56Z",
+      "id": "IC_kwDOAToIks7qwZaO",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3938555534"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Argh4k"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "https://github.com/kubernetes/kubernetes/pull/137139 is waiting for LGTM, it should resolve the flakiness,, ",
+      "createdAt": "2026-02-21T12:56:48Z",
+      "id": "IC_kwDOAToIks7qxGmh",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3938740641"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "aojea"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "still flaking, @Argh4k you should be able to trigger in a PR sending `/test pull-kubernetes-unit-windows-master` in the PR",
+      "createdAt": "2026-02-23T20:07:19Z",
+      "id": "IC_kwDOAToIks7rQvNe",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3947033438"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "Argh4k"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@aojea I took a look at https://storage.googleapis.com/k8s-triage/index.html?text=TestSchedulerScheduleOne%2Fprebind_pod_cancelled_during_prebin&test=k8s.io%2Fkubernetes%2Fpkg%2Fscheduler and the latest ci-kubernetes-unit-windows-master failure was still on pre https://github.com/kubernetes/kubernetes/pull/137139 code. Are you sure this is still flaking? I do not see any failures on code post 137139",
+      "createdAt": "2026-02-24T08:38:18Z",
+      "id": "IC_kwDOAToIks7rcSyt",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3950062765"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "aojea"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "/close\n\n@Argh4k my apologies , it seems I did wrong the maths and assumed the job I was checking was after that PR\n\nThe testgrid shows a constant green after 02-23 https://testgrid.k8s.io/sig-windows-signal#windows-unit-master&sort-by-flakiness=&include-filter-by-regex=scheduler.scheduler ,, that is one that PR landed\n\nEDIT \n\nok, found my mistake, I checked by commit date not by the PR merge data \ud83d\ude13 \n\n",
+      "createdAt": "2026-02-25T12:35:50Z",
+      "id": "IC_kwDOAToIks7r-Sms",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3958974892"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@aojea: Closing this issue.\n\n<details>\n\nIn response to [this](https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3958974892):\n\n>/close\n>\n>@Argh4k my apologies , it seems I did wrong the maths and assumed the job I was checking was after that PR\n>\n>The testgrid shows a constant green after 02-23 https://testgrid.k8s.io/sig-windows-signal#windows-unit-master&sort-by-flakiness=&include-filter-by-regex=scheduler.scheduler ,, that is one that PR landed\n>\n>\n>\n>\n\n\nInstructions for interacting with me using PR comments are available [here](https://git.k8s.io/community/contributors/guide/pull-requests.md).  If you have questions or suggestions related to my behavior, please file an issue against the [kubernetes-sigs/prow](https://github.com/kubernetes-sigs/prow/issues/new?title=Prow%20issue:) repository.\n</details>",
+      "createdAt": "2026-02-25T12:35:55Z",
+      "id": "IC_kwDOAToIks7r-St5",
+      "url": "https://github.com/kubernetes/kubernetes/issues/137125#issuecomment-3958975353"
+    }
+  ],
+  "createdAt": "2026-02-19T07:38:10Z",
+  "id": "I_kwDOAToIks7sHqed",
+  "labels": [
+    {
+      "name": "sig/scheduling"
+    },
+    {
+      "name": "kind/flake"
+    },
+    {
+      "name": "needs-triage"
+    }
+  ],
+  "number": 137125,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "Rajalakshmi-Girish"
+      },
+      "createdAt": "2026-02-19T07:38:11Z",
+      "label": {
+        "name": "kind/flake"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-02-19T07:38:12Z",
+      "label": {
+        "name": "sig/scheduling"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-02-19T07:38:17Z",
+      "label": {
+        "name": "needs-triage"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "k8s-ci-robot"
+      },
+      "createdAt": "2026-02-25T12:35:55Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "Flaking UT k8s.io/kubernetes/pkg/scheduler:TestSchedulerScheduleOne/prebind_pod_cancelled_during_prebind",
+  "url": "https://github.com/kubernetes/kubernetes/issues/137125"
+}

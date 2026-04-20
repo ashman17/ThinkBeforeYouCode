@@ -1,0 +1,297 @@
+{
+  "issue": {
+    "artifact_count": 16,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "xpu_backend",
+              "problem_kind": "incorrect_behavior",
+              "user_or_system_impact": "crash"
+            },
+            "summary": "XPU item() method fails on Intel Arc Pro B50 with UR_RESULT_ERROR_OUT_OF_DEVICE_MEMORY due to device-to-host memory copy error.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "onlycparra",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934"
+      },
+      {
+        "artifact_count": 3,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "backend/XPU",
+              "problem_kind": "logic_bug",
+              "user_or_system_impact": "runtime_error"
+            },
+            "summary": "XPU backend passing invalid USM pointer to urEnqueueUSMMemcpy; potential Intel Zero runtime issue",
+            "tags": [
+              "bug",
+              "performance_issue",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "diagnose and resolve issue",
+              "target_area": "backend/XPU",
+              "urgency": "unknown"
+            },
+            "summary": "Suggested workarounds and tests for verifying the issue: .cpu().item(), x.cpu(), y=x.cpu()",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          },
+          {
+            "metadata": {
+              "determinism": "conditional",
+              "environment": "PyTorch with XPU backend",
+              "prerequisites": "XPU device available, valid tensor operations"
+            },
+            "summary": "Steps to potentially reproduce the issue: use .cpu().item() or x.cpu(), print memory transfer result for diagnosis.",
+            "tags": [
+              "bug",
+              "runtime_error"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "ayushmanpani",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3777443874"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "torch library initialization",
+              "problem_kind": "bug",
+              "user_or_system_impact": "user unable to run code"
+            },
+            "summary": "User reports memory error and segfault during torch library initialization on B580 graphics card.",
+            "tags": [
+              "runtime_error",
+              "memory_issue"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "LogExE",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3780948452"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "cpu_device_memory_management",
+              "problem_kind": "bug",
+              "user_or_system_impact": "error_on_cpu_conversion"
+            },
+            "summary": "Using `x.cpu()` leads to a runtime error due to out-of-device-memory when running on an XPU device.",
+            "tags": [
+              "runtime_error"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "onlycparra",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3781406242"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "PyTorch compatibility",
+              "problem_kind": "performance_issue",
+              "user_or_system_impact": "user-experienced bug"
+            },
+            "summary": "User experiencing out-of-device-memory error with PyTorch versions 2.9.1 and 2.8.0 on B580 hardware running Fedora 43.",
+            "tags": [
+              "runtime_error",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          }
+        ],
+        "comment_author": "YanWenKun",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3787081073"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "escalation",
+              "status_kind": "progress_state"
+            },
+            "summary": "escalated_to_driver_team",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "EikanWang",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3787851716"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "question_kind": "technical Inquiry",
+              "target_area": "user environment",
+              "urgency": "low"
+            },
+            "summary": "EikanWang is seeking information about LogExE's OS distribution.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "EikanWang",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3788455390"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "constraint_type": "unknown",
+              "scope": "unknown",
+              "severity": "unknown"
+            },
+            "summary": "The system must support Fedora 43.",
+            "tags": [
+              "compatibility_issue"
+            ],
+            "type": "constraint"
+          }
+        ],
+        "comment_author": "LogExE",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3788456806"
+      },
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "affected_area": "python environment setup",
+              "problem_kind": "bug",
+              "user_or_system_impact": "program fails to run due to missing module dependency"
+            },
+            "summary": "user reports missing numpy module when running torch on rawhide with intel graphics driver and docker container",
+            "tags": [
+              "runtime_error",
+              "incorrect_behavior"
+            ],
+            "type": "problem_statement"
+          },
+          {
+            "metadata": {
+              "component": "torch setup",
+              "implementation_action": "installation and configuration steps",
+              "lifecycle_stage": "setup"
+            },
+            "summary": "steps and environment details for setting up and running torch on rawhide with intel graphics driver in docker container",
+            "tags": [
+              "docker",
+              "linux"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "determinism": "reproducible steps provided",
+              "environment": "rawhide Fedora OS, docker container with render group gid 991, Intel(R) Arc(TM) B580 Graphics",
+              "prerequisites": "installing required packages and setting up virtual environment"
+            },
+            "summary": "details on how to reproduce the missing numpy module issue in torch environment with intel graphics driver on rawhide in docker container",
+            "tags": [
+              "docker",
+              "linux"
+            ],
+            "type": "bug_reproduction_steps"
+          },
+          {
+            "metadata": {
+              "expected_improvement": "identifying platform-specific issues",
+              "target_area": "cross-platform validation and testing",
+              "urgency": "informative request for collaboration"
+            },
+            "summary": "request for others to try the latest driver version on their side to validate issue",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "chuanqi129",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3790899372"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "expected_improvement": "resolution of device memory out-of-space issues",
+              "target_area": "memory management",
+              "urgency": "high"
+            },
+            "summary": "Suggest switching to a specific Linux kernel version as a workaround for memory errors.",
+            "tags": [
+              "workaround",
+              "fix_proposed",
+              "bug"
+            ],
+            "type": "suggestion"
+          }
+        ],
+        "comment_author": "YanWenKun",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3792367170"
+      },
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "determinism": "The error can be consistently reproduced by running the provided script",
+              "environment": "Linux 6.17.11-200.fc42.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Dec 9 00:25:56 UTC 2025",
+              "prerequisites": "Python 3 and pytorch installed, Intel(R) Graphics device available"
+            },
+            "summary": "On Linux 6.17.11 with pytorch 2.10.0+xpu and Intel(R) Graphics [0xe212], running a test script causes an error.",
+            "tags": [
+              "bug",
+              "runtime_error",
+              "incorrect_output"
+            ],
+            "type": "bug_reproduction_steps"
+          }
+        ],
+        "comment_author": "onlycparra",
+        "comment_link": "https://github.com/pytorch/pytorch/issues/172934#issuecomment-3793146700"
+      }
+    ],
+    "issue_number": 172934,
+    "issue_title": "XPU: x.item() fails on Intel Arc Pro B50 with UR_RESULT_ERROR_OUT_OF_DEVICE_MEMORY; UR shows urEnqueueUSMMemcpy(size=4)",
+    "issue_url": "https://github.com/pytorch/pytorch/issues/172934"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/pytorch__pytorch/issue_172934.json",
+  "repository": "pytorch/pytorch",
+  "status": "completed"
+}

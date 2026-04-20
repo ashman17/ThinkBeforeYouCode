@@ -1,0 +1,128 @@
+{
+  "issue": {
+    "artifact_count": 7,
+    "comments": [
+      {
+        "artifact_count": 1,
+        "artifacts": [
+          {
+            "metadata": {
+              "blocking": false,
+              "progress_state": "in_progress",
+              "status_kind": "request_for_participation"
+            },
+            "summary": "v31.0 Testing - Requesting contributors to test on various platforms and report any issues found.",
+            "tags": [
+              "test_infra_issue"
+            ],
+            "type": "status_update"
+          }
+        ],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34840"
+      },
+      {
+        "artifact_count": 0,
+        "artifacts": [],
+        "comment_author": "fanquake",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34840#issuecomment-4073396103"
+      },
+      {
+        "artifact_count": 2,
+        "artifacts": [
+          {
+            "metadata": {
+              "coverage_target": "private transaction handling and mempool interaction",
+              "expected_outcome": "Transactions should be processed correctly according to the protocol, with proper logging and state updates in the RPC queue.",
+              "test_level": "integration"
+            },
+            "summary": "Tested private broadcast functionality with multiple transactions on mainnet.",
+            "tags": [
+              "functional_test"
+            ],
+            "type": "test_case"
+          },
+          {
+            "metadata": {
+              "evidence_type": "test_results",
+              "reliability": "first-hand observations and logs",
+              "sample_source": "mainnet"
+            },
+            "summary": "Provided detailed steps and observed outcomes of testing private broadcast transactions.",
+            "tags": [
+              "incorrect_behavior"
+            ],
+            "type": "empirical_evidence"
+          }
+        ],
+        "comment_author": "l0rinc",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34840#issuecomment-4089523958"
+      },
+      {
+        "artifact_count": 4,
+        "artifacts": [
+          {
+            "metadata": {
+              "coverage_target": "mempool, private broadcasts",
+              "expected_outcome": "success in all tested scenarios",
+              "test_level": "integration"
+            },
+            "summary": "Tested various scenarios including cluster mempool behavior and private broadcast functionality.",
+            "tags": [
+              "functional_test"
+            ],
+            "type": "test_case"
+          },
+          {
+            "metadata": {
+              "component": "API responses",
+              "implementation_action": "reporting inconsistency",
+              "lifecycle_stage": "implementation"
+            },
+            "summary": "Reported inconsistency between `getblock` and `getrawtransaction` for the `coinbase_tx.witness` field.",
+            "tags": [
+              "api",
+              "compatibility_issue"
+            ],
+            "type": "implementation_detail"
+          },
+          {
+            "metadata": {
+              "evidence_type": "test results",
+              "reliability": "high (personal test)",
+              "sample_source": "local testing environment"
+            },
+            "summary": "Provided evidence of tested scenarios and outcomes across different verbosity levels, block heights, and transactions.",
+            "tags": [
+              "unit_test"
+            ],
+            "type": "empirical_evidence"
+          },
+          {
+            "metadata": {
+              "question_kind": "unknown",
+              "target_area": "API design consistency",
+              "urgency": "low (informational)"
+            },
+            "summary": "Asked about the intentional nature of the inconsistency in `coinbase_tx.witness` field responses.",
+            "tags": [
+              "api"
+            ],
+            "type": "question"
+          }
+        ],
+        "comment_author": "enirox001",
+        "comment_link": "https://github.com/bitcoin/bitcoin/issues/34840#issuecomment-4105913717"
+      }
+    ],
+    "issue_number": 34840,
+    "issue_title": "v31.0 Testing",
+    "issue_url": "https://github.com/bitcoin/bitcoin/issues/34840"
+  },
+  "model_id": "qwen2.5:7b-instruct",
+  "model_url": "http://localhost:11434",
+  "prompt_version": "discussion_artifacts_v7",
+  "records_path": "data/extractions/bitcoin__bitcoin/issue_34840.json",
+  "repository": "bitcoin/bitcoin",
+  "status": "completed"
+}

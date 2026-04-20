@@ -1,0 +1,109 @@
+{
+  "author": {
+    "__typename": "User",
+    "login": "rdesgroppes"
+  },
+  "authorAssociation": "CONTRIBUTOR",
+  "body": "### Please list the URLs of the archives you'd like to mirror:\n\n\nhttps://github.com/bazelbuild/bazel-skylib/releases/download/1.9.0/bazel-skylib-1.9.0.tar.gz",
+  "closedAt": "2026-03-20T05:41:32Z",
+  "comments": [
+    {
+      "author": {
+        "__typename": "User",
+        "login": "bharadwaj08-one"
+      },
+      "authorAssociation": "NONE",
+      "body": "@rdesgroppes  Here you go !\nhttps://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.9.0/bazel-skylib-1.9.0.tar.gz",
+      "createdAt": "2026-03-20T05:41:32Z",
+      "id": "IC_kwDOATz7jc70IDPV",
+      "url": "https://github.com/bazelbuild/bazel/issues/29030#issuecomment-4095751125"
+    },
+    {
+      "author": {
+        "__typename": "User",
+        "login": "rdesgroppes"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thanks, @bharadwaj08-one!",
+      "createdAt": "2026-03-21T02:52:22Z",
+      "id": "IC_kwDOATz7jc70fpHE",
+      "url": "https://github.com/bazelbuild/bazel/issues/29030#issuecomment-4101935556"
+    }
+  ],
+  "createdAt": "2026-03-19T11:49:06Z",
+  "id": "I_kwDOATz7jc70cs3S",
+  "labels": [
+    {
+      "name": "P2"
+    },
+    {
+      "name": "type: process"
+    },
+    {
+      "name": "team-OSS"
+    },
+    {
+      "name": "mirror request"
+    }
+  ],
+  "number": 29030,
+  "state": "CLOSED",
+  "stateReason": "COMPLETED",
+  "timelineItems": [
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rdesgroppes"
+      },
+      "createdAt": "2026-03-19T11:49:08Z",
+      "label": {
+        "name": "P2"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rdesgroppes"
+      },
+      "createdAt": "2026-03-19T11:49:08Z",
+      "label": {
+        "name": "type: process"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rdesgroppes"
+      },
+      "createdAt": "2026-03-19T11:49:08Z",
+      "label": {
+        "name": "team-OSS"
+      }
+    },
+    {
+      "__typename": "LabeledEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "rdesgroppes"
+      },
+      "createdAt": "2026-03-19T11:49:08Z",
+      "label": {
+        "name": "mirror request"
+      }
+    },
+    {
+      "__typename": "ClosedEvent",
+      "actor": {
+        "__typename": "User",
+        "login": "bharadwaj08-one"
+      },
+      "createdAt": "2026-03-20T05:41:32Z",
+      "stateReason": "COMPLETED"
+    }
+  ],
+  "title": "[Mirror] bazel-skylib 1.9.0",
+  "url": "https://github.com/bazelbuild/bazel/issues/29030"
+}
