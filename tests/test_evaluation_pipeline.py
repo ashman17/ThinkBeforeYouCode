@@ -328,6 +328,10 @@ def test_resolve_issue_thought_provider_routes_by_prefix_and_tag() -> None:
     assert _resolve_issue_thought_provider("openai/gpt-4o-mini") == ("api", "gpt-4o-mini")
     assert _resolve_issue_thought_provider("ollama/qwen2.5:14b") == ("ollama", "qwen2.5:14b")
     assert _resolve_issue_thought_provider("qwen2.5:14b") == ("ollama", "qwen2.5:14b")
+    assert _resolve_issue_thought_provider("claude-opus-4-20250514-v1:0") == (
+        "api",
+        "claude-opus-4-20250514-v1:0",
+    )
     assert _resolve_issue_thought_provider("gpt-4.1") == ("api", "gpt-4.1")
 
 

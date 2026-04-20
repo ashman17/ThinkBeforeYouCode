@@ -235,9 +235,18 @@ def _resolve_issue_thought_provider(model_id: str) -> Tuple[str, str]:
     if lowered.startswith("ollama/"):
         return "ollama", normalized[7:]
 
-    # Ollama tags commonly include a colon (for example qwen2.5:14b).
+    # For unprefixed IDs, use a small heuristic:
+    # - Ollama tags commonly use size labels (qwen2.5:14b, llama3.1:8b, :latest).
+    # - API providers (for example Bedrock model IDs) often use numeric revision
+    #   suffixes like claude-opus-4-20250514-v1:0.
     if ":" in normalized:
-        return "ollama", normalized
+        _, suffix = normalized.rsplit(":", 1)
+        suffix_lower = suffix.lower()
+        if suffix.isdigit():
+            return "api", normalized
+        if suffix_lower.endswith(("b", "m")) or suffix_lower == "latest":
+            return "ollama", normalized
+        return "api", normalized
 
     # Default to API for untagged model IDs.
     return "api", normalized

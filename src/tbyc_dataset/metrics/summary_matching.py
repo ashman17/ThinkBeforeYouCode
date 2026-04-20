@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
@@ -18,6 +19,10 @@ def compute_summary_matching_metrics(
     codebert_model: str = "microsoft/codebert-base",
     bertscore_model: str = "microsoft/codebert-base",
     bleurt_model: str = "Elron/bleurt-base-512",
+    bleurt_postprocess: str = "sigmoid",
+    bleurt_clip_min: Optional[float] = 0.0,
+    bleurt_sigmoid_temperature: float = 2.0,
+    bleurt_sigmoid_bias: float = 0.0,
 ) -> Dict[str, Any]:
     repo_ref = RepositoryRef(owner=owner, name=repo)
     root = Path(output_root)
@@ -38,6 +43,10 @@ def compute_summary_matching_metrics(
         codebert_model=codebert_model,
         bertscore_model=bertscore_model,
         bleurt_model=bleurt_model,
+        bleurt_postprocess=bleurt_postprocess,
+        bleurt_clip_min=bleurt_clip_min,
+        bleurt_sigmoid_temperature=bleurt_sigmoid_temperature,
+        bleurt_sigmoid_bias=bleurt_sigmoid_bias,
     )
 
     per_issue: List[Dict[str, Any]] = []
@@ -65,6 +74,13 @@ def compute_summary_matching_metrics(
             "codebert": codebert_model,
             "bertscore": bertscore_model,
             "bleurt": bleurt_model,
+        },
+        "bleurt_postprocess": {
+            "mode": bleurt_postprocess,
+            "clip_min": bleurt_clip_min,
+            "sigmoid_temperature": bleurt_sigmoid_temperature,
+            "sigmoid_bias": bleurt_sigmoid_bias,
+            "note": "score is post-processed for aggregation/reporting; raw_score is preserved per comparison when available",
         },
         "overall": overall,
         "per_type": per_type,
@@ -508,7 +524,15 @@ class _BERTScoreScorer(_BaseScorer):
 
 
 class _BLEURTScorer(_BaseScorer):
-    def __init__(self, model_name: str) -> None:
+    def __init__(
+        self,
+        model_name: str,
+        *,
+        postprocess: str = "sigmoid",
+        clip_min: Optional[float] = 0.0,
+        sigmoid_temperature: float = 2.0,
+        sigmoid_bias: float = 0.0,
+    ) -> None:
         try:
             import torch
             from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -519,6 +543,10 @@ class _BLEURTScorer(_BaseScorer):
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         self._model = AutoModelForSequenceClassification.from_pretrained(model_name)
         self._model.eval()
+        self._postprocess = postprocess
+        self._clip_min = clip_min
+        self._sigmoid_temperature = sigmoid_temperature
+        self._sigmoid_bias = sigmoid_bias
 
     def score(self, reference: str, candidate: str) -> Dict[str, float]:
         if not reference and not candidate:
@@ -537,10 +565,19 @@ class _BLEURTScorer(_BaseScorer):
             outputs = self._model(**encoded)
             logits = outputs.logits
             if logits.ndim == 2:
-                value = float(logits.squeeze(0).squeeze(-1).item())
+                raw_value = float(logits.squeeze(0).squeeze(-1).item())
             else:
-                value = float(logits.item())
-            return {"score": value}
+                raw_value = float(logits.item())
+            return {
+                "score": _normalize_bleurt_score(
+                    raw_value,
+                    postprocess=self._postprocess,
+                    clip_min=self._clip_min,
+                    sigmoid_temperature=self._sigmoid_temperature,
+                    sigmoid_bias=self._sigmoid_bias,
+                ),
+                "raw_score": raw_value,
+            }
 
 
 @dataclass
@@ -556,7 +593,16 @@ class _UnavailableScorer(_BaseScorer):
         return {"score": 0.0, "unavailable": 1.0}
 
 
-def _build_scorers(*, codebert_model: str, bertscore_model: str, bleurt_model: str) -> Dict[str, _BaseScorer]:
+def _build_scorers(
+    *,
+    codebert_model: str,
+    bertscore_model: str,
+    bleurt_model: str,
+    bleurt_postprocess: str = "sigmoid",
+    bleurt_clip_min: Optional[float] = 0.0,
+    bleurt_sigmoid_temperature: float = 2.0,
+    bleurt_sigmoid_bias: float = 0.0,
+) -> Dict[str, _BaseScorer]:
     scorers: Dict[str, _BaseScorer] = {}
 
     try:
@@ -570,8 +616,37 @@ def _build_scorers(*, codebert_model: str, bertscore_model: str, bleurt_model: s
         scorers["bertscore"] = _UnavailableScorer("bertscore", str(exc))
 
     try:
-        scorers["bleurt"] = _BLEURTScorer(bleurt_model)
+        scorers["bleurt"] = _BLEURTScorer(
+            bleurt_model,
+            postprocess=bleurt_postprocess,
+            clip_min=bleurt_clip_min,
+            sigmoid_temperature=bleurt_sigmoid_temperature,
+            sigmoid_bias=bleurt_sigmoid_bias,
+        )
     except Exception as exc:  # pragma: no cover - dependency/environment specific
         scorers["bleurt"] = _UnavailableScorer("bleurt", str(exc))
 
     return scorers
+
+
+def _normalize_bleurt_score(
+    raw_score: float,
+    *,
+    postprocess: str = "sigmoid",
+    clip_min: Optional[float] = 0.0,
+    sigmoid_temperature: float = 2.0,
+    sigmoid_bias: float = 0.0,
+) -> float:
+    value = float(raw_score)
+    if postprocess == "raw":
+        return value
+    if postprocess == "clip":
+        if clip_min is not None:
+            return max(float(clip_min), value)
+        return value
+    if postprocess == "sigmoid":
+        temperature = max(1e-6, float(sigmoid_temperature))
+        shifted = (value - float(sigmoid_bias)) / temperature
+        shifted = max(-60.0, min(60.0, shifted))
+        return 1.0 / (1.0 + math.exp(-shifted))
+    raise ValueError(f"Unsupported BLEURT postprocess mode: {postprocess}")
