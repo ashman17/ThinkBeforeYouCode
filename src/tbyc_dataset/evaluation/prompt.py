@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, Mapping, Sequence
+from typing import Iterable, Mapping, Optional, Sequence
 
 
 THOUGHT_TOPICS: Sequence[str] = (
@@ -43,6 +43,7 @@ def build_issue_thought_prompt(
     *,
     include_context: bool,
     context_blocks: Iterable[Mapping[str, object]],
+    few_shot_examples: Optional[Sequence[Mapping[str, object]]] = None,
 ) -> str:
     title = str(issue.get("title") or "").strip()
     body = str(issue.get("body") or "").strip()
@@ -54,10 +55,25 @@ def build_issue_thought_prompt(
         "Each line must follow: [Topic] comment",
         "Use only these topics:",
         "; ".join(THOUGHT_TOPICS),
-        "",
-        f"Issue #{issue_number}: {title}" if issue_number is not None else f"Issue: {title}",
-        body,
     ]
+
+    rendered_examples = list(_render_few_shot_examples(few_shot_examples or ()))
+    if rendered_examples:
+        sections.extend(
+            [
+                "",
+                "Here are examples from the same repository. Follow their format, but do not copy them:",
+                "\n\n".join(rendered_examples),
+            ]
+        )
+
+    sections.extend(
+        [
+            "",
+            f"Issue #{issue_number}: {title}" if issue_number is not None else f"Issue: {title}",
+            body,
+        ]
+    )
 
     if include_context:
         rendered_blocks = list(_render_context_blocks(context_blocks))
@@ -92,3 +108,26 @@ def _render_context_blocks(blocks: Iterable[Mapping[str, object]]) -> Iterable[s
             location = f"{path}:{start_line}-{end_line}"
         symbol_segment = f" ({symbol})" if symbol else ""
         yield f"[{location}{symbol_segment}]\n{text}"
+
+
+def _render_few_shot_examples(examples: Sequence[Mapping[str, object]]) -> Iterable[str]:
+    for index, example in enumerate(examples, start=1):
+        issue_number = example.get("issue_number")
+        title = str(example.get("title") or "").strip()
+        body = str(example.get("body") or "").strip()
+        response = str(example.get("response") or "").strip()
+        if not response:
+            continue
+
+        heading = f"Example {index}"
+        issue_line = f"Issue #{issue_number}: {title}" if issue_number is not None else f"Issue: {title}"
+        parts = [heading, issue_line]
+        if body:
+            parts.append(body)
+        parts.extend(
+            [
+                "Response:",
+                response,
+            ]
+        )
+        yield "\n".join(parts)

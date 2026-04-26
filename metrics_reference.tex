@@ -1,0 +1,672 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\title{TBYC Dataset Metrics Reference}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Scope}
+This document describes the metrics implemented in \texttt{src/tbyc\_dataset/metrics}: type matching, metadata matching, tag matching, and summary matching. The equations below are written to match the current code behavior, including edge cases such as empty sets and unmatched-type penalties.
+
+\section{Global Notation}
+Let an issue be indexed by $i \in \mathcal{I}$ and an artifact type by $t \in \mathcal{T}$.
+
+\begin{itemize}[leftmargin=*]
+\item $H_i$: set of human artifact types present in issue $i$.
+\item $L_i$: set of LLM artifact types present in issue $i$.
+\item $M_i = H_i \cap L_i$: set of matching types in issue $i$.
+\item $F_{i,t}^{H}$, $F_{i,t}^{L}$: human and LLM metadata field-name sets for issue $i$, type $t$.
+\item $V_{i,t,f}^{H} = (v_1,\dots,v_m)$: human metadata values for issue $i$, type $t$, field $f$.
+\item $V_{i,t,f}^{L} = (u_1,\dots,u_n)$: LLM metadata values for issue $i$, type $t$, field $f$.
+\item $G_{i,t}^{H}$, $G_{i,t}^{L}$: human and LLM tag sets for issue $i$, type $t$.
+\item $S_{i,t}^{H} = (s_1,\dots,s_a)$, $S_{i,t}^{L} = (r_1,\dots,r_b)$: human and LLM summary strings for issue $i$, type $t$.
+\item $\operatorname{combine}(x_1,\dots,x_k)$: newline-joined concatenation of non-empty summary strings.
+\item $\operatorname{ratio}(x,y)=\begin{cases}1 & y=0 \text{ and } x=0\\0 & y=0 \text{ and } x>0\\x/y & y>0\end{cases}$.
+\item $\operatorname{harm}(p,r)=\begin{cases}0 & p+r=0\\ \frac{2pr}{p+r} & p+r>0\end{cases}$.
+\end{itemize}
+
+\section{Type Matching}
+\subsection{What It Measures}
+Type matching measures whether the model predicts the correct artifact \emph{types}, ignoring summaries, tags, and metadata values.
+
+\subsection{Per-Issue Set Metrics}
+For issue $i$, define:
+\[
+\mathrm{TP}_i = |H_i \cap L_i|,\quad
+\mathrm{FP}_i = |L_i \setminus H_i|,\quad
+\mathrm{FN}_i = |H_i \setminus L_i|,\quad
+\mathrm{U}_i = |H_i \cup L_i|.
+\]
+
+The reported metrics are:
+\[
+\mathrm{Precision}_i = \operatorname{ratio}(\mathrm{TP}_i, |L_i|),
+\]
+\[
+\mathrm{Recall}_i = \operatorname{ratio}(\mathrm{TP}_i, |H_i|),
+\]
+\[
+\mathrm{F1}_i = \operatorname{harm}(\mathrm{Precision}_i,\mathrm{Recall}_i),
+\]
+\[
+\mathrm{Jaccard}_i = \operatorname{ratio}(\mathrm{TP}_i,\mathrm{U}_i).
+\]
+
+Short description: these scores measure set overlap between human and predicted type inventories for one issue.
+
+\subsection{Macro Average}
+If there are $N$ evaluated issues, then:
+\[
+\mathrm{MacroPrecision} = \frac{1}{N}\sum_{i=1}^{N}\mathrm{Precision}_i,
+\quad
+\mathrm{MacroRecall} = \frac{1}{N}\sum_{i=1}^{N}\mathrm{Recall}_i,
+\]
+\[
+\mathrm{MacroF1} = \frac{1}{N}\sum_{i=1}^{N}\mathrm{F1}_i,
+\quad
+\mathrm{MacroJaccard} = \frac{1}{N}\sum_{i=1}^{N}\mathrm{Jaccard}_i.
+\]
+
+Short description: this treats each issue equally.
+
+\subsection{Overall Union Metrics}
+The code also forms the global unions:
+\[
+H^{\cup}=\bigcup_{i \in \mathcal{I}} H_i,
+\qquad
+L^{\cup}=\bigcup_{i \in \mathcal{I}} L_i,
+\]
+and computes the same set-overlap metrics on $(H^{\cup},L^{\cup})$.
+
+Short description: this asks whether the model covers the repository-level type vocabulary, not whether it gets issue-by-issue presence right.
+
+\subsection{Per-Type Presence Metrics}
+For each type $t$ across issues:
+\[
+\mathrm{TP}_t = |\{i: t \in H_i \land t \in L_i\}|,
+\quad
+\mathrm{FP}_t = |\{i: t \notin H_i \land t \in L_i\}|,
+\]
+\[
+\mathrm{FN}_t = |\{i: t \in H_i \land t \notin L_i\}|,
+\quad
+\mathrm{TN}_t = |\{i: t \notin H_i \land t \notin L_i\}|.
+\]
+
+Then:
+\[
+\mathrm{Precision}_t = \operatorname{ratio}(\mathrm{TP}_t,\mathrm{TP}_t+\mathrm{FP}_t),
+\]
+\[
+\mathrm{Recall}_t = \operatorname{ratio}(\mathrm{TP}_t,\mathrm{TP}_t+\mathrm{FN}_t),
+\]
+\[
+\mathrm{F1}_t = \operatorname{harm}(\mathrm{Precision}_t,\mathrm{Recall}_t),
+\]
+\[
+\mathrm{Jaccard}_t = \operatorname{ratio}(\mathrm{TP}_t,\mathrm{TP}_t+\mathrm{FP}_t+\mathrm{FN}_t).
+\]
+
+Short description: this measures how reliably one specific type is detected across issues.
+
+\section{Metadata Matching}
+\subsection{What It Measures}
+Metadata matching evaluates whether metadata values attached to a given type and field agree between human and LLM annotations. Unlike type matching, this metric compares \emph{strings} using exact counts plus soft similarity.
+
+\subsection{Metadata Value Normalization}
+Each metadata value is converted to a string before scoring:
+\begin{itemize}[leftmargin=*]
+\item strings are stripped,
+\item numbers and booleans are stringified,
+\item lists are joined with spaces,
+\item dictionaries are rendered as sorted \texttt{key: value} pairs joined with \texttt{ ; }.
+\end{itemize}
+
+Short description: this produces a flat textual representation so all metadata can be compared by phrase-similarity functions.
+
+\subsection{Phrase Normalization}
+Before computing similarity, a phrase $x$ is normalized to $\nu(x)$ by:
+\begin{itemize}[leftmargin=*]
+\item lowercasing,
+\item replacing all non-alphanumeric characters with spaces,
+\item collapsing repeated whitespace,
+\item trimming leading and trailing whitespace.
+\end{itemize}
+
+\subsection{Primitive Similarity Functions}
+For normalized phrases $a$ and $b$, let $T(a)$ be the set of whitespace-delimited tokens, and let $C_n(a)$ be the set of character $n$-grams of the padded string ``\verb| |\,$a$\,\verb| |''.
+
+\paragraph{Token F1.}
+Let $o = |T(a)\cap T(b)|$. Then:
+\[
+\operatorname{tokPrec}(a,b)=\operatorname{ratio}(o,|T(b)|),\qquad
+\operatorname{tokRec}(a,b)=\operatorname{ratio}(o,|T(a)|),
+\]
+\[
+\operatorname{tokenF1}(a,b)=\operatorname{harm}(\operatorname{tokPrec}(a,b),\operatorname{tokRec}(a,b)).
+\]
+Measures overlap between unique token sets.
+
+\paragraph{Sequence Ratio.}
+\[
+\operatorname{sequenceRatio}(a,b)=\texttt{SequenceMatcher}(a,b).\texttt{ratio()}.
+\]
+Measures surface-form similarity of the normalized strings.
+
+\paragraph{Token Jaccard.}
+\[
+\operatorname{tokenJaccard}(a,b)=\operatorname{ratio}(|T(a)\cap T(b)|,|T(a)\cup T(b)|).
+\]
+Measures set overlap between token vocabularies.
+
+\paragraph{Character 3-gram Jaccard.}
+\[
+\operatorname{char3Jaccard}(a,b)=\operatorname{ratio}(|C_3(a)\cap C_3(b)|,|C_3(a)\cup C_3(b)|).
+\]
+Measures fuzzy overlap at the subword character level.
+
+\paragraph{Token Containment.}
+\[
+\operatorname{containment}(a,b)=\operatorname{ratio}(|T(a)\cap T(b)|,\min(|T(a)|,|T(b)|)).
+\]
+Measures whether the shorter token set is mostly contained in the longer one.
+
+\paragraph{Max-All Ensemble.}
+\[
+\operatorname{maxAll}(a,b)=\max\{
+\operatorname{tokenF1}(a,b),
+\operatorname{sequenceRatio}(a,b),
+\operatorname{tokenJaccard}(a,b),
+\operatorname{char3Jaccard}(a,b),
+\operatorname{containment}(a,b)
+\}.
+\]
+Measures best-case phrase agreement across several lightweight similarity functions.
+
+\subsection{Greedy One-to-One Matching}
+For one field $f$ of one type $t$ in one issue $i$, compute all pairwise similarities:
+\[
+\sigma_{jk}=\operatorname{sim}(v_j,u_k),
+\quad v_j \in V_{i,t,f}^{H},\ u_k \in V_{i,t,f}^{L}.
+\]
+Sort all candidate pairs by descending $\sigma_{jk}$ and greedily keep a pair only if neither value has been used before. This produces a one-to-one set of greedy pairs $P$.
+
+Short description: this approximates bipartite matching while preferring the strongest alignments first.
+
+\subsection{Hard Metadata Metrics}
+Given a threshold $\tau$ (default $0.82$), define:
+\[
+\mathrm{TP}_{i,t,f}=|\{(j,k)\in P : \sigma_{jk}\ge\tau\}|,
+\]
+\[
+\mathrm{FP}_{i,t,f}=|V_{i,t,f}^{L}|-\mathrm{TP}_{i,t,f},
+\qquad
+\mathrm{FN}_{i,t,f}=|V_{i,t,f}^{H}|-\mathrm{TP}_{i,t,f}.
+\]
+
+Then:
+\[
+\mathrm{Precision}_{i,t,f}=\operatorname{ratio}(\mathrm{TP}_{i,t,f},|V_{i,t,f}^{L}|),
+\]
+\[
+\mathrm{Recall}_{i,t,f}=\operatorname{ratio}(\mathrm{TP}_{i,t,f},|V_{i,t,f}^{H}|),
+\]
+\[
+\mathrm{F1}_{i,t,f}=\operatorname{harm}(\mathrm{Precision}_{i,t,f},\mathrm{Recall}_{i,t,f}),
+\]
+\[
+\mathrm{Jaccard}_{i,t,f}=\operatorname{ratio}(\mathrm{TP}_{i,t,f},\mathrm{TP}_{i,t,f}+\mathrm{FP}_{i,t,f}+\mathrm{FN}_{i,t,f}).
+\]
+
+Short description: these scores count how many metadata values can be matched strongly enough to count as correct.
+
+\subsection{Soft Metadata Metrics}
+For each LLM value, compute its best similarity against any human value:
+\[
+b^{L}(u_k)=\max_{v_j \in V_{i,t,f}^{H}} \operatorname{sim}(v_j,u_k).
+\]
+For each human value, compute its best similarity against any LLM value:
+\[
+b^{H}(v_j)=\max_{u_k \in V_{i,t,f}^{L}} \operatorname{sim}(v_j,u_k).
+\]
+
+The code stores the sums:
+\[
+\Sigma^{L}_{i,t,f}=\sum_{u_k \in V_{i,t,f}^{L}} b^{L}(u_k),
+\qquad
+\Sigma^{H}_{i,t,f}=\sum_{v_j \in V_{i,t,f}^{H}} b^{H}(v_j).
+\]
+
+Then:
+\[
+\mathrm{SoftPrecision}_{i,t,f}=
+\begin{cases}
+1 & |V_{i,t,f}^{L}|=0\\
+\Sigma^{L}_{i,t,f}/|V_{i,t,f}^{L}| & \text{otherwise}
+\end{cases}
+\]
+\[
+\mathrm{SoftRecall}_{i,t,f}=
+\begin{cases}
+1 & |V_{i,t,f}^{H}|=0\\
+\Sigma^{H}_{i,t,f}/|V_{i,t,f}^{H}| & \text{otherwise}
+\end{cases}
+\]
+\[
+\mathrm{SoftF1}_{i,t,f}=\operatorname{harm}(\mathrm{SoftPrecision}_{i,t,f},\mathrm{SoftRecall}_{i,t,f}).
+\]
+
+Short description: these scores measure closeness even when values do not cross the hard-match threshold.
+
+\subsection{Pooling and Aggregation}
+Within an issue or type, the code pools counts and similarity sums by simple addition:
+\[
+\mathrm{TP}=\sum \mathrm{TP}_{i,t,f},\quad
+\mathrm{FP}=\sum \mathrm{FP}_{i,t,f},\quad
+\mathrm{FN}=\sum \mathrm{FN}_{i,t,f},
+\]
+\[
+\Sigma^L=\sum \Sigma^L_{i,t,f},\qquad \Sigma^H=\sum \Sigma^H_{i,t,f},
+\]
+and then recomputes:
+\[
+\mathrm{Precision}=\operatorname{ratio}(\mathrm{TP},N_L),\quad
+\mathrm{Recall}=\operatorname{ratio}(\mathrm{TP},N_H),\quad
+\mathrm{F1}=\operatorname{harm}(\mathrm{Precision},\mathrm{Recall}),
+\]
+\[
+\mathrm{Jaccard}=\operatorname{ratio}(\mathrm{TP},\mathrm{TP}+\mathrm{FP}+\mathrm{FN}),
+\]
+\[
+\mathrm{SoftPrecision}=
+\begin{cases}
+1 & N_L=0\\
+\Sigma^L/N_L & \text{otherwise}
+\end{cases},
+\quad
+\mathrm{SoftRecall}=
+\begin{cases}
+1 & N_H=0\\
+\Sigma^H/N_H & \text{otherwise}
+\end{cases},
+\]
+\[
+\mathrm{SoftF1}=\operatorname{harm}(\mathrm{SoftPrecision},\mathrm{SoftRecall}).
+\]
+Here $N_H$ and $N_L$ are pooled human and LLM metadata-value counts.
+
+Short description: pooled scores are micro-style metrics over all values in the aggregation bucket.
+
+\subsection{Metadata Matching Outputs}
+\begin{itemize}[leftmargin=*]
+\item \texttt{per\_issue}: pooled metadata metrics within each issue.
+\item \texttt{overall.pooled}: pooled metadata metrics after unioning all issue values by type and field.
+\item \texttt{macro\_average}: arithmetic mean of per-issue pooled metrics.
+\item \texttt{metadata\_matching\_all.json}: repeats the full computation for each similarity backend and stores a side-by-side summary.
+\end{itemize}
+
+\section{Tag Matching}
+\subsection{What It Measures}
+Tag matching compares human and LLM tag sets, but only for types that appear on both sides of an issue.
+
+\subsection{Per-Issue, Per-Type Tag Overlap}
+For issue $i$ and matched type $t \in M_i$, let:
+\[
+\mathrm{Int}_{i,t}=|G_{i,t}^{H}\cap G_{i,t}^{L}|,
+\qquad
+\mathrm{Uni}_{i,t}=|G_{i,t}^{H}\cup G_{i,t}^{L}|.
+\]
+
+Then:
+\[
+\mathrm{Precision}_{i,t}=\operatorname{ratio}(\mathrm{Int}_{i,t},|G_{i,t}^{L}|),
+\]
+\[
+\mathrm{Recall}_{i,t}=\operatorname{ratio}(\mathrm{Int}_{i,t},|G_{i,t}^{H}|),
+\]
+\[
+\mathrm{F1}_{i,t}=\operatorname{harm}(\mathrm{Precision}_{i,t},\mathrm{Recall}_{i,t}),
+\]
+\[
+\mathrm{Jaccard}_{i,t}=\operatorname{ratio}(\mathrm{Int}_{i,t},\mathrm{Uni}_{i,t}).
+\]
+
+Short description: this measures whether the detailed labels attached to correctly detected types agree.
+
+\subsection{Pooled Tag Metrics}
+Within an issue, per type, or overall, the code sums:
+\[
+N_H=\sum |G_{i,t}^{H}|,\quad
+N_L=\sum |G_{i,t}^{L}|,\quad
+\mathrm{Int}=\sum \mathrm{Int}_{i,t},\quad
+\mathrm{Uni}=\sum \mathrm{Uni}_{i,t},
+\]
+then computes:
+\[
+\mathrm{Precision}=\operatorname{ratio}(\mathrm{Int},N_L),\quad
+\mathrm{Recall}=\operatorname{ratio}(\mathrm{Int},N_H),
+\]
+\[
+\mathrm{F1}=\operatorname{harm}(\mathrm{Precision},\mathrm{Recall}),\quad
+\mathrm{Jaccard}=\operatorname{ratio}(\mathrm{Int},\mathrm{Uni}).
+\]
+
+Short description: this is a pooled overlap score over all compared type-tag sets.
+
+\subsection{Macro Average}
+The macro average in \texttt{tag\_matching.json} is the arithmetic mean of the per-issue pooled precision, recall, F1, and Jaccard.
+
+\section{Summary Matching}
+\subsection{What It Measures}
+Summary matching compares the semantic similarity of aggregated human and LLM summaries, but only for matching types.
+
+\subsection{Summary Construction}
+For issue $i$ and type $t \in M_i$:
+\[
+\bar{S}_{i,t}^{H} = \operatorname{combine}(S_{i,t}^{H}),\qquad
+\bar{S}_{i,t}^{L} = \operatorname{combine}(S_{i,t}^{L}).
+\]
+
+Short description: all summaries of the same type are concatenated into one reference text and one candidate text before scoring.
+
+\subsection{CodeBERT Cosine}
+Let $\phi(x)$ be the mean pooled token embedding produced by the configured CodeBERT encoder after truncation to 512 tokens and masking out padding. Then:
+\[
+\mathrm{CodeBERTCosine}(x,y)=
+\frac{\phi(x)\cdot\phi(y)}{\|\phi(x)\|_2\|\phi(y)\|_2}.
+\]
+The implementation clips the result to $[-1,1]$ and returns $1$ for two empty strings, $0$ if exactly one side is empty.
+
+Short description: this measures embedding-level semantic similarity of the aggregated summaries.
+
+\subsection{BERTScore}
+Let $R=\{r_1,\dots,r_m\}$ be the non-special reference token embeddings and $C=\{c_1,\dots,c_n\}$ the non-special candidate token embeddings after L2 normalization. Form the cosine-similarity matrix:
+\[
+A_{jk}=c_j^\top r_k.
+\]
+Then:
+\[
+\mathrm{BERTScorePrecision}(x,y)=\frac{1}{n}\sum_{j=1}^{n}\max_k A_{jk},
+\]
+\[
+\mathrm{BERTScoreRecall}(x,y)=\frac{1}{m}\sum_{k=1}^{m}\max_j A_{jk},
+\]
+\[
+\mathrm{BERTScoreF1}(x,y)=\operatorname{harm}(\mathrm{BERTScorePrecision}(x,y),\mathrm{BERTScoreRecall}(x,y)).
+\]
+The implementation returns all ones for two empty strings and all zeros if exactly one side is empty.
+
+Short description: this measures token-level semantic coverage between the generated and reference summaries.
+
+\subsection{BLEURT}
+Let $\beta_{\mathrm{raw}}(x,y)$ be the scalar output of the configured BLEURT sequence-classification model. The reported score depends on post-processing mode.
+
+\paragraph{Raw mode.}
+\[
+\beta(x,y)=\beta_{\mathrm{raw}}(x,y).
+\]
+
+\paragraph{Clip mode.}
+For clipping floor $c_{\min}$:
+\[
+\beta(x,y)=
+\begin{cases}
+\max(c_{\min},\beta_{\mathrm{raw}}(x,y)) & c_{\min}\neq \varnothing\\
+\beta_{\mathrm{raw}}(x,y) & \text{otherwise}.
+\end{cases}
+\]
+
+\paragraph{Sigmoid mode.}
+For temperature $T>0$ and bias $b$:
+\[
+z=\frac{\beta_{\mathrm{raw}}(x,y)-b}{T},
+\qquad
+z \leftarrow \min(60,\max(-60,z)),
+\]
+\[
+\beta(x,y)=\frac{1}{1+e^{-z}}.
+\]
+The implementation returns $1$ for two empty strings and $0$ if exactly one side is empty.
+
+Short description: BLEURT is a learned text-quality score, optionally normalized to a bounded range for easier aggregation.
+
+\subsection{Issue-Level Coverage Metrics}
+For issue $i$:
+\[
+h_i = |H_i|,\qquad
+\ell_i = |L_i|,\qquad
+m_i = |M_i|.
+\]
+
+Coverage metrics are:
+\[
+\mathrm{CovPrecision}_i=\operatorname{ratio}(m_i,\ell_i),\quad
+\mathrm{CovRecall}_i=\operatorname{ratio}(m_i,h_i),\quad
+\mathrm{CovF1}_i=\operatorname{harm}(\mathrm{CovPrecision}_i,\mathrm{CovRecall}_i).
+\]
+
+Short description: these scores measure how much of the type inventory was actually available for summary comparison.
+
+\subsection{Issue-Level Summary Scores}
+For issue $i$, let $Q_i$ be the set of score rows for matched types. Each row contains:
+\[
+q_{i,t} =
+\bigl(
+\mathrm{CodeBERTCosine}_{i,t},
+\mathrm{BERTScorePrecision}_{i,t},
+\mathrm{BERTScoreRecall}_{i,t},
+\mathrm{BERTScoreF1}_{i,t},
+\beta_{i,t}
+\bigr).
+\]
+
+The issue-level matched-only macro score is the mean over matched types:
+\[
+\overline{q}_i = \frac{1}{|Q_i|}\sum_{q \in Q_i} q,
+\]
+with all-zero scores if $|Q_i|=0$.
+
+The issue-level weighted score uses weight
+\[
+w_{i,t}=\max(1,|S_{i,t}^{H}|),
+\]
+and computes:
+\[
+\widetilde{q}_i=\frac{\sum_{t \in M_i} w_{i,t} q_{i,t}}{\sum_{t \in M_i} w_{i,t}},
+\]
+again defaulting to zeros when no matched types exist.
+
+Short description: the macro version weights each matched type equally, while the weighted version gives more influence to types with more human summary chunks.
+
+\subsection{Penalty for Unmatched Types}
+For any score vector $q$ and penalty $p \in [0,1]$, define:
+\[
+\operatorname{PenaltyApply}(q,p)=p \cdot q.
+\]
+The code uses:
+\[
+q^{\mathrm{pen}}_i = \operatorname{PenaltyApply}(\overline{q}_i,\mathrm{CovRecall}_i).
+\]
+
+Short description: this discounts summary quality when many human types were missed entirely.
+
+\subsection{Per-Type Summary Scores Across Issues}
+For each type $t$, all human summaries from issues where $t$ exists on both sides are concatenated together, and all LLM summaries from those same issues are concatenated together:
+\[
+\bar{S}_{t}^{H}=\operatorname{combine}\Bigl(\bigcup_{i:\, t \in H_i \cap L_i} S_{i,t}^{H}\Bigr),
+\]
+\[
+\bar{S}_{t}^{L}=\operatorname{combine}\Bigl(\bigcup_{i:\, t \in H_i \cap L_i} S_{i,t}^{L}\Bigr).
+\]
+These are scored once with the same summary scorers. Type-level coverage is:
+\[
+\mathrm{TypeCovPrecision}_t=\operatorname{ratio}(m_t,\ell_t),\quad
+\mathrm{TypeCovRecall}_t=\operatorname{ratio}(m_t,h_t),\quad
+\mathrm{TypeCovF1}_t=\operatorname{harm}(\mathrm{TypeCovPrecision}_t,\mathrm{TypeCovRecall}_t),
+\]
+where $h_t$ is the number of issues containing type $t$ in human data, $\ell_t$ is the number containing it in LLM data, and $m_t$ is the number containing it in both.
+
+The penalized per-type score is:
+\[
+q^{\mathrm{pen}}_t = \operatorname{PenaltyApply}(q_t,\mathrm{TypeCovRecall}_t).
+\]
+
+\subsection{Overall Summary Aggregates}
+The code reports several top-level aggregates in \texttt{summary\_matching.json}.
+
+\paragraph{\texttt{matched\_only\_macro}.}
+Arithmetic mean of issue-level matched-only score vectors over issues with $m_i>0$.
+
+\paragraph{\texttt{all\_issues\_macro\_raw}.}
+Arithmetic mean of issue-level matched-only score vectors over all issues, including zero rows for issues with no matched types.
+
+\paragraph{\texttt{all\_issues\_macro\_with\_unmatched\_penalty}.}
+Arithmetic mean of penalized issue-level score vectors $q^{\mathrm{pen}}_i$ over all issues.
+
+\paragraph{\texttt{support\_weighted\_matched\_only}.}
+Weighted average of issue-level weighted score vectors $\widetilde{q}_i$ using weight $\max(0,m_i)=m_i$:
+\[
+q^{\mathrm{supp}}=\frac{\sum_i m_i \widetilde{q}_i}{\sum_i m_i}.
+\]
+
+\paragraph{\texttt{coverage}.}
+Macro average of issue-level coverage metrics:
+\[
+\overline{\mathrm{CovPrecision}}=\frac{1}{N}\sum_i \mathrm{CovPrecision}_i,\quad
+\overline{\mathrm{CovRecall}}=\frac{1}{N}\sum_i \mathrm{CovRecall}_i,\quad
+\overline{\mathrm{CovF1}}=\frac{1}{N}\sum_i \mathrm{CovF1}_i.
+\]
+
+\paragraph{\texttt{penalized\_overall}.}
+Apply the macro coverage recall as a global penalty:
+\[
+q^{\mathrm{pen\_overall}}=
+\operatorname{PenaltyApply}\bigl(q^{\mathrm{matched\_only}},\overline{\mathrm{CovRecall}}\bigr).
+\]
+
+\paragraph{\texttt{per\_type\_matched\_only\_macro}.}
+Arithmetic mean of type-level score vectors over types with at least one matched issue.
+
+\paragraph{\texttt{per\_type\_macro\_with\_unmatched\_penalty}.}
+Arithmetic mean of penalized type-level score vectors over all types.
+
+\section{Edge-Case Conventions}
+Several metrics use the same conventions:
+\begin{itemize}[leftmargin=*]
+\item empty-vs-empty set comparisons score as $1$ for precision/recall-style ratios when both numerator and denominator are zero,
+\item empty-vs-nonempty scores as $0$ when the denominator is zero but the numerator is positive,
+\item harmonic means are defined as $0$ when both inputs are zero,
+\item summary scorers return perfect agreement for two empty strings and zero for one empty string versus one non-empty string.
+\end{itemize}
+
+These conventions matter because some metric buckets can be empty after filtering by issue, type, or matched-type constraints.
+
+\section{File Mapping}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Output file & Main contents \\
+\midrule
+\texttt{type\_matching.json} & type presence overlap metrics \\
+\texttt{metadata\_matching.json} & hard and soft metadata-value matching metrics \\
+\texttt{metadata\_matching\_all.json} & metadata metrics for all similarity backends \\
+\texttt{tag\_matching.json} & tag overlap metrics on matching types \\
+\texttt{summary\_matching.json} & semantic summary similarity plus coverage-aware aggregates \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Visualization-Derived Global Points}
+The bar chart \texttt{global\_points\_bar.png} in \texttt{src/tbyc\_dataset/metrics/visualization.py} uses a \emph{derived visualization score}, not a separately stored evaluation metric JSON.
+
+\subsection{Component Set}
+For each repository-model bundle, the visualization reads these seven component scores:
+\[
+\mathcal{C}=
+\{
+\texttt{metadata\_f1},
+\texttt{metadata\_soft\_f1},
+\texttt{tag\_f1},
+\texttt{type\_f1},
+\texttt{summary\_bleurt},
+\texttt{summary\_bertscore\_f1},
+\texttt{summary\_codebert}
+\}.
+\]
+
+More explicitly, for repository $r$ and model $m$, the component vector is:
+\[
+c_{r,m} =
+\bigl(
+\mathrm{MetaF1}_{r,m},
+\mathrm{MetaSoftF1}_{r,m},
+\mathrm{TagF1}_{r,m},
+\mathrm{TypeF1}_{r,m},
+\mathrm{SummBLEURT}_{r,m},
+\mathrm{SummBERTF1}_{r,m},
+\mathrm{SummCodeBERT}_{r,m}
+\bigr),
+\]
+where:
+\begin{itemize}[leftmargin=*]
+\item $\mathrm{TypeF1}_{r,m}$ is \texttt{type\_matching.json -> macro\_average.f1},
+\item $\mathrm{MetaF1}_{r,m}$ is \texttt{metadata\_matching.json -> macro\_average.f1},
+\item $\mathrm{MetaSoftF1}_{r,m}$ is \texttt{metadata\_matching.json -> macro\_average.soft\_f1},
+\item $\mathrm{TagF1}_{r,m}$ is \texttt{tag\_matching.json -> overall.f1},
+\item $\mathrm{SummBERTF1}_{r,m}$ is \texttt{summary\_matching.json -> overall.all\_issues\_macro\_with\_unmatched\_penalty.bertscore.f1},
+\item $\mathrm{SummBLEURT}_{r,m}$ is \texttt{summary\_matching.json -> overall.all\_issues\_macro\_with\_unmatched\_penalty.bleurt.score},
+\item $\mathrm{SummCodeBERT}_{r,m}$ is \texttt{summary\_matching.json -> overall.all\_issues\_macro\_with\_unmatched\_penalty.codebert.cosine}.
+\end{itemize}
+
+\subsection{Per-Bundle Composite Score}
+The repository-model composite score is the unweighted arithmetic mean of the seven components:
+\[
+\mathrm{BundleScore}_{r,m}=\frac{1}{7}\sum_{k \in \mathcal{C}} c_{r,m,k}.
+\]
+
+Short description: each repository contributes one equally weighted composite score per model, averaging type, metadata, tag, and penalized summary quality.
+
+\subsection{Global Model Score}
+If a model $m$ appears on repositories $\mathcal{R}_m$, the global score used for the bar chart is:
+\[
+\mathrm{GlobalScore}_{m}=
+\frac{1}{|\mathcal{R}_m|}
+\sum_{r \in \mathcal{R}_m}\mathrm{BundleScore}_{r,m}.
+\]
+
+Short description: this treats each repository equally, regardless of issue count.
+
+\subsection{Conversion to Discrete Points}
+Let $P_{\max}$ be \texttt{points\_max} and $\Delta$ be \texttt{points\_step}. The raw points are:
+\[
+\mathrm{RawPoints}_m = \mathrm{GlobalScore}_m \cdot P_{\max}.
+\]
+The displayed point total is quantized to the nearest multiple of $\Delta$:
+\[
+\mathrm{QuantizedPoints}_m =
+\Delta \cdot \operatorname{round}\!\left(\frac{\mathrm{RawPoints}_m}{\Delta}\right).
+\]
+Finally it is clipped to the interval $[0,P_{\max}]$:
+\[
+\mathrm{Points}_m=
+\min\!\bigl(P_{\max},\max(0,\mathrm{QuantizedPoints}_m)\bigr).
+\]
+
+Short description: the chart converts a normalized average score into an integer-style point total for presentation.
+
+\subsection{Defaults}
+The visualization entry point uses:
+\[
+P_{\max}=100,\qquad \Delta=1.
+\]
+With the defaults, the displayed score is simply the global composite score on a 0--100 scale rounded to the nearest integer.
+
+\end{document}

@@ -26,8 +26,13 @@ class DerivedExtractionSettings:
     model_id: str = "qwen2.5:14b"
     # Model id used to locate response files; defaults to model_id for backward compatibility.
     responses_model_id: Optional[str] = None
+    # Root directory used to locate source responses.
+    responses_root_dirname: str = "responses"
+    # Root directory used to write derived extraction outputs.
+    derived_root_dirname: str = "derived"
     model_url: str = "http://localhost:11434"
     num_ctx: int = 32768
+    limit_issues: Optional[int] = None
     issue_number: Optional[int] = None
     skip_existing: bool = True
 
@@ -43,15 +48,17 @@ def extract_derived_artifacts_from_responses(
     base_dir = Path(output_root)
     responses_model_id = (settings.responses_model_id or settings.model_id).strip()
     responses_model_dir = _model_dir_name(responses_model_id)
-    responses_dir = base_dir / "responses" / responses_model_dir / repo_ref.fs_slug
+    responses_dir = base_dir / settings.responses_root_dirname / responses_model_dir / repo_ref.fs_slug
     # Derived artifacts are keyed by the response model lineage so downstream metrics
     # remain aligned with the model that generated the responses.
-    derived_dir = base_dir / "derived" / responses_model_dir / repo_ref.fs_slug
+    derived_dir = base_dir / settings.derived_root_dirname / responses_model_dir / repo_ref.fs_slug
     ensure_directory(derived_dir)
 
     response_paths = sorted(responses_dir.glob("issue_*.json"))
     if settings.issue_number is not None:
         response_paths = [path for path in response_paths if path.name == f"issue_{settings.issue_number}.json"]
+    if settings.limit_issues is not None:
+        response_paths = response_paths[: max(0, int(settings.limit_issues))]
 
     if not response_paths:
         raise FileNotFoundError(f"No response payloads found under {responses_dir}")
@@ -100,6 +107,8 @@ def extract_derived_artifacts_from_responses(
             "repository": repo_ref.slug,
             "prompt_version": PROMPT_VERSION,
             "source": "responses",
+            "responses_root_dirname": settings.responses_root_dirname,
+            "derived_root_dirname": settings.derived_root_dirname,
             "model_id": responses_model_id,
             "responses_model_id": responses_model_id,
             "extraction_model_id": settings.model_id,
@@ -126,6 +135,8 @@ def extract_derived_artifacts_from_responses(
         "extraction_model_id": settings.model_id,
         "prompt_version": PROMPT_VERSION,
         "source": "responses",
+        "responses_root_dirname": settings.responses_root_dirname,
+        "derived_root_dirname": settings.derived_root_dirname,
         "model_url": settings.model_url,
         "issue_count": issue_count,
         "total_comment_count": total_comments,

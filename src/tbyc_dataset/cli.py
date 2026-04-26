@@ -17,11 +17,14 @@ from tbyc_dataset.evaluation import (
     extract_derived_artifacts_from_responses,
 )
 from tbyc_dataset.extraction.pipeline import ExtractionSettings, extract_discussion_artifacts
+from tbyc_dataset.extraction.regex_pipeline import RegexExtractionSettings, extract_discussion_artifacts_regex
 from tbyc_dataset.metrics import (
+    compute_extraction_comparison_metrics,
     compute_metadata_matching_metrics,
     compute_summary_matching_metrics,
     compute_tag_matching_metrics,
     compute_type_matching_metrics,
+    generate_extraction_comparison_visualizations,
     generate_metrics_visualizations,
 )
 from tbyc_dataset.models import RepositoryRef
@@ -30,6 +33,18 @@ from tbyc_dataset.viewer import build_processed_viewer
 
 
 LOGGER = logging.getLogger(__name__)
+
+
+FEW_SHOT_GENERATION_COMMANDS = {"generate-issue-thoughts-few-shot", "generate-issue-thoughts-regex"}
+NO_CONTEXT_GENERATION_COMMANDS = {"generate-issue-thoughts-no-context"}
+FEW_SHOT_DERIVED_COMMANDS = {"extract-derived-artifacts-few-shot", "extract-derived-artifacts-regex"}
+NO_CONTEXT_DERIVED_COMMANDS = {"extract-derived-artifacts-no-context"}
+FEW_SHOT_TYPE_METRIC_COMMANDS = {"compute-type-metrics-few-shot", "compute-type-metrics-regex"}
+FEW_SHOT_METADATA_METRIC_COMMANDS = {"compute-metadata-metrics-few-shot", "compute-metadata-metrics-regex"}
+FEW_SHOT_TAG_METRIC_COMMANDS = {"compute-tag-metrics-few-shot", "compute-tag-metrics-regex"}
+FEW_SHOT_SUMMARY_METRIC_COMMANDS = {"compute-summary-metrics-few-shot", "compute-summary-metrics-regex"}
+FEW_SHOT_ALL_METRIC_COMMANDS = {"compute-all-metrics-few-shot", "compute-all-metrics-regex"}
+FEW_SHOT_VISUALIZATION_COMMANDS = {"visualize-metrics-few-shot", "visualize-metrics-regex"}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -44,24 +59,57 @@ def build_parser() -> argparse.ArgumentParser:
         "build-dataset",
         "extract-discussion-entities",
         "extract-discussion-artifacts",
+        "extract-discussion-artifacts-regex",
         "retrieve-code-chunks",
         "generate-issue-thoughts",
+        "generate-issue-thoughts-no-context",
+        "generate-issue-thoughts-few-shot",
+        "generate-issue-thoughts-regex",
         "extract-derived-artifacts",
+        "extract-derived-artifacts-no-context",
+        "extract-derived-artifacts-few-shot",
+        "extract-derived-artifacts-regex",
         "compute-type-metrics",
+        "compute-type-metrics-few-shot",
+        "compute-type-metrics-regex",
         "compute-metadata-metrics",
+        "compute-metadata-metrics-few-shot",
+        "compute-metadata-metrics-regex",
         "compute-tag-metrics",
+        "compute-tag-metrics-few-shot",
+        "compute-tag-metrics-regex",
         "compute-summary-metrics",
+        "compute-summary-metrics-few-shot",
+        "compute-summary-metrics-regex",
+        "compute-extraction-comparison",
         "compute-all-metrics",
+        "compute-all-metrics-few-shot",
+        "compute-all-metrics-regex",
+        "compute-all-metrics-one-shot",
         "build-leaderboard",
         "visualize-metrics",
+        "visualize-metrics-few-shot",
+        "visualize-metrics-regex",
+        "visualize-extraction-comparison",
     ):
         subparser = subparsers.add_parser(command)
         subparser.add_argument(
             "--repo",
-            required=command not in {"compute-all-metrics", "build-leaderboard", "visualize-metrics"},
+            required=command
+            not in {
+                "compute-all-metrics",
+                "compute-all-metrics-few-shot",
+                "compute-all-metrics-regex",
+                "compute-all-metrics-one-shot",
+                "build-leaderboard",
+                "visualize-metrics",
+                "visualize-metrics-few-shot",
+                "visualize-metrics-regex",
+                "visualize-extraction-comparison",
+            },
             default=None,
             help=(
-                "Repository in owner/name format. For compute-all-metrics, this is optional "
+                "Repository in owner/name format. For compute-all-metrics variants, this is optional "
                 "and acts as a filter."
             ),
         )
@@ -129,6 +177,31 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Unused compatibility flag kept for CLI stability.",
             )
 
+        if command == "extract-discussion-artifacts-regex":
+            subparser.add_argument(
+                "--limit-threads",
+                type=int,
+                default=None,
+                help="Optional cap on the number of discussion threads to extract from.",
+            )
+            subparser.add_argument(
+                "--issue-number",
+                type=int,
+                default=None,
+                help="Optional issue number filter to run extraction for a single issue.",
+            )
+            subparser.add_argument(
+                "--parallel-issues",
+                type=int,
+                default=1,
+                help="Number of issues to process concurrently.",
+            )
+            subparser.add_argument(
+                "--no-skip-existing",
+                action="store_true",
+                help="Reprocess issues even when issue_<n>.json already exists.",
+            )
+
         if command == "retrieve-code-chunks":
             subparser.add_argument(
                 "--embedding-model",
@@ -148,7 +221,7 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Number of top results to return per issue.",
             )
 
-        if command == "generate-issue-thoughts":
+        if command in {"generate-issue-thoughts"} | FEW_SHOT_GENERATION_COMMANDS | NO_CONTEXT_GENERATION_COMMANDS:
             subparser.add_argument(
                 "--model-id",
                 default="qwen2.5:14b",
@@ -201,12 +274,31 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Optional issue number filter.",
             )
             subparser.add_argument(
+                "--limit-issues",
+                type=int,
+                default=None,
+                help="Optional cap to process only the first N issues after filtering.",
+            )
+            subparser.add_argument(
                 "--no-skip-existing",
                 action="store_true",
                 help="Regenerate response files even when they already exist.",
             )
+            if command in FEW_SHOT_GENERATION_COMMANDS:
+                subparser.add_argument(
+                    "--few-shot-example-count",
+                    type=int,
+                    default=3,
+                    help="Number of in-repo extraction examples to include in the prompt.",
+                )
+                subparser.add_argument(
+                    "--few-shot-artifacts-per-example",
+                    type=int,
+                    default=5,
+                    help="Maximum artifact-derived lines to include from each few-shot example issue.",
+                )
 
-        if command == "extract-derived-artifacts":
+        if command in {"extract-derived-artifacts"} | FEW_SHOT_DERIVED_COMMANDS | NO_CONTEXT_DERIVED_COMMANDS:
             subparser.add_argument(
                 "--model-id",
                 default="qwen2.5:14b",
@@ -216,7 +308,7 @@ def build_parser() -> argparse.ArgumentParser:
                 "--responses-model-id",
                 default=None,
                 help=(
-                    "Model identifier used to locate response files under data/responses. "
+                    "Model identifier used to locate response files under the selected responses directory. "
                     "Defaults to --model-id for backward compatibility."
                 ),
             )
@@ -238,12 +330,18 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Optional issue number filter.",
             )
             subparser.add_argument(
+                "--limit-issues",
+                type=int,
+                default=None,
+                help="Optional cap to process only the first N issues after filtering.",
+            )
+            subparser.add_argument(
                 "--no-skip-existing",
                 action="store_true",
                 help="Regenerate derived files even when they already exist.",
             )
 
-        if command == "compute-type-metrics":
+        if command in {"compute-type-metrics"} | FEW_SHOT_TYPE_METRIC_COMMANDS:
             subparser.add_argument(
                 "--model-id",
                 default="qwen2.5:7b-instruct",
@@ -256,7 +354,7 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Optional issue number filter.",
             )
 
-        if command == "compute-metadata-metrics":
+        if command in {"compute-metadata-metrics"} | FEW_SHOT_METADATA_METRIC_COMMANDS:
             subparser.add_argument(
                 "--model-id",
                 default="qwen2.5:7b-instruct",
@@ -289,7 +387,7 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Similarity backend used for metadata phrase matching.",
             )
 
-        if command == "compute-tag-metrics":
+        if command in {"compute-tag-metrics"} | FEW_SHOT_TAG_METRIC_COMMANDS:
             subparser.add_argument(
                 "--model-id",
                 default="qwen2.5:7b-instruct",
@@ -302,7 +400,7 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Optional issue number filter.",
             )
 
-        if command == "compute-summary-metrics":
+        if command in {"compute-summary-metrics"} | FEW_SHOT_SUMMARY_METRIC_COMMANDS:
             subparser.add_argument(
                 "--model-id",
                 default="qwen2.5:7b-instruct",
@@ -354,21 +452,88 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Bias shift for --bleurt-postprocess=sigmoid.",
             )
 
-        if command == "compute-all-metrics":
+        if command == "compute-extraction-comparison":
+            subparser.add_argument(
+                "--issue-number",
+                type=int,
+                default=None,
+                help="Optional issue number filter.",
+            )
+            subparser.add_argument(
+                "--similarity-threshold",
+                type=float,
+                default=0.82,
+                help="Minimum phrase similarity used for metadata comparison.",
+            )
+            subparser.add_argument(
+                "--similarity-metric",
+                choices=[
+                    "max_all",
+                    "token_f1",
+                    "sequence_ratio",
+                    "token_jaccard",
+                    "char_3gram_jaccard",
+                    "token_containment",
+                ],
+                default="max_all",
+                help="Similarity backend used for metadata phrase matching.",
+            )
+            subparser.add_argument(
+                "--codebert-model",
+                default="microsoft/codebert-base",
+                help="Encoder model used for the CodeBERT cosine baseline.",
+            )
+            subparser.add_argument(
+                "--bertscore-model",
+                default="microsoft/codebert-base",
+                help="Encoder model used for BERTScore token-level contextual matching.",
+            )
+            subparser.add_argument(
+                "--bleurt-model",
+                default="Elron/bleurt-base-512",
+                help="BLEURT model checkpoint for summary quality scoring.",
+            )
+            subparser.add_argument(
+                "--bleurt-postprocess",
+                choices=["sigmoid", "clip", "raw"],
+                default="sigmoid",
+                help="BLEURT post-processing mode (default: sigmoid).",
+            )
+            subparser.add_argument(
+                "--bleurt-clip-min",
+                type=float,
+                default=0.0,
+                help="Minimum BLEURT score when --bleurt-postprocess=clip (default: 0.0).",
+            )
+            subparser.add_argument(
+                "--bleurt-sigmoid-temperature",
+                type=float,
+                default=2.0,
+                help="Temperature for --bleurt-postprocess=sigmoid (higher = more relaxed).",
+            )
+            subparser.add_argument(
+                "--bleurt-sigmoid-bias",
+                type=float,
+                default=0.0,
+                help="Bias shift for --bleurt-postprocess=sigmoid.",
+            )
+
+        if command in {"compute-all-metrics", "compute-all-metrics-one-shot"} | FEW_SHOT_ALL_METRIC_COMMANDS:
             subparser.add_argument(
                 "--model-id",
                 default=None,
                 help=(
                     "Optional model filter. If omitted, run all discovered models "
-                    "under data/derived."
+                    "under the selected derived directory."
                 ),
             )
-            subparser.add_argument(
-                "--issue-number",
-                type=int,
-                default=None,
-                help="Optional issue number filter forwarded to all metric computations.",
-            )
+            if command in {"compute-all-metrics"} | FEW_SHOT_ALL_METRIC_COMMANDS:
+                subparser.add_argument(
+                    "--issue-number",
+                    type=int,
+                    default=None,
+                    help="Optional issue number filter forwarded to all metric computations.",
+                )
             subparser.add_argument(
                 "--similarity-threshold",
                 type=float,
@@ -428,6 +593,25 @@ def build_parser() -> argparse.ArgumentParser:
                 default=0.0,
                 help="Bias shift for --bleurt-postprocess=sigmoid.",
             )
+            if command == "compute-all-metrics-one-shot":
+                subparser.add_argument(
+                    "--rrf-k",
+                    type=int,
+                    default=60,
+                    help="Reciprocal rank fusion constant k for leaderboard generation (default: 60).",
+                )
+                subparser.add_argument(
+                    "--points-max",
+                    type=int,
+                    default=100,
+                    help="Maximum points assigned to the theoretical max-possible score (default: 100).",
+                )
+                subparser.add_argument(
+                    "--points-step",
+                    type=int,
+                    default=1,
+                    help="Quantization step for leaderboard points (default: 1).",
+                )
 
         if command in {"fetch-repo", "build-dataset"}:
             subparser.add_argument(
@@ -468,7 +652,7 @@ def build_parser() -> argparse.ArgumentParser:
                 help="Quantization step for leaderboard points (default: 1).",
             )
 
-        if command == "visualize-metrics":
+        if command in {"visualize-metrics"} | FEW_SHOT_VISUALIZATION_COMMANDS:
             subparser.add_argument(
                 "--model-id",
                 default=None,
@@ -490,6 +674,13 @@ def build_parser() -> argparse.ArgumentParser:
                 type=int,
                 default=1,
                 help="Quantization step for points graph (default: 1).",
+            )
+
+        if command == "visualize-extraction-comparison":
+            subparser.add_argument(
+                "--graphs-root",
+                default=None,
+                help="Optional output directory for graphs (default: <output-root>/graphs_regex_comparison).",
             )
 
     viewer_parser = subparsers.add_parser("build-viewer")
@@ -554,6 +745,97 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         )
         return
 
+    if args.command in FEW_SHOT_ALL_METRIC_COMMANDS:
+        LOGGER.info("stage=compute-all-metrics-few-shot model_filter=%s repo_filter=%s", args.model_id, args.repo)
+        p_settings = pipeline_settings(args.output_root, args.min_comments, args.max_comments)
+        result = _compute_all_metrics(
+            output_root=p_settings.output_root,
+            model_id_filter=args.model_id,
+            repo_filter=args.repo,
+            issue_number=args.issue_number,
+            similarity_threshold=args.similarity_threshold,
+            similarity_metric=args.similarity_metric,
+            codebert_model=args.codebert_model,
+            bertscore_model=args.bertscore_model,
+            bleurt_model=args.bleurt_model,
+            bleurt_postprocess=args.bleurt_postprocess,
+            bleurt_clip_min=args.bleurt_clip_min,
+            bleurt_sigmoid_temperature=args.bleurt_sigmoid_temperature,
+            bleurt_sigmoid_bias=args.bleurt_sigmoid_bias,
+            derived_root_dirname="derived_few-shot",
+            metrics_root_dirname="metrics_few-shot",
+        )
+        print(
+            json.dumps(
+                {
+                    "model_filter": result.get("model_filter"),
+                    "repo_filter": result.get("repo_filter"),
+                    "target_count": result.get("target_count"),
+                    "metric_run_count": result.get("metric_run_count"),
+                    "succeeded_metric_count": result.get("succeeded_metric_count"),
+                    "failed_metric_count": result.get("failed_metric_count"),
+                    "targets": result.get("targets"),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+
+    if args.command == "compute-all-metrics-one-shot":
+        LOGGER.info("stage=compute-all-metrics-one-shot")
+        p_settings = pipeline_settings(args.output_root, args.min_comments, args.max_comments)
+        compute_result = _compute_all_metrics(
+            output_root=p_settings.output_root,
+            model_id_filter=None,
+            repo_filter=None,
+            issue_number=None,
+            similarity_threshold=args.similarity_threshold,
+            similarity_metric=args.similarity_metric,
+            codebert_model=args.codebert_model,
+            bertscore_model=args.bertscore_model,
+            bleurt_model=args.bleurt_model,
+            bleurt_postprocess=args.bleurt_postprocess,
+            bleurt_clip_min=args.bleurt_clip_min,
+            bleurt_sigmoid_temperature=args.bleurt_sigmoid_temperature,
+            bleurt_sigmoid_bias=args.bleurt_sigmoid_bias,
+        )
+        leaderboard_result = _build_rank_fusion_leaderboard(
+            output_root=p_settings.output_root,
+            repo_filter=None,
+            model_id_filter=None,
+            rrf_k=args.rrf_k,
+            points_max=args.points_max,
+            points_step=args.points_step,
+        )
+        metrics_dir = p_settings.output_root / "metrics"
+        metrics_dir.mkdir(parents=True, exist_ok=True)
+        leaderboard_path = metrics_dir / "leaderboard_rank_fusion.json"
+        leaderboard_path.write_text(json.dumps(leaderboard_result, indent=2, sort_keys=True), encoding="utf-8")
+        print(
+            json.dumps(
+                {
+                    "metric": "all_metrics_one_shot",
+                    "scope": "all_repositories_all_models_all_issues",
+                    "metric_runs": {
+                        "target_count": compute_result.get("target_count"),
+                        "metric_run_count": compute_result.get("metric_run_count"),
+                        "succeeded_metric_count": compute_result.get("succeeded_metric_count"),
+                        "failed_metric_count": compute_result.get("failed_metric_count"),
+                    },
+                    "leaderboard": {
+                        "repo_count": leaderboard_result.get("repo_count"),
+                        "model_count": leaderboard_result.get("model_count"),
+                        "saved_to": str(leaderboard_path),
+                    },
+                    "targets": compute_result.get("targets"),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+
     if args.command == "build-leaderboard":
         p_settings = pipeline_settings(args.output_root, args.min_comments, args.max_comments)
         result = _build_rank_fusion_leaderboard(
@@ -589,6 +871,31 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         print(json.dumps(result, indent=2, sort_keys=True))
         return
 
+    if args.command in FEW_SHOT_VISUALIZATION_COMMANDS:
+        p_settings = pipeline_settings(args.output_root, args.min_comments, args.max_comments)
+        result = generate_metrics_visualizations(
+            output_root=str(p_settings.output_root),
+            graphs_root=args.graphs_root,
+            repo=args.repo,
+            model_id=args.model_id,
+            metrics_root_dirname="metrics_few-shot",
+            graphs_root_dirname="graphs_few-shot",
+            points_max=args.points_max,
+            points_step=args.points_step,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return
+
+    if args.command == "visualize-extraction-comparison":
+        p_settings = pipeline_settings(args.output_root, args.min_comments, args.max_comments)
+        result = generate_extraction_comparison_visualizations(
+            output_root=str(p_settings.output_root),
+            graphs_root=args.graphs_root,
+            repo=args.repo,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return
+
     repo = RepositoryRef.parse(args.repo)
     LOGGER.info("repo=%s", repo.slug)
     p_settings = pipeline_settings(args.output_root, args.min_comments, args.max_comments)
@@ -619,15 +926,26 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             repo=repo.name,
             output_dir=str(p_settings.output_root / "evaluation")
         )
-    elif args.command == "generate-issue-thoughts":
+    elif args.command == "generate-issue-thoughts" or args.command in FEW_SHOT_GENERATION_COMMANDS or args.command in NO_CONTEXT_GENERATION_COMMANDS:
         LOGGER.info("stage=generate-issue-thoughts model=%s", args.model_id)
+        is_few_shot = args.command in FEW_SHOT_GENERATION_COMMANDS
+        is_no_context = args.command in NO_CONTEXT_GENERATION_COMMANDS
         thought_settings = IssueThoughtSettings(
             model_id=args.model_id,
             model_url=args.model_url,
-            include_context=args.include_context,
+            include_context=False if is_no_context else args.include_context,
             max_context_chars=args.max_context_chars,
             max_context_chunks=args.max_context_chunks,
             num_ctx=args.num_ctx,
+            response_root_dirname=(
+                "responses_few-shot"
+                if is_few_shot
+                else ("responses_no-context" if is_no_context else "responses")
+            ),
+            few_shot_from_extractions=is_few_shot,
+            few_shot_example_count=getattr(args, "few_shot_example_count", 0),
+            few_shot_artifacts_per_example=getattr(args, "few_shot_artifacts_per_example", 0),
+            limit_issues=args.limit_issues,
             issue_number=args.issue_number,
             skip_existing=not args.no_skip_existing,
         )
@@ -636,17 +954,30 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             settings=thought_settings,
         )
         result = pipeline.run(owner=repo.owner, repo=repo.name)
-    elif args.command == "extract-derived-artifacts":
+    elif args.command == "extract-derived-artifacts" or args.command in FEW_SHOT_DERIVED_COMMANDS or args.command in NO_CONTEXT_DERIVED_COMMANDS:
         LOGGER.info(
             "stage=extract-derived-artifacts extraction_model=%s responses_model=%s",
             args.model_id,
             args.responses_model_id or args.model_id,
         )
+        is_few_shot = args.command in FEW_SHOT_DERIVED_COMMANDS
+        is_no_context = args.command in NO_CONTEXT_DERIVED_COMMANDS
         derived_settings = DerivedExtractionSettings(
             model_id=args.model_id,
             responses_model_id=args.responses_model_id,
+            responses_root_dirname=(
+                "responses_few-shot"
+                if is_few_shot
+                else ("responses_no-context" if is_no_context else "responses")
+            ),
+            derived_root_dirname=(
+                "derived_few-shot"
+                if is_few_shot
+                else ("derived_no-context" if is_no_context else "derived")
+            ),
             model_url=args.model_url,
             num_ctx=args.num_ctx,
+            limit_issues=args.limit_issues,
             issue_number=args.issue_number,
             skip_existing=not args.no_skip_existing,
         )
@@ -656,17 +987,21 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             output_root=str(p_settings.output_root),
             settings=derived_settings,
         )
-    elif args.command == "compute-type-metrics":
+    elif args.command == "compute-type-metrics" or args.command in FEW_SHOT_TYPE_METRIC_COMMANDS:
         LOGGER.info("stage=compute-type-metrics model=%s", args.model_id)
+        is_few_shot = args.command in FEW_SHOT_TYPE_METRIC_COMMANDS
         result = compute_type_matching_metrics(
             owner=repo.owner,
             repo=repo.name,
             output_root=str(p_settings.output_root),
             model_id=args.model_id,
             issue_number=args.issue_number,
+            derived_root_dirname="derived_few-shot" if is_few_shot else "derived",
+            metrics_root_dirname="metrics_few-shot" if is_few_shot else "metrics",
         )
-    elif args.command == "compute-metadata-metrics":
+    elif args.command == "compute-metadata-metrics" or args.command in FEW_SHOT_METADATA_METRIC_COMMANDS:
         LOGGER.info("stage=compute-metadata-metrics model=%s", args.model_id)
+        is_few_shot = args.command in FEW_SHOT_METADATA_METRIC_COMMANDS
         result = compute_metadata_matching_metrics(
             owner=repo.owner,
             repo=repo.name,
@@ -675,24 +1010,49 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             issue_number=args.issue_number,
             similarity_threshold=args.similarity_threshold,
             similarity_metric=args.similarity_metric,
+            derived_root_dirname="derived_few-shot" if is_few_shot else "derived",
+            metrics_root_dirname="metrics_few-shot" if is_few_shot else "metrics",
         )
-    elif args.command == "compute-tag-metrics":
+    elif args.command == "compute-tag-metrics" or args.command in FEW_SHOT_TAG_METRIC_COMMANDS:
         LOGGER.info("stage=compute-tag-metrics model=%s", args.model_id)
+        is_few_shot = args.command in FEW_SHOT_TAG_METRIC_COMMANDS
         result = compute_tag_matching_metrics(
             owner=repo.owner,
             repo=repo.name,
             output_root=str(p_settings.output_root),
             model_id=args.model_id,
             issue_number=args.issue_number,
+            derived_root_dirname="derived_few-shot" if is_few_shot else "derived",
+            metrics_root_dirname="metrics_few-shot" if is_few_shot else "metrics",
         )
-    elif args.command == "compute-summary-metrics":
+    elif args.command == "compute-summary-metrics" or args.command in FEW_SHOT_SUMMARY_METRIC_COMMANDS:
         LOGGER.info("stage=compute-summary-metrics model=%s", args.model_id)
+        is_few_shot = args.command in FEW_SHOT_SUMMARY_METRIC_COMMANDS
         result = compute_summary_matching_metrics(
             owner=repo.owner,
             repo=repo.name,
             output_root=str(p_settings.output_root),
             model_id=args.model_id,
             issue_number=args.issue_number,
+            derived_root_dirname="derived_few-shot" if is_few_shot else "derived",
+            metrics_root_dirname="metrics_few-shot" if is_few_shot else "metrics",
+            codebert_model=args.codebert_model,
+            bertscore_model=args.bertscore_model,
+            bleurt_model=args.bleurt_model,
+            bleurt_postprocess=args.bleurt_postprocess,
+            bleurt_clip_min=args.bleurt_clip_min,
+            bleurt_sigmoid_temperature=args.bleurt_sigmoid_temperature,
+            bleurt_sigmoid_bias=args.bleurt_sigmoid_bias,
+        )
+    elif args.command == "compute-extraction-comparison":
+        LOGGER.info("stage=compute-extraction-comparison repo=%s", repo.slug)
+        result = compute_extraction_comparison_metrics(
+            owner=repo.owner,
+            repo=repo.name,
+            output_root=str(p_settings.output_root),
+            issue_number=args.issue_number,
+            similarity_threshold=args.similarity_threshold,
+            similarity_metric=args.similarity_metric,
             codebert_model=args.codebert_model,
             bertscore_model=args.bertscore_model,
             bleurt_model=args.bleurt_model,
@@ -717,6 +1077,19 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             pipeline_settings=p_settings,
             extraction_settings=e_settings,
         )
+    elif args.command == "extract-discussion-artifacts-regex":
+        LOGGER.info("stage=extract-regex issue_number=%s", args.issue_number)
+        regex_settings = RegexExtractionSettings(
+            limit_threads=args.limit_threads,
+            issue_number=args.issue_number,
+            parallel_issues=args.parallel_issues,
+            skip_existing=not args.no_skip_existing,
+        )
+        result = extract_discussion_artifacts_regex(
+            repo=repo,
+            pipeline_settings=p_settings,
+            extraction_settings=regex_settings,
+        )
     else:
         LOGGER.info("stage=build-dataset")
         g_settings = github_settings_from_env()
@@ -731,7 +1104,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     LOGGER.info("command completed")
     if args.command == "retrieve-code-chunks":
         print(json.dumps({"manifest": result.get("manifest")}, indent=2, sort_keys=True))
-    elif args.command == "generate-issue-thoughts":
+    elif args.command == "generate-issue-thoughts" or args.command in FEW_SHOT_GENERATION_COMMANDS or args.command in NO_CONTEXT_GENERATION_COMMANDS:
         print(
             json.dumps(
                 {
@@ -743,7 +1116,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 sort_keys=True,
             )
         )
-    elif args.command == "extract-derived-artifacts":
+    elif args.command == "extract-derived-artifacts" or args.command in FEW_SHOT_DERIVED_COMMANDS or args.command in NO_CONTEXT_DERIVED_COMMANDS:
         print(
             json.dumps(
                 {
@@ -757,7 +1130,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 sort_keys=True,
             )
         )
-    elif args.command == "compute-type-metrics":
+    elif args.command == "compute-type-metrics" or args.command in FEW_SHOT_TYPE_METRIC_COMMANDS:
         print(
             json.dumps(
                 {
@@ -772,7 +1145,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 sort_keys=True,
             )
         )
-    elif args.command == "compute-metadata-metrics":
+    elif args.command == "compute-metadata-metrics" or args.command in FEW_SHOT_METADATA_METRIC_COMMANDS:
         print(
             json.dumps(
                 (
@@ -805,7 +1178,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 sort_keys=True,
             )
         )
-    elif args.command == "compute-tag-metrics":
+    elif args.command == "compute-tag-metrics" or args.command in FEW_SHOT_TAG_METRIC_COMMANDS:
         print(
             json.dumps(
                 {
@@ -820,7 +1193,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 sort_keys=True,
             )
         )
-    elif args.command == "compute-summary-metrics":
+    elif args.command == "compute-summary-metrics" or args.command in FEW_SHOT_SUMMARY_METRIC_COMMANDS:
         print(
             json.dumps(
                 {
@@ -830,6 +1203,29 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                     "metric": result.get("metric"),
                     "models": result.get("models"),
                     "overall": result.get("overall"),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    elif args.command == "compute-extraction-comparison":
+        print(
+            json.dumps(
+                {
+                    "repository": result.get("repository"),
+                    "issue_count": result.get("issue_count"),
+                    "reference_side": result.get("reference_side"),
+                    "candidate_side": result.get("candidate_side"),
+                    "overall": {
+                        "type_f1": result.get("macro_average", {}).get("type", {}).get("f1"),
+                        "tag_f1": result.get("macro_average", {}).get("tag", {}).get("f1"),
+                        "metadata_f1": result.get("macro_average", {}).get("metadata", {}).get("f1"),
+                        "metadata_soft_f1": result.get("macro_average", {}).get("metadata", {}).get("soft_f1"),
+                        "summary_bertscore_f1": result.get("macro_average", {}).get("summary", {}).get("bertscore", {}).get("f1"),
+                        "summary_codebert": result.get("macro_average", {}).get("summary", {}).get("codebert", {}).get("cosine"),
+                        "summary_bleurt": result.get("macro_average", {}).get("summary", {}).get("bleurt", {}).get("score"),
+                    },
+                    "counts": result.get("overall", {}).get("counts"),
                 },
                 indent=2,
                 sort_keys=True,
@@ -854,16 +1250,19 @@ def _compute_all_metrics(
     bleurt_clip_min: float,
     bleurt_sigmoid_temperature: float,
     bleurt_sigmoid_bias: float,
+    derived_root_dirname: str = "derived",
+    metrics_root_dirname: str = "metrics",
 ) -> dict:
     targets = _discover_metric_targets(
         output_root=output_root,
         model_id_filter=model_id_filter,
         repo_filter=repo_filter,
+        derived_root_dirname=derived_root_dirname,
     )
     if not targets:
         raise FileNotFoundError(
             "No derived metric targets found for the provided filters under "
-            f"{output_root / 'derived'}."
+            f"{output_root / derived_root_dirname}."
         )
 
     target_reports = []
@@ -888,6 +1287,8 @@ def _compute_all_metrics(
                     output_root=str(output_root),
                     model_id=model_id,
                     issue_number=issue_number,
+                    derived_root_dirname=derived_root_dirname,
+                    metrics_root_dirname=metrics_root_dirname,
                 ),
             ),
             (
@@ -900,6 +1301,8 @@ def _compute_all_metrics(
                     issue_number=issue_number,
                     similarity_threshold=similarity_threshold,
                     similarity_metric=similarity_metric,
+                    derived_root_dirname=derived_root_dirname,
+                    metrics_root_dirname=metrics_root_dirname,
                 ),
             ),
             (
@@ -910,6 +1313,8 @@ def _compute_all_metrics(
                     output_root=str(output_root),
                     model_id=model_id,
                     issue_number=issue_number,
+                    derived_root_dirname=derived_root_dirname,
+                    metrics_root_dirname=metrics_root_dirname,
                 ),
             ),
             (
@@ -920,6 +1325,8 @@ def _compute_all_metrics(
                     output_root=str(output_root),
                     model_id=model_id,
                     issue_number=issue_number,
+                    derived_root_dirname=derived_root_dirname,
+                    metrics_root_dirname=metrics_root_dirname,
                     codebert_model=codebert_model,
                     bertscore_model=bertscore_model,
                     bleurt_model=bleurt_model,
@@ -961,8 +1368,9 @@ def _discover_metric_targets(
     output_root: Path,
     model_id_filter: Optional[str],
     repo_filter: Optional[str],
+    derived_root_dirname: str = "derived",
 ) -> list[tuple[str, RepositoryRef]]:
-    derived_root = output_root / "derived"
+    derived_root = output_root / derived_root_dirname
     if not derived_root.exists():
         return []
 

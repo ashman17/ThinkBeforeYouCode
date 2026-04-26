@@ -23,6 +23,10 @@ def extraction_repo_dir(output_root: Path, repo: RepositoryRef) -> Path:
     return output_root / "extractions" / repo.fs_slug
 
 
+def extraction_regex_repo_dir(output_root: Path, repo: RepositoryRef) -> Path:
+    return output_root / "extractions_regex" / repo.fs_slug
+
+
 def issue_snapshot_path(output_root: Path, repo: RepositoryRef, number: int) -> Path:
     return raw_repo_dir(output_root, repo) / "issues" / f"issue_{number}.json"
 

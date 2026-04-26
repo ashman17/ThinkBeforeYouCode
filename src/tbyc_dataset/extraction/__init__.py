@@ -9,6 +9,12 @@ from tbyc_dataset.extraction.prompt import (
     iter_comment_prompt_jobs,
 )
 from tbyc_dataset.extraction.pipeline import ExtractionSettings, extract_discussion_artifacts
+from tbyc_dataset.extraction.regex_pipeline import (
+    REGEX_PROMPT_VERSION,
+    RegexExtractionSettings,
+    extract_discussion_artifacts_regex,
+    extract_regex_artifacts_from_comment,
+)
 
 __all__ = [
     "ARTIFACT_TYPES",
@@ -19,4 +25,8 @@ __all__ = [
     "iter_comment_prompt_jobs",
     "ExtractionSettings",
     "extract_discussion_artifacts",
+    "REGEX_PROMPT_VERSION",
+    "RegexExtractionSettings",
+    "extract_discussion_artifacts_regex",
+    "extract_regex_artifacts_from_comment",
 ]

@@ -38,6 +38,8 @@ def generate_metrics_visualizations(
     graphs_root: Optional[str] = None,
     repo: Optional[str] = None,
     model_id: Optional[str] = None,
+    metrics_root_dirname: str = "metrics",
+    graphs_root_dirname: str = "graphs",
     points_max: int = 100,
     points_step: int = 1,
     random_seed: int = 7,
@@ -46,20 +48,19 @@ def generate_metrics_visualizations(
     random.seed(random_seed)
 
     data_root = Path(output_root)
-    metrics_root = data_root / "metrics"
+    metrics_root = data_root / metrics_root_dirname
     if not metrics_root.exists():
         raise FileNotFoundError(f"No metrics directory found at {metrics_root}")
 
-    target_root = Path(graphs_root) if graphs_root else (data_root / "graphs")
+    target_root = Path(graphs_root) if graphs_root else (data_root / graphs_root_dirname)
     target_root.mkdir(parents=True, exist_ok=True)
 
     repo_filter = RepositoryRef.parse(repo) if repo else None
     model_dir_filter = _model_dir_name(model_id) if model_id else None
 
     bundles = _load_metric_bundles(metrics_root, repo_filter=repo_filter, model_dir_filter=model_dir_filter)
-    bundles = [bundle for bundle in bundles if _model_family_and_recency(bundle.model_id)[0] != "qwen"]
     if not bundles:
-        raise FileNotFoundError("No metric bundles found for the provided filters after excluding Qwen.")
+        raise FileNotFoundError("No metric bundles found for the provided filters.")
 
     model_colors = _build_model_color_map([bundle.model_id for bundle in bundles], plt)
 
@@ -127,12 +128,27 @@ def _load_plotting_dependencies():
     return plt, np
 
 
+def _write_graph_sidecar(path: Path, payload: Mapping[str, Any]) -> str:
+    txt_path = path.with_suffix(".txt")
+    txt_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    return str(txt_path)
+
+
+def _finalize_graph(fig, path: Path, plt, payload: Mapping[str, Any]) -> List[str]:
+    fig.tight_layout()
+    fig.savefig(path, dpi=180)
+    plt.close(fig)
+    _write_graph_sidecar(path, payload)
+    return [str(path)]
+
+
 def _load_metric_bundles(
     metrics_root: Path,
     *,
     repo_filter: Optional[RepositoryRef],
     model_dir_filter: Optional[str],
 ) -> List[_MetricsBundle]:
+    data_root = metrics_root.parent
     bundles: List[_MetricsBundle] = []
     for model_dir in sorted(path for path in metrics_root.iterdir() if path.is_dir()):
         if model_dir_filter and model_dir.name != model_dir_filter:
@@ -196,7 +212,10 @@ def _load_metric_bundles(
                 tag_payload=tag_payload,
                 summary_payload=summary_payload,
             )
-            human_tag_frequency, llm_tag_frequency = _extract_tag_frequencies(tag_payload)
+            human_tag_frequency = _load_tag_frequency_from_issue_payloads(data_root / "extractions" / repo_ref.fs_slug)
+            llm_tag_frequency = _load_tag_frequency_from_issue_payloads(
+                data_root / "derived" / model_dir.name / repo_ref.fs_slug
+            )
 
             bundles.append(
                 _MetricsBundle(
@@ -252,10 +271,21 @@ def _plot_repo_overall_bars(
     ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize=9)
 
     out = target_root / f"repo_{repo_slug.replace('/', '__')}_overall_grouped_bar.png"
-    fig.tight_layout()
-    fig.savefig(out, dpi=180)
-    plt.close(fig)
-    return [str(out)]
+    return _finalize_graph(
+        fig,
+        out,
+        plt,
+        {
+            "graph": "repo_overall_grouped_bar",
+            "repository": repo_slug,
+            "models": models,
+            "model_labels": model_labels,
+            "metric_keys": keys,
+            "values_by_model": {
+                bundle.model_id: {key: bundle.components.get(key, 0.0) for key in keys} for bundle in ordered_bundles
+            },
+        },
+    )
 
 
 def _plot_repo_issue_boxplots(
@@ -309,11 +339,19 @@ def _plot_repo_issue_boxplots(
         ax.grid(axis="y", alpha=0.2)
 
     fig.suptitle(f"Per-Issue Boxplots with Data Points ({repo_slug})")
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
     out = target_root / f"repo_{repo_slug.replace('/', '__')}_issue_boxplots.png"
-    fig.savefig(out, dpi=180)
-    plt.close(fig)
-    return [str(out)]
+    return _finalize_graph(
+        fig,
+        out,
+        plt,
+        {
+            "graph": "repo_issue_boxplots",
+            "repository": repo_slug,
+            "values_by_model": {
+                bundle.model_id: {key: bundle.per_issue.get(key, []) for key in keys} for bundle in bundles
+            },
+        },
+    )
 
 
 def _plot_repo_issue_violin(
@@ -359,11 +397,19 @@ def _plot_repo_issue_violin(
         ax.grid(axis="y", alpha=0.2)
 
     fig.suptitle(f"Per-Issue Violin Plots ({repo_slug})")
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
     out = target_root / f"repo_{repo_slug.replace('/', '__')}_issue_violin.png"
-    fig.savefig(out, dpi=180)
-    plt.close(fig)
-    return [str(out)]
+    return _finalize_graph(
+        fig,
+        out,
+        plt,
+        {
+            "graph": "repo_issue_violin",
+            "repository": repo_slug,
+            "values_by_model": {
+                bundle.model_id: {key: bundle.per_issue.get(key, []) for key in keys} for bundle in bundles
+            },
+        },
+    )
 
 
 def _plot_repo_issue_scatter(
@@ -414,10 +460,26 @@ def _plot_repo_issue_scatter(
     ax.grid(alpha=0.25)
     ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize=8)
     out = target_root / f"repo_{repo_slug.replace('/', '__')}_issue_scatter.png"
-    fig.tight_layout()
-    fig.savefig(out, dpi=180)
-    plt.close(fig)
-    return [str(out)]
+    return _finalize_graph(
+        fig,
+        out,
+        plt,
+        {
+            "graph": "repo_issue_scatter",
+            "repository": repo_slug,
+            "x_metric": "summary_bertscore_f1",
+            "y_metric": "metadata_soft_f1",
+            "points_by_model": {
+                bundle.model_id: {
+                    "x": bundle.per_issue.get("summary_bertscore_f1", []),
+                    "y": bundle.per_issue.get("metadata_soft_f1", []),
+                    "aggregate_x": bundle.components.get("summary_bertscore_f1", 0.0),
+                    "aggregate_y": bundle.components.get("metadata_soft_f1", 0.0),
+                }
+                for bundle in bundles
+            },
+        },
+    )
 
 
 def _plot_global_component_heatmap(
@@ -457,11 +519,18 @@ def _plot_global_component_heatmap(
     for tick_label, model in zip(ax.get_yticklabels(), models):
         tick_label.set_color(model_colors.get(model))
     fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02)
-    fig.tight_layout()
     out = target_root / "global_component_heatmap.png"
-    fig.savefig(out, dpi=180)
-    plt.close(fig)
-    return [str(out)]
+    return _finalize_graph(
+        fig,
+        out,
+        plt,
+        {
+            "graph": "global_component_heatmap",
+            "models": models,
+            "metric_keys": list(COMPONENT_KEYS),
+            "matrix": arr.tolist(),
+        },
+    )
 
 
 def _plot_global_model_lines(
@@ -519,11 +588,18 @@ def _plot_global_model_lines(
     ax.set_ylabel("Score")
     ax.grid(axis="y", alpha=0.25)
     ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize=8)
-    fig.tight_layout()
     out = target_root / "global_model_component_lines.png"
-    fig.savefig(out, dpi=180)
-    plt.close(fig)
-    return [str(out)]
+    return _finalize_graph(
+        fig,
+        out,
+        plt,
+        {
+            "graph": "global_model_component_lines",
+            "models": models,
+            "metric_keys": list(COMPONENT_KEYS),
+            "scores": {model: component_scores[idx] for idx, model in enumerate(models)},
+        },
+    )
 
 
 def _plot_global_points_bar(
@@ -578,11 +654,20 @@ def _plot_global_points_bar(
         if y >= y_top:
             y = max(0.5, y_top - 0.8)
         ax.text(x, y, str(val), ha="center", va="bottom", fontsize=9)
-    fig.tight_layout()
     out = target_root / "global_points_bar.png"
-    fig.savefig(out, dpi=180)
-    plt.close(fig)
-    return [str(out)]
+    return _finalize_graph(
+        fig,
+        out,
+        plt,
+        {
+            "graph": "global_points_bar",
+            "points_max": max_points,
+            "points_step": step,
+            "ranked_models": [name for name, _ in ranked],
+            "scores": {name: score for name, score in ranked},
+            "points": {name: points[idx] for idx, (name, _) in enumerate(ranked)},
+        },
+    )
 
 
 def _plot_global_per_type_metric_bars(
@@ -631,11 +716,23 @@ def _plot_global_per_type_metric_bars(
         ax.set_xticklabels([_display_type_name(type_name) for type_name in type_names], rotation=65, ha="right")
         ax.grid(axis="y", alpha=0.25)
         ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), fontsize=8)
-        fig.tight_layout()
         out = target_root / f"global_per_type_{metric}_grouped_bar.png"
-        fig.savefig(out, dpi=180)
-        plt.close(fig)
-        files.append(str(out))
+        files.extend(
+            _finalize_graph(
+                fig,
+                out,
+                plt,
+                {
+                    "graph": "global_per_type_grouped_bar",
+                    "metric": metric,
+                    "type_names": type_names,
+                    "values_by_model": {
+                        model: [aggregated[model].get(type_name, {}).get(metric, 0.0) for type_name in type_names]
+                        for model in models
+                    },
+                },
+            )
+        )
 
     return files
 
@@ -691,11 +788,23 @@ def _plot_global_per_type_metric_spiders(
         ax.set_xticklabels([_display_type_name(type_name) for type_name in ordered_types], fontsize=7)
         ax.grid(alpha=0.25)
         ax.legend(loc="upper left", bbox_to_anchor=(1.12, 1.05), fontsize=8)
-        fig.tight_layout()
         out = target_root / f"global_per_type_{metric}_spider.png"
-        fig.savefig(out, dpi=180)
-        plt.close(fig)
-        files.append(str(out))
+        files.extend(
+            _finalize_graph(
+                fig,
+                out,
+                plt,
+                {
+                    "graph": "global_per_type_spider",
+                    "metric": metric,
+                    "ordered_types": ordered_types,
+                    "values_by_model": {
+                        model: [aggregated[model].get(type_name, {}).get(metric, 0.0) for type_name in ordered_types]
+                        for model in models
+                    },
+                },
+            )
+        )
 
     return files
 
@@ -739,6 +848,7 @@ def _plot_dataset_tag_frequencies(
     axes[0].set_yticklabels(labels)
     axes[0].invert_yaxis()
     axes[0].grid(axis="x", alpha=0.25)
+    _annotate_barh_counts(axes[0], human_values)
 
     axes[1].barh(y, llm_values, color="#F58518")
     axes[1].set_title("Model-Extracted Tag Frequency (Dataset-Level)")
@@ -747,13 +857,37 @@ def _plot_dataset_tag_frequencies(
     axes[1].set_yticklabels(labels)
     axes[1].invert_yaxis()
     axes[1].grid(axis="x", alpha=0.25)
+    axes[1].tick_params(axis="y", labelleft=True)
+    _annotate_barh_counts(axes[1], llm_values)
 
     fig.suptitle("Tag Frequency Across Repositories and Issues")
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
     out = target_root / "dataset_tag_frequency_comparison.png"
-    fig.savefig(out, dpi=180)
-    plt.close(fig)
-    return [str(out)]
+    return _finalize_graph(
+        fig,
+        out,
+        plt,
+        {
+            "graph": "dataset_tag_frequency_comparison",
+            "tags": selected_tags,
+            "human_values": human_values,
+            "llm_values": llm_values,
+        },
+    )
+
+
+def _annotate_barh_counts(ax, values: Sequence[int]) -> None:
+    max_value = max(values) if values else 0
+    x_pad = max(1.0, max_value * 0.01)
+    for idx, value in enumerate(values):
+        ax.text(
+            float(value) + x_pad,
+            idx,
+            str(int(value)),
+            va="center",
+            ha="left",
+            fontsize=8,
+            color="#333333",
+        )
 
 
 def _compute_dataset_stats(bundles: Sequence[_MetricsBundle]) -> Dict[str, Any]:
@@ -1191,6 +1325,39 @@ def _extract_tag_frequencies(tag_payload: Mapping[str, Any]) -> tuple[Dict[str, 
                         llm_counts[tag] = llm_counts.get(tag, 0) + 1
 
     return human_counts, llm_counts
+
+
+def _load_tag_frequency_from_issue_payloads(base_dir: Path) -> Dict[str, int]:
+    counts: Dict[str, int] = {}
+    if not base_dir.exists():
+        return counts
+
+    for path in sorted(base_dir.glob("issue_*.json")):
+        payload = _read_json_if_exists(path)
+        if not isinstance(payload, Mapping):
+            continue
+        issue = payload.get("issue", {})
+        if not isinstance(issue, Mapping):
+            continue
+        comments = issue.get("comments", [])
+        if not isinstance(comments, list):
+            continue
+        for comment in comments:
+            if not isinstance(comment, Mapping):
+                continue
+            artifacts = comment.get("artifacts", [])
+            if not isinstance(artifacts, list):
+                continue
+            for artifact in artifacts:
+                if not isinstance(artifact, Mapping):
+                    continue
+                tags = artifact.get("tags", [])
+                if not isinstance(tags, list):
+                    continue
+                for tag in tags:
+                    if isinstance(tag, str) and tag:
+                        counts[tag] = counts.get(tag, 0) + 1
+    return counts
 
 
 def _extract_summary_metric_by_type(

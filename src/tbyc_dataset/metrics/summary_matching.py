@@ -16,6 +16,8 @@ def compute_summary_matching_metrics(
     output_root: str,
     model_id: str,
     issue_number: Optional[int] = None,
+    derived_root_dirname: str = "derived",
+    metrics_root_dirname: str = "metrics",
     codebert_model: str = "microsoft/codebert-base",
     bertscore_model: str = "microsoft/codebert-base",
     bleurt_model: str = "Elron/bleurt-base-512",
@@ -28,8 +30,8 @@ def compute_summary_matching_metrics(
     root = Path(output_root)
     model_dir = _model_dir_name(model_id)
     extracted_dir = root / "extractions" / repo_ref.fs_slug
-    derived_dir = root / "derived" / model_dir / repo_ref.fs_slug
-    metrics_dir = root / "metrics" / model_dir / repo_ref.fs_slug
+    derived_dir = root / derived_root_dirname / model_dir / repo_ref.fs_slug
+    metrics_dir = root / metrics_root_dirname / model_dir / repo_ref.fs_slug
     ensure_directory(metrics_dir)
 
     extracted = _load_issue_type_summaries(extracted_dir)

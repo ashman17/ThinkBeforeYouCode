@@ -29,6 +29,8 @@ def compute_metadata_matching_metrics(
     issue_number: Optional[int] = None,
     similarity_threshold: float = 0.82,
     similarity_metric: str = "max_all",
+    derived_root_dirname: str = "derived",
+    metrics_root_dirname: str = "metrics",
 ) -> Dict[str, Any]:
     if similarity_metric == "all":
         return compute_metadata_matching_metrics_all(
@@ -38,6 +40,8 @@ def compute_metadata_matching_metrics(
             model_id=model_id,
             issue_number=issue_number,
             similarity_threshold=similarity_threshold,
+            derived_root_dirname=derived_root_dirname,
+            metrics_root_dirname=metrics_root_dirname,
         )
 
     if similarity_metric not in SIMILARITY_METRICS:
@@ -54,6 +58,8 @@ def compute_metadata_matching_metrics(
         issue_number=issue_number,
         similarity_threshold=similarity_threshold,
         similarity_metric=similarity_metric,
+        derived_root_dirname=derived_root_dirname,
+        metrics_root_dirname=metrics_root_dirname,
     )
 
 
@@ -65,6 +71,8 @@ def compute_metadata_matching_metrics_all(
     model_id: str,
     issue_number: Optional[int] = None,
     similarity_threshold: float = 0.82,
+    derived_root_dirname: str = "derived",
+    metrics_root_dirname: str = "metrics",
 ) -> Dict[str, Any]:
     reports_by_metric: Dict[str, Dict[str, Any]] = {}
     for metric in SIMILARITY_METRICS:
@@ -77,12 +85,14 @@ def compute_metadata_matching_metrics_all(
             similarity_threshold=similarity_threshold,
             similarity_metric=metric,
             write_single_report=False,
+            derived_root_dirname=derived_root_dirname,
+            metrics_root_dirname=metrics_root_dirname,
         )
 
     repo_ref = RepositoryRef(owner=owner, name=repo)
     root = Path(output_root)
     model_dir = _model_dir_name(model_id)
-    metrics_dir = root / "metrics" / model_dir / repo_ref.fs_slug
+    metrics_dir = root / metrics_root_dirname / model_dir / repo_ref.fs_slug
     ensure_directory(metrics_dir)
 
     issue_count = 0
@@ -132,13 +142,15 @@ def _compute_metadata_matching_single(
     similarity_threshold: float,
     similarity_metric: str,
     write_single_report: bool = True,
+    derived_root_dirname: str = "derived",
+    metrics_root_dirname: str = "metrics",
 ) -> Dict[str, Any]:
     repo_ref = RepositoryRef(owner=owner, name=repo)
     root = Path(output_root)
     model_dir = _model_dir_name(model_id)
     extracted_dir = root / "extractions" / repo_ref.fs_slug
-    derived_dir = root / "derived" / model_dir / repo_ref.fs_slug
-    metrics_dir = root / "metrics" / model_dir / repo_ref.fs_slug
+    derived_dir = root / derived_root_dirname / model_dir / repo_ref.fs_slug
+    metrics_dir = root / metrics_root_dirname / model_dir / repo_ref.fs_slug
     ensure_directory(metrics_dir)
 
     extracted = _load_issue_type_field_values(extracted_dir)
